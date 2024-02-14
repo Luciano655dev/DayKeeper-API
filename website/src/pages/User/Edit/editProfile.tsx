@@ -7,8 +7,13 @@ import Cookies from 'js-cookie'
 export default function EditProfile() {
     const navigate = useNavigate()
     const token = Cookies.get('userToken')
-    const [form, setForm] = useState({})
-    const [userInfo, setUserInfo] = useState({ name: '...', email: '...', private: false })
+    const [form, setForm]: any = useState({
+        name: '',
+        email: '',
+        password: '',
+        private: ''
+    })
+    const [userInfo, setUserInfo] = useState({ name: '...', email: '...', private: '' })
     const [loading, setLoading] = useState(true)
     const [errMsg, setErrMsg] = useState('')
     const [image, setImage] = useState(null)
@@ -16,7 +21,6 @@ export default function EditProfile() {
     useEffect(() => {
         const getUserInfo = async () => {
             try {
-                if (!token) return setLoading(false)
 
                 const responseLoggedInUser = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${token}` } })
                 setUserInfo(responseLoggedInUser.data.user)
@@ -77,7 +81,6 @@ export default function EditProfile() {
         }
     }
 
-    if (!token) return <NotLogged></NotLogged>
     if (loading || !form) return <p>...</p>
 
     return (
@@ -127,8 +130,4 @@ export default function EditProfile() {
             <StyledButton onClick={handleDelete} backgroundColor={'red'}>DELETE USER (PERMANENT)</StyledButton>
         </StyledForm>
     );
-}
-
-function NotLogged() {
-    return <h1> FAÇA LOGIN PARA EDITAR SEU USUARIO </h1>
 }

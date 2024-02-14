@@ -16,7 +16,6 @@ export default function PostInfo() {
     const getPostInfo = async () => {
       try {
         const token = Cookies.get('userToken')
-        if (!token) return setLoading(false)
 
         if (postTitleFromParams) {
           const responsePostInfo = await axios.get(`http://localhost:3000/${username}/${postTitleFromParams}`, { headers: { Authorization: `Bearer ${token}` } })

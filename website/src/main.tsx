@@ -2,10 +2,13 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {
   createBrowserRouter,
+  Navigate,
   RouterProvider
 } from "react-router-dom"
 import { Provider } from 'react-redux'
 import store from './redux/store.tsx'
+import Cookies from 'js-cookie'
+import axios from 'axios'
 
 import './index.css'
 
@@ -15,8 +18,6 @@ import './index.css'
 import Main from './pages/Main'
 import Home from './pages/Home/home'
 import AboutUs from './pages/About/aboutUs.tsx'
-
-// General
 import Message from './pages/Message/Message.tsx'
 
 // Auth
@@ -35,6 +36,34 @@ import Posts from './pages/Post/Posts/posts.tsx'
 import Post from './pages/Post/Info/postInfo.tsx'
 import CreatePost from './pages/Post/Create/createPost.tsx'
 import EditPost from './pages/Post/Edit/editPost.tsx'
+
+// Function to check if user is authenticated
+const isAuthenticated = async () => {
+  const userToken = Cookies.get('userToken')
+  try {
+    const response = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${userToken}` } })
+    return response.status !== 400
+  } catch (error) {
+    return false
+  }
+}
+
+// Private Route Component
+const PrivateRoute = ({ element }: any) => {
+  const [loading, setLoading] = React.useState(true)
+  const [authenticated, setAuthenticated] = React.useState(false)
+
+  React.useEffect(() => {
+    isAuthenticated().then(authenticated => {
+      setAuthenticated(authenticated)
+      setLoading(false)
+    })
+  }, [])
+
+  if (loading) return <div>Loading...</div>
+
+  return authenticated ? element : <Navigate to="/message?msg=VOCE PRECISA SE AUTENTICAR ANTES" replace />
+}
 
 const router = createBrowserRouter([
   {
@@ -75,31 +104,31 @@ const router = createBrowserRouter([
       },
       {
         path: '/:name',
-        element: <UserInfo></UserInfo>
+        element: <PrivateRoute element={<UserInfo />}></PrivateRoute>
       },
       {
         path: '/profile',
-        element: <EditProfile></EditProfile>
+        element: <PrivateRoute element={<EditProfile />}></PrivateRoute>
       },
       {
         path: 'posts',
-        element: <Posts></Posts>
+        element: <PrivateRoute element={<Posts />}></PrivateRoute>
       },
       {
         path: '/:name/:title',
-        element: <Post></Post>
+        element: <PrivateRoute element={<Post />}></PrivateRoute>
       },
       {
         path: '/createpost',
-        element: <CreatePost></CreatePost>
+        element: <PrivateRoute element={<CreatePost />}></PrivateRoute>
       },
       {
         path: '/editpost/:title',
-        element: <EditPost></EditPost>
+        element: <PrivateRoute element={<EditPost />}></PrivateRoute>
       }
     ]
   }
-]);
+])
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

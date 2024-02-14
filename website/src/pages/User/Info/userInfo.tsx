@@ -1,10 +1,11 @@
 import { StyledBody, StyledContainer, StyledImage, StyledUsername, StyledEmail, StyledSubContainer, StyledEditProfileButton } from './userInfoCSS'
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
 export default function UserInfo() {
+  const navigate = useNavigate()
   const { name: userNameFromParams } = useParams();
   const [userInfo, setUserInfo] = useState({
     profile_picture: { url: '' },
@@ -21,7 +22,7 @@ export default function UserInfo() {
     const getUserInfo = async () => {
       try {
         const token = Cookies.get('userToken')
-        if (!token) return setLoading(false)
+        if(!token) return navigate('/message?msg=FAÇA LOGIN PARA VER OS USUARIOS')
 
         const responseLoggedInUser = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${token}` } })
 
@@ -47,7 +48,7 @@ export default function UserInfo() {
     getUserInfo();
   }, [userNameFromParams]);
 
-  if (loading || !userInfo) return <p>...</p>
+  if (loading) return <p>...</p>
   if (error) <p>{error}</p>
 
   return (

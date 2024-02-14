@@ -11,9 +11,6 @@ export default function createPost(){
     const [images, setImages]: any = useState(null)
     const [errMsg, setErrMsg] = useState('')
 
-    // Tratar erro
-    if(!token) return navigate('/message?msg=FAÇA LOGIN PARA POSTAR ALGO')
-
     const handleImageChange = (e: any) => setImages(e.target.files)
 
     const handleForm = async () =>{

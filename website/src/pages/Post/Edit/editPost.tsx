@@ -21,7 +21,6 @@ export default function EditPost(){
     useEffect(() => {
         const getPostInfo = async () => {
           try {
-            if (!token) return setLoading(false)
     
             const responseLoggedInUser = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${token}` } })
             const responsePost = await(axios.get(`http://localhost:3000/posts/${title}`, { headers: { Authorization: `Bearer ${token}` } }))
@@ -71,8 +70,6 @@ export default function EditPost(){
     }
 
     const handleImageChange = (e: any) => setImages(e.target.files)
-
-    if(!token) return <NotLogged></NotLogged>
     if (loading || !form) return <p>...</p>
     if(err) return <h1>{err}</h1>
 
@@ -100,8 +97,4 @@ export default function EditPost(){
         <StyledTitle>Delete your Post</StyledTitle>
         <StyledButton onClick={handleDelete} backgroundColor='red' >DELETE POST {'(PERMANENT)'}</StyledButton>
     </StyledForm>
-}
-
-function NotLogged(){
-    return <h1> FAÇA LOGIN PARA EDITAR SEU USUARIO </h1>
 }
