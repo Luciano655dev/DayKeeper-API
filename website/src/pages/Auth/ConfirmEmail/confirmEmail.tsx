@@ -17,7 +17,7 @@ function ConfirmEmail(){
     
                 setMsg(response.data.msg)
             } catch(err: any) {
-                setMsg(err.response.data.msg);
+                setMsg(err.response.data.msg)
             }
         }
 
@@ -34,3 +34,10 @@ function ConfirmEmail(){
 }
 
 export default ConfirmEmail
+
+/*
+    TODO: Fazer uma thread todo dia!
+    ! CUIDADO COM OS ERRINHOS ESPERTOS
+    ? MAS SERÁ QUE EU SEI RECOLVER O ERRINHO
+    * * NÃO ESQUECE DE ME SEGUIR TAMBÉM
+*/

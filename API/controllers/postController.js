@@ -228,10 +228,10 @@ const commentPost = async(req, res)=>{
 
 // reactComment
 const reactComment = async (req, res) => {
-  const { name: username, posttitle, usercomment } = req.params;
-  let userCommentId = await User.findOne({ name: usercomment });
-  userCommentId = userCommentId._id;
-  const loggedUserId = req.id;
+  const { name: username, posttitle, usercomment } = req.params
+  let userCommentId = await User.findOne({ name: usercomment })
+  userCommentId = userCommentId._id
+  const loggedUserId = req.id
 
   // reaction
   const reaction = req.body.reaction;

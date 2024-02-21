@@ -20,7 +20,7 @@ const postSchema = mongoose.Schema({
             key: String,
             url: String
         }
-    ], // Images in Base64
+    ],
     reactions: [
         {
             user: String,

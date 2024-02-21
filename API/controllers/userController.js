@@ -9,7 +9,8 @@ const deleteImage = require('../common/deleteImage')
 const getUserByName = async(req, res) => {
   try {
     const { name } = req.params
-    const user = await User.findOne({ name }).select("-password")
+    let user = await User.findOne({ name }).select("-password")
+    if (!user) user = await User.findById(name).select("-password") // ver se o nome é um ID
     if (!user) return res.status(404).json({ msg: "Usuário não encontrado" })
 
     res.status(200).json({ user })
