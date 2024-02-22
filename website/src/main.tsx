@@ -5,7 +5,7 @@ import {
   Navigate,
   RouterProvider
 } from "react-router-dom"
-import { Provider } from 'react-redux'
+import { Provider, useDispatch } from 'react-redux'
 import store from './redux/store.tsx'
 import Cookies from 'js-cookie'
 import axios from 'axios'
@@ -40,9 +40,10 @@ import EditPost from './pages/Post/Edit/editPost.tsx'
 // Function to check if user is authenticated
 const isAuthenticated = async () => {
   const userToken = Cookies.get('userToken')
+
   try {
     const response = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${userToken}` } })
-    return response.status !== 400
+    return { isAuth: response.status !== 400, response}
   } catch (error) {
     return false
   }
@@ -50,12 +51,18 @@ const isAuthenticated = async () => {
 
 // Private Route Component
 const PrivateRoute = ({ element }: any) => {
+  const dispatch = useDispatch()
   const [loading, setLoading] = React.useState(true)
   const [authenticated, setAuthenticated] = React.useState(false)
 
   React.useEffect(() => {
-    isAuthenticated().then(authenticated => {
-      setAuthenticated(authenticated)
+    isAuthenticated().then((authenticated: any) => {
+      setAuthenticated(authenticated.isAuth)
+      dispatch({ type: 'user', payload: {
+        name: authenticated.response.data.user.name,
+        id: authenticated.response.data.user._id,
+        pfp: authenticated.response.data.user.profile_picture
+      } })
       setLoading(false)
     })
   }, [])

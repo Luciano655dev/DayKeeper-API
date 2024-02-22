@@ -1,5 +1,12 @@
 const initialState = {
-    loading: true
+    name: '',
+    id: '',
+    pfp: {
+        key: '',
+        url: '',
+        name: '',
+        size: 0
+    }
 }
 
 export const userReducer = (state = initialState, action: any)=>{
@@ -7,5 +14,5 @@ export const userReducer = (state = initialState, action: any)=>{
 
     return state
 }
-  
-  export default userReducer
+
+export default userReducer

@@ -159,6 +159,8 @@ const followUser = async (req, res) => {
     if (!user)
       return res.status(404).json({ msg: 'Usuário não encontrado' })
 
+    if(user._id == loggedUserId) return res.status(400).json({ msg: 'Você não pode seguir a si mesmo' })
+
     if (user.followers.includes(loggedUserId)) {
       // Deixar de seguir alguem
       await User.updateOne({ name }, { $pull: { followers: loggedUserId } })
@@ -174,17 +176,18 @@ const followUser = async (req, res) => {
 
       // Fazer solicitação
       await User.updateOne({ name }, { $push: { follow_requests: loggedUserId } })
-      return res.status(200).json({ msg: `Você mandou uma solicitação para seguir ${name}` })
+      return res.status(200).json({ msg: `Você mandou uma solicitação para seguir ${name}`, following: false })
     }
 
-    await User.updateOne({ name }, { $push: { followers: loggedUserId } });
-    return res.status(200).json({ msg: `Você começou a seguir ${name}` });
+    await User.updateOne({ name }, { $push: { followers: loggedUserId } })
+
+    return res.status(200).json({ msg: `Você começou a seguir ${name}`, following: true })
   } catch (error) {
     res.status(500).json({ msg: `${error}` })
   }
 }
 
-// respondFollowRequest
+// respondFollowRequest (private users only)
 const respondFollowRequest = async(req, res)=>{
   const { name } = req.params
   const response = req.query.response == 'true'
@@ -218,7 +221,7 @@ const respondFollowRequest = async(req, res)=>{
   }
 }
 
-// removeFollower
+// removeFollower (private users only)
 const removeFollower = async(req, res)=>{
   const { name } = req.params
   const loggedUserId = req.id

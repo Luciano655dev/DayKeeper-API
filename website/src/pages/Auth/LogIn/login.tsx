@@ -1,18 +1,25 @@
 import { StyledForm, StyledInput, StyledButton, StyledAlert } from './loginCSS';
 import axios from 'axios'
+import { useDispatch } from 'react-redux'
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Cookies from 'js-cookie'
 
 function LogIn(){
+    const dispatch = useDispatch()
     const navigate = useNavigate()
-    const [form, setForm] = useState({})
+    const [form, setForm] = useState({ name: '', password: '' })
     const [errMsg, setErrMsg] = useState('')
 
     const handleForm = async ()=>{
         try{
             const response = await axios.post('http://localhost:3000/auth/login', form)
             Cookies.set('userToken', response.data.token, { expires: 7 })
+            dispatch({ type: 'user', payload: {
+                name: response.data.user.name,
+                id: response.data.user._id,
+                pfp: response.data.user.profile_picture
+            } })
             return navigate('/')
         }catch(err: any){
             setErrMsg(err.response.data.msg)

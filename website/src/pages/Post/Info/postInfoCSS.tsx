@@ -100,8 +100,12 @@ export const StyledButton = styled.button`
 const fadeOutAnimation = keyframes`
   0%{
     opacity: 100%;
+    right: -10vw;
   }
-  65%{
+  10%{
+    right: 3vw;
+  }
+  80%{
     opacity: 100%;
   }
   100%{
@@ -111,6 +115,8 @@ const fadeOutAnimation = keyframes`
 
 // Componente StyledAlert
 export const StyledAlert = styled.div`
+  position: absolute;
+  right: 1vw;
   padding: 10px;
   background-color: green;
   color: white;
