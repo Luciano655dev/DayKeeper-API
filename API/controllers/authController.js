@@ -6,20 +6,6 @@ const {
   sendPasswordResetEmail
 } = require('../common/emailHandler')
 
-// temp
-const postImg = (req, res)=>{
-  const { originalname: name, size, key, location: url = "" } = req.file
-
-  const img = {
-    name,
-    size,
-    key,
-    url
-  }
-
-  return res.status(200).json({ img })
-}
-
 // register
 const register = async(req, res) => {
   const { name: username, email, password } = req.body
@@ -213,6 +199,5 @@ module.exports = {
   userData,
   confirmEmail,
   forgetPassword,
-  resetPassword,
-  postImg
+  resetPassword
 }

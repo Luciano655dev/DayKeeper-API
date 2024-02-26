@@ -6,8 +6,7 @@ const {
     userData,
     confirmEmail,
     forgetPassword,
-    resetPassword,
-    postImg
+    resetPassword
 } = require('../controllers/authController')
 
 // Middlewares

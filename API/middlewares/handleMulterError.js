@@ -8,7 +8,7 @@ const handleMulterError = (err, req, res, next)=>{
         return res.status(400).json({ error: 'Erro no upload de arquivos', message: err.message })
     }
 
-    next()
+    return next()
 }
 
 module.exports = handleMulterError

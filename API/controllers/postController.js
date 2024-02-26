@@ -60,9 +60,9 @@ const updatePost = async(req, res)=>{
       user: loggedUserId
     })
     if(!post) return cb('Post não encontrado', false)
-    const keep_files = req.body.keep_files.split('').map(Number) || []
 
     // verifica se não ultrapassou o limite
+    const keep_files = req.body.keep_files.split('').map(Number) || []
     const maxFiles = ((post.images.length - 1) - (post.images.length - keep_files.length)) + req.files.length
     if(maxFiles > 5){
       // deleta os arquivos enviados antes

@@ -18,7 +18,7 @@ const postEditValidation = async(req, res, next)=>{
     // deleta as imagens enviadas anetriormente
     if(req.files)
       for(let i in req.files)
-          deleteImage(req.files[i].key)
+        deleteImage(req.files[i].key)
 
     return res.status(500).json({ msg: `${error}` })
   }
