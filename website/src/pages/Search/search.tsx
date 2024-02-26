@@ -30,27 +30,8 @@ export default function Search(){
     const [posts, setPosts]: any = useState([])
     const [error, setError] = useState('')
 
-    const getPostDetails = async(post: any, id: String)=>{
-        setLoading(true)
-        try {
-          const userResponse: any = await axios.get(`http://localhost:3000/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-          return {
-            ...post,
-            path: `/${userResponse.data.user.name}/${post.title}`,
-            user: {
-                username: userResponse.data.user.name,
-                pfp: userResponse.data.user.profile_picture.url,
-            }
-          }
-        } catch (error: any) {
-          setError(`${error.response.data.msg}`)
-        }
-        setLoading(false)
-    }
-
     const updatePosts = async(response: any)=>{
-        const postPromises = response.data.posts.map((post: any) => getPostDetails(post, post.user))
-        const newPosts = await Promise.all(postPromises)
+        const newPosts = response.data.posts
 
         const indexOfLastPost = Number(page) * postsPerPage
         const currentPosts = newPosts.slice((indexOfLastPost - postsPerPage), indexOfLastPost)
@@ -101,8 +82,8 @@ export default function Search(){
         }
     }
 
-    const handleOrderChange = (newOrder: string) => {
-        const newUrl = `?page=1&order=${newOrder}`
+    const handleOrderChange = () => {
+        const newUrl = `?page=1&order=${order == 'recent' ? 'relevant' : 'recent'}`
         window.location.href = newUrl
     }
 
@@ -132,15 +113,14 @@ export default function Search(){
 
         {/* Filter buttons */}
         <div>
-            <StyledButton onClick={() => handleOrderChange('recent')}>Most Recent</StyledButton>
-            <StyledButton onClick={() => handleOrderChange('relevant')}>Most Relevant</StyledButton>
+            <StyledButton onClick={() => handleOrderChange()}>{order == 'recent' ? 'Relevant' : 'Recent'}</StyledButton>
         </div>
 
         <StyledContainer>
             {posts.map((post: any)=>
                 <StyledItem>
-                    <img src={post.user.pfp}></img>
-                    <label>{post.user.username}</label>
+                    <img src={post.user_info.profile_picture.url}></img>
+                    <label>{post.user_info.name}</label>
                     <h1>{post.title}</h1>
                     <StyledLink to={post.path}> <strong>Acesse aqui</strong> </StyledLink>
                 </StyledItem>

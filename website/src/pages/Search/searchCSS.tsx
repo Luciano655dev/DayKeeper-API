@@ -28,7 +28,6 @@ export const StyledItem = styled.div`
     align-items: center;
     flex: auto;
     border-bottom: 1px solid black;
-    border-radius: 1em;
     margin: 1em;
     width: 100%;
 

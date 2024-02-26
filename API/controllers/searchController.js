@@ -10,9 +10,31 @@ const {
 const performAggregation = async (sortStage = { _id: 1 }, searchQuery = '') => {
     return await Post.aggregate([
         {
+            $lookup: {
+                from: 'users',
+                let: { userId: { $toObjectId: '$user' } },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ['$_id', '$$userId'] }
+                        }
+                    },
+                ],
+                as: 'user_info'
+            }
+        },
+        {
             $match: {
-                title: { $regex: new RegExp(searchQuery, 'i'), },
-            },
+                $or: [
+                    { title: { $regex: new RegExp(searchQuery, 'i') } },
+                    { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                relevance: { $sum: ['$reactions', '$comments'] }
+            }
         },
         {
             $project: {
@@ -20,19 +42,17 @@ const performAggregation = async (sortStage = { _id: 1 }, searchQuery = '') => {
                 title: 1,
                 data: 1,
                 user: 1,
-                reactions: { $size: '$reactions' },
-                comments: { $size: '$comments' },
+                reactions: 1,
+                comments: 1,
                 created_at: 1,
-            },
+                user_info: { $arrayElemAt: ['$user_info', 0] }
+            }
         },
-        {
-            $addFields: {
-                relevance: { $add: ['$reactions', '$comments'] },
-            },
-        },
-        sortStage,
+        sortStage
     ]);
 }
+
+
 
 const algorithm = async (req, res) => {
     const day = req.query.day || bf.FormatDate(Date.now()).day

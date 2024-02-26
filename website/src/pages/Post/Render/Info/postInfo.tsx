@@ -49,9 +49,9 @@ export default function PostInfo({ togglePage }: any) {
 
       // Coloca o comentário do usuário logado no topo
       userCommentData.sort((a, b) => {
-        if (a.username === user.name) return -1
-        if (b.username === user.name) return 1
-        return 0
+        if (a.username === user.name) return -1;
+        if (b.username === user.name) return 1;
+        return b.reactions.length - a.reactions.length
       })
       
       setUserCommentData(userCommentData)
