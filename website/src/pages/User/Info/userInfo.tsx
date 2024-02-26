@@ -1,21 +1,22 @@
 import { StyledBody, StyledContainer, StyledImage, StyledUsername, StyledEmail, StyledSubContainer, StyledEditProfileButton } from './userInfoCSS'
+import { StyledButton } from '../Edit/editProfileCSS';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
 import Cookies from 'js-cookie';
 import axios from 'axios';
-import { StyledButton } from '../Edit/editProfileCSS'
-import { Alert } from '../../Post/Info/postInfoCSS'
+import { Alert } from '../../Post/Render/Info/postInfoCSS'
+import Page404 from '../../404/Page404'
 
 export default function UserInfo() {
   const token = Cookies.get('userToken')
   const user = useSelector((state: any) => state.userReducer)
   const { name: userNameFromParams } = useParams()
+  const sameUser = userNameFromParams === user.name
   const [isFollowing, setIsFollowing] = useState(false)
   const [userInfo, setUserInfo]: any = useState({})
-  const [sameUser, setSameUser]= useState(false)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(false)
   const [msg, setMsg] = useState('')
 
   const updateUserInfo = async()=>{
@@ -28,22 +29,14 @@ export default function UserInfo() {
   useEffect(() => {
     const getUserInfo = async () => {
       try {
-        if (userNameFromParams) {
-          await updateUserInfo()
+        await updateUserInfo()
 
-          if (userNameFromParams === user.name) {
-            setSameUser(true)
-            console.log('MESMO USUÁRIO')
-          }
-        }
-
-        setLoading(false);
+        setLoading(false)
       } catch (error) {
-        console.error('Erro ao obter informações do usuário:', error);
-        setError('...')
+        setError(true)
         setLoading(false)
       }
-    };
+    }
 
     getUserInfo();
   }, [userNameFromParams])
@@ -63,8 +56,8 @@ export default function UserInfo() {
     setLoading(false)
   }
 
-  if (loading) return <p>...</p>
-  if (error) <p>{error}</p>
+  if (loading) return <div>loading...</div>
+  if(error) return <Page404></Page404>
 
   return (
     <StyledBody>
@@ -103,10 +96,10 @@ export default function UserInfo() {
         }
 
         {sameUser ?
-          <StyledEditProfileButton to='/profile'>EDITAR PERFIL</StyledEditProfileButton> :
+          <StyledEditProfileButton to={"/profile"}>EDITAR PERFIL</StyledEditProfileButton> :
           <div></div>
         }
       </StyledContainer>
     </StyledBody>
-  );
+  )
 }

@@ -43,10 +43,10 @@ export const StyledButton = styled.button`
     border-radius: 5px;
     cursor: pointer;
     &:disabled {
-        opacity: 0.5;
+      opacity: 0.5;
     }
     &:enabled {
-        opacity: 1.0;
+      opacity: 1.0;
     }
     opacity: ${(props: any) => !props.enabled ? 0.5 : 1};
 `

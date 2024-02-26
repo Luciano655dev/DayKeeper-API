@@ -17,6 +17,8 @@ import './index.css'
 // General
 import Main from './pages/Main'
 import Home from './pages/Home/home'
+import Search from './pages/Search/search.tsx'
+import Page404 from './pages/404/Page404.tsx'
 import AboutUs from './pages/About/aboutUs.tsx'
 import Message from './pages/Message/Message.tsx'
 
@@ -32,10 +34,8 @@ import UserInfo from './pages/User/Info/userInfo.tsx'
 import EditProfile from './pages/User/Edit/editProfile.tsx'
 
 // Posts
-import Posts from './pages/Post/Posts/posts.tsx'
-import Post from './pages/Post/Info/postInfo.tsx'
+import Post from './pages/Post/Render/Render.tsx'
 import CreatePost from './pages/Post/Create/createPost.tsx'
-import EditPost from './pages/Post/Edit/editPost.tsx'
 
 // Function to check if user is authenticated
 const isAuthenticated = async () => {
@@ -78,6 +78,10 @@ const router = createBrowserRouter([
     element: <Main></Main>,
     children: [
       {
+        path: "*",
+        element: <Page404></Page404>
+      },
+      {
         path: '/',
         element: <Home></Home>
       },
@@ -118,20 +122,16 @@ const router = createBrowserRouter([
         element: <PrivateRoute element={<EditProfile />}></PrivateRoute>
       },
       {
-        path: 'posts',
-        element: <PrivateRoute element={<Posts />}></PrivateRoute>
+        path: 'search',
+        element: <PrivateRoute element={<Search />}></PrivateRoute>
       },
       {
         path: '/:name/:title',
         element: <PrivateRoute element={<Post />}></PrivateRoute>
       },
       {
-        path: '/createpost',
+        path: '/publish',
         element: <PrivateRoute element={<CreatePost />}></PrivateRoute>
-      },
-      {
-        path: '/editpost/:title',
-        element: <PrivateRoute element={<EditPost />}></PrivateRoute>
       }
     ]
   }

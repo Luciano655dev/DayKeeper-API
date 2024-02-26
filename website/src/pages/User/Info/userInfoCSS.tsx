@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 export const StyledBody = styled.div`
-z-index: -100;
+    z-index: -100;
     position: absolute;
     display: flex;
     justify-content: center;

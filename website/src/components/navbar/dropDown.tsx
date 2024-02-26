@@ -1,7 +1,7 @@
 // Dropdown.js
-import { StyledLink, StyledImage } from './navbarCSS'
+import { StyledImage } from './navbarCSS'
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const DropdownContainer = styled.div`
@@ -12,19 +12,39 @@ const DropdownContainer = styled.div`
 
 const DropdownMenu = styled.div`
   position: absolute;
-  top: 100%;
-  left: 0;
+  top: 95%;
+  right: -2vw;
   background-color: #fff;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  display: ${(props: any) => (props.isOpen ? 'block' : 'none')};
+  display: ${(props: any) => (props.isOpen ? 'flex' : 'none')};
+  flex-direction: column;
+  justify-content: center;
+  align-items: end; /* start or center too */
 `;
 
 const MenuItem = styled.button`
   padding: 10px;
+  font-size: 1em;
+  width: 6em;
   &:hover {
     background-color: #f1f1f1;
   }
-`;
+`
+
+const StyledLink = styled(Link)`
+  margin: 0;
+  font-size: 1.5em;
+
+  color: black;
+  text-decoration: none;
+
+  border-bottom: 1px solid white;
+  transition: 0.2s;
+
+  &:hover{
+    cursor: pointer;
+    border-bottom: 1px solid black;
+  }
+`
 
 const Dropdown = ({ options, text, url }: any) => {
   const navigate = useNavigate()

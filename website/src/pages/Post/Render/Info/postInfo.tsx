@@ -6,15 +6,16 @@ import {
   StyledButton,
   Alert,
   StyledLabel,
-  StyledLink
+  StyledReactions
 } from './postInfoCSS'
 import { useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 
-export default function PostInfo() {
+export default function PostInfo({ togglePage }: any) {
+  const navigate = useNavigate()
   const token = Cookies.get('userToken')
   const user = useSelector((state: any) => state.userReducer)
   const { title: postTitleFromParams, name: username } = useParams()
@@ -54,8 +55,8 @@ export default function PostInfo() {
       })
       
       setUserCommentData(userCommentData)
-    } catch (error) {
-      console.error('Erro ao buscar dados do usuário:', error)
+    } catch (error: any) {
+      setMsg(error.response.data.msg)
     }
   }
 
@@ -80,20 +81,21 @@ export default function PostInfo() {
           })
           setPostInfo(responsePostInfo.data.post)
 
+            // update selected reaction
+          responsePostInfo.data.post.reactions.filter((reac: any)=>
+            reac.user == user.id ? setSelectedReaction(reac.reaction) : reac
+          )
+
           // fill the Data
           await updateLocalComments(responsePostInfo)
 
-          if(responsePostInfo.status != 200) return setMsg(responsePostInfo.data.msg)
-
           // set Same user
-          const user: any = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${token}` } })
-          if (responsePostInfo.data.post.user == user.data.user._id) setSameUser(true)
+          if (responsePostInfo.data.post.user == user.id) setSameUser(true)
         }
 
         setLoading(false)
       }catch (error: any) {
-        setError(error.response.data.msg)
-        setLoading(false)
+        return navigate('/message?msg=POST NÃO ENCONTRADO')
       }
     };
 
@@ -167,42 +169,38 @@ export default function PostInfo() {
       <p>{postInfo.data}</p>
 
       <div>
-        <div>
+        <StyledReactions>
           <label>
             <input type="checkbox" name="reaction" value="0" checked={selectedReaction === 0} onChange={() => handleReaction(0)} />
             😍
             { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 0).length }
-            ❗
           </label>
           <label>
             <input type="checkbox" name="reaction" value="1" checked={selectedReaction === 1} onChange={() => handleReaction(1)} />
             😄
             { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 1).length }
-            ❗
           </label>
           <label>
             <input type="checkbox" name="reaction" value="2" checked={selectedReaction === 2} onChange={() => handleReaction(2)} />
             😂
-            { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 2).length }
-            ❗
           </label>
           <label>
             <input type="checkbox" name="reaction" value="3" checked={selectedReaction === 3} onChange={() => handleReaction(3)} />
             😢
             { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 3).length }
-            ❗
           </label>
           <label>
             <input type="checkbox" name="reaction" value="4" checked={selectedReaction === 4} onChange={() => handleReaction(4)} />
             😠
             { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 4).length }
-            ❗
           </label>
-        </div>
+        </StyledReactions>
 
-        <br></br> <br></br> <br></br>
-        { sameUser ? <StyledLink to={`/editpost/${postInfo.title}`}>Edite seu post aqui</StyledLink> : <></> }
-        <br></br> <br></br> <br></br>
+        { sameUser ? <div>
+          <br></br><br></br>
+          <StyledButton onClick={togglePage}>Edite seu post aqui</StyledButton>
+          <br></br><br></br>
+        </div> : <></> }
 
         <StyledLabel>Comment</StyledLabel>
         { userCommentData.filter((com: any) => com.username == user.name).length == 0 ? 

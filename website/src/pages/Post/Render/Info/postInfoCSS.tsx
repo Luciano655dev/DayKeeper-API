@@ -3,13 +3,13 @@ import { Link } from "react-router-dom"
 import styled, { keyframes } from "styled-components"
 
 export const StyledImage = styled.img`
-    max-width: 100px;
-    max-height: 100px;
+  max-width: 100px;
+  max-height: 100px;
 `
 
 export const StyledCommentSection = styled.div`
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 `
 
 export const StyledLink = styled(Link)`
@@ -22,6 +22,14 @@ export const StyledLink = styled(Link)`
   cursor: pointer;
 `
 
+export const StyledReactions = styled.div`
+  label {
+    margin: 0;
+    margin-left: 10px;
+    font-family: 'JetBrains Mono';
+  }
+`
+
 export const StyledComment = styled.div`
     display: flex;
     flex-direction: column;
@@ -30,26 +38,26 @@ export const StyledComment = styled.div`
     border-bottom: 1px solid black;
     
     div {
-        display: flex;
-        align-items: center;
-        flex-direction: row;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
     }
 
     img {
-        margin: 0;
-        width: 40px;
-        height: 40px;
-        border-radius: 40px;
+      margin: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 40px;
     }
     label {
-        margin: 0;
-        margin-left: 10px;
-        font-family: 'JetBrains Mono';
+      margin: 0;
+      margin-left: 10px;
+      font-family: 'JetBrains Mono';
     }
     p{
-        margin: 0;
-        margin-left: 2em;
-        padding: 10px;
+      margin: 0;
+      margin-left: 2em;
+      padding: 10px;
     }
 `
 
@@ -110,11 +118,12 @@ const fadeOutAnimation = keyframes`
   }
   100%{
     opacity: 0%;
+    display: none;
   }
 `
 
 // Componente StyledAlert
-export const StyledAlert = styled.div`
+export const StyledAlert: any = styled.div`
   position: absolute;
   right: 1vw;
   padding: 10px;
@@ -132,7 +141,7 @@ export const Alert = ({ msg }: any) => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setVisible(false); // Define a visibilidade como false após 2 segundos
+      setVisible(false) // Define a visibilidade como false após 2 segundos
     }, 2000);
 
     return () => clearTimeout(timeout);

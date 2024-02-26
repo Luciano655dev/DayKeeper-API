@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import { useSelector } from 'react-redux';
 
-export default function EditPost(){
+export default function EditPost({ togglePage }: any){
     const navigate = useNavigate()
+    const user = useSelector((state: any) => state.userReducer)
     const token = Cookies.get('userToken')
     const { title } = useParams()
     const [form, setForm] = useState({
@@ -15,27 +17,18 @@ export default function EditPost(){
     })
     const [images, setImages] = useState([])
     const [loading, setLoading] = useState(true)
-    const [err, setErr] = useState('')
     const [errMsg, setErrMsg] = useState('')
 
     useEffect(() => {
         const getPostInfo = async () => {
           try {
-    
-            const responseLoggedInUser = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${token}` } })
-            const responsePost = await(axios.get(`http://localhost:3000/posts/${title}`, { headers: { Authorization: `Bearer ${token}` } }))
-            if(responseLoggedInUser.data.user.name != responsePost.data.post.user) {
-                setLoading(false)
-                return setErr('Você não pode editar posts de outros usuarios!')
-            }
+            const responsePost = await axios.get(`http://localhost:3000/${user.name}/${title}`, { headers: { Authorization: `Bearer ${token}` } })
 
             setForm( responsePost.data.post )
             
             setLoading(false)
           } catch (error: any) {
-            console.error('Erro ao obter informações do post:', error.response.data.msg)
-            setErrMsg(error.response.data.msg)
-            setLoading(false)
+            return navigate('/message?msg=POST NÃO ENCONTRADO')
           }
         }
     
@@ -44,17 +37,15 @@ export default function EditPost(){
 
     const handleEdit = async()=>{
         try{
-            const user: any = await axios.get('http://localhost:3000/auth/user', { headers: { Authorization: `Bearer ${token}` } })
-
             const formData: any = new FormData()
             formData.append('data', form.data)
-            formData.append('keep_files', form.keep_files)
+            formData.append('keep_files', form.keep_files || '')
             if(images)
                 for (let i = 0; i < Math.min(5, images.length); i++)
                     formData.append('files', images[i])
             
             await axios.put(`http://localhost:3000/${title}`, formData, { headers: { Authorization: `Bearer ${token}` } })
-            return navigate(`/${user.data.user.name}/${title}`)
+            togglePage()
         }catch(err: any){
             setErrMsg(err.response.data.msg)
         }
@@ -71,7 +62,6 @@ export default function EditPost(){
 
     const handleImageChange = (e: any) => setImages(e.target.files)
     if (loading || !form) return <p>...</p>
-    if(err) return <h1>{err}</h1>
 
     return <StyledForm>
         <StyledLabel>Edit post</StyledLabel>
@@ -95,6 +85,13 @@ export default function EditPost(){
         <StyledButton onClick={handleEdit}>SEND</StyledButton>
 
         <StyledTitle>Delete your Post</StyledTitle>
-        <StyledButton onClick={handleDelete} backgroundColor='red' >DELETE POST {'(PERMANENT)'}</StyledButton>
+        <StyledButton onClick={handleDelete} style={{ backgroundColor: 'red' }} >DELETE POST {'(PERMANENT)'}</StyledButton>
+
+        <br></br>
+
+        <StyledButton
+            style={{ backgroundColor: 'gray' }}
+            onClick={togglePage}
+        >Cancel</StyledButton>
     </StyledForm>
 }
