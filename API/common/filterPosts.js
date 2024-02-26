@@ -5,7 +5,7 @@ async function filterDay(posts, day){
     return posts.filter( post => bf.FormatDate(post.created_at).day == day) // get Today posts
 }
 
-async function filterPosts(posts, day, loggedUserId){
+async function filterPosts(posts, loggedUserId){
     const mainUser = await User.findById(loggedUserId)
 
     return posts

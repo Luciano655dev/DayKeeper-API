@@ -8,7 +8,6 @@ const {
 } = require('../common/filterPosts')
 
 const performAggregation = async (sortStage = { _id: 1 }, searchQuery = '') => {
-
     return await Post.aggregate([
         {
             $match: {
@@ -39,22 +38,21 @@ const algorithm = async (req, res) => {
     const day = req.query.day || bf.FormatDate(Date.now()).day
     const loggedUserId = req.id
     const order = req.query.order || 'relevant'
-    const following = req.query.following === 'true' || false
+    const following = req.query.following === 'true'
 
     try {
         let posts = []
 
         if (order === 'relevant')
             posts = await performAggregation({ $sort: { relevance: -1 } })
-        else if (order === 'recent')
+        else // recent
             posts = await performAggregation({ $sort: { created_at: -1 } })
-        
 
         if (following)
             posts = await filterFollowing(posts, loggedUserId)
         
 
-        const filteredPosts = await filterPosts(posts, day, loggedUserId)
+        const filteredPosts = await filterPosts(posts, loggedUserId)
 
         res.status(200).json({ posts: filteredPosts })
     } catch (error) {
@@ -74,22 +72,21 @@ const search = async (req, res) => {
     try {
         // SEARCH USER
         if(filter == 'users'){
-            let users = await User.find({})
+            let users = await User.find({ name: { $regex: new RegExp(searchQuery, 'i'), }, })
             return res.status(200).json({ users })
         }
 
         let posts = []
 
-        if (order === 'relevant') {
+        if (order === 'relevant')
             posts = await performAggregation({ $sort: { relevance: -1 } }, searchQuery)
-        } else if (order === 'recent') {
+        else if (order === 'recent')
             posts = await performAggregation({ $sort: { created_at: -1 } }, searchQuery)
-        }
 
         if (following)
             posts = await filterFollowing(posts, loggedUserId)
 
-        const filteredPosts = await filterPosts(posts, day, loggedUserId)
+        const filteredPosts = await filterPosts(posts, loggedUserId)
 
         res.status(200).json({ posts: filteredPosts })
     } catch (error) {

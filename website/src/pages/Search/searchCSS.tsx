@@ -52,7 +52,7 @@ export const StyledItem = styled.div`
 
 export const StyledSearchBox = styled.div`
     position: absolute;
-    top: 5vw;
+    top: 4vw;
 `
 
 export const StyledLink = styled(Link)`

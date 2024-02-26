@@ -13,8 +13,6 @@ import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import Page404 from '../404/Page404'
 
-// TODO: colocar as páginas e Search Params
-
 export default function Search(){
     const token = Cookies.get('userToken')
     const location = useLocation()
@@ -22,6 +20,9 @@ export default function Search(){
     const page: any = queryParams.get('page') || '1'
     const postsPerPage = 2
     const [maxPages, setMaxPages] = useState(1)
+
+    // Filters
+    const order = queryParams.get('order') || 'recent' // recent or relevant
 
     const [searchTxt, setSearchTxt] = useState('')
 
@@ -61,32 +62,48 @@ export default function Search(){
     useEffect(()=>{
         const getPosts = async () => {
             try {
+                let reqStr = `http://localhost:3000/search?q=${searchTxt}&order=${order}&page=${page}`
                 // posts: [{ title, user, created_at, ... }]
-                const response: any = await axios.get('http://localhost:3000', { headers: { Authorization: `Bearer ${token}` } })
-                const newPosts = await updatePosts(response)
-
-                if(!newPosts.length) return setError(`404`)
+                const response: any = await axios.get(reqStr, { headers: { Authorization: `Bearer ${token}` } })
+                await updatePosts(response)
             } catch (error) {
-                setError(`${error}`)
             }
             setLoading(false)
           }
       
           getPosts()
-    }, [page])
+    }, [page, order])
 
     const handleSearch = async()=>{
         setLoading(true)
         try{
-            const response: any = await axios.get(`http://localhost:3000/search?q=${searchTxt}`,
+            let reqStr = `http://localhost:3000/search?q=${searchTxt}&order=${order}&page=${page}`
+            const response: any = await axios.get(reqStr,
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             await updatePosts(response)
         }catch(error: any){
-            if(error.response.status !- 404) setError(`${error}`)
+            if(error.response.status !== 404) setError(`${error}`)
             setLoading(false)
         }
         setLoading(false)
+    }
+
+    const handleChangePage = (newPage: String)=>{
+        if(newPage === '<') {
+            const nextPage = Math.max(Number(page) - 1, 1)
+            const newUrl = `?page=${nextPage}&order=${order}`
+            window.location.href = newUrl
+        } else {
+            const nextPage = Math.min(Number(page) + 1, maxPages)
+            const newUrl = `?page=${nextPage}&order=${order}`
+            window.location.href = newUrl
+        }
+    }
+
+    const handleOrderChange = (newOrder: string) => {
+        const newUrl = `?page=1&order=${newOrder}`
+        window.location.href = newUrl
     }
 
     if(error) return <Page404></Page404>
@@ -113,18 +130,26 @@ export default function Search(){
             <StyledButton onClick={handleSearch}>Send</StyledButton>
         </StyledSearchBox>
 
+        {/* Filter buttons */}
+        <div>
+            <StyledButton onClick={() => handleOrderChange('recent')}>Most Recent</StyledButton>
+            <StyledButton onClick={() => handleOrderChange('relevant')}>Most Relevant</StyledButton>
+        </div>
+
         <StyledContainer>
-            {posts.map((post: any)=><StyledItem>
-                <img src={post.user.pfp}></img>
-                <label>{post.user.username}</label>
-                <h1>{post.title}</h1>
-                <StyledLink to={post.path}> <strong>Acesse aqui</strong> </StyledLink>
-            </StyledItem>)}
+            {posts.map((post: any)=>
+                <StyledItem>
+                    <img src={post.user.pfp}></img>
+                    <label>{post.user.username}</label>
+                    <h1>{post.title}</h1>
+                    <StyledLink to={post.path}> <strong>Acesse aqui</strong> </StyledLink>
+                </StyledItem>
+            )}
         </StyledContainer>
 
         <div>
-            { page-1 > 0 ? <StyledLink to={`/search?page=${page-1}`}><strong>{'<'}</strong></StyledLink> : <></> }
-            { Number(page)+1 <= maxPages ? <StyledLink to={`/search?page=${Number(page)+1}`}><strong>{'>'}</strong></StyledLink> : <></> }
+            { Number(page) - 1 > 0 ? <StyledButton onClick={()=>handleChangePage('<')}> <strong>{'<'}</strong> </StyledButton> : null }
+            { Number(page) + 1 <= maxPages ? <StyledButton onClick={()=>handleChangePage('>')}> <strong>{'>'}</strong> </StyledButton> : null }
         </div>
     </StyledBody>
 }
