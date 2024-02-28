@@ -176,12 +176,12 @@ const followUser = async (req, res) => {
 
       // Fazer solicitação
       await User.updateOne({ name }, { $push: { follow_requests: loggedUserId } })
-      return res.status(200).json({ msg: `Você mandou uma solicitação para seguir ${name}`, following: false })
+      return res.status(200).json({ msg: `Você mandou uma solicitação para seguir ${name}` })
     }
 
     await User.updateOne({ name }, { $push: { followers: loggedUserId } })
 
-    return res.status(200).json({ msg: `Você começou a seguir ${name}`, following: true })
+    return res.status(200).json({ msg: `Você começou a seguir ${name}` })
   } catch (error) {
     res.status(500).json({ msg: `${error}` })
   }
@@ -277,13 +277,13 @@ const blockUser = async(req, res)=>{
 
     // Desbloquear
     if(mainUser.blocked_users.includes(blockedUser._id)){
-      await User.updateOne({ name: mainUser.name }, { $pull: { blocked_users: blockedUser._id } })
-      return res.status(200).json({ msg: `User ${blockedUser.name} foi desbloqueado(a) com sucesso` })
+      const user = await User.updateOne({ name: mainUser.name }, { $pull: { blocked_users: blockedUser._id } })
+      return res.status(200).json({ msg: `User ${blockedUser.name} foi desbloqueado(a) com sucesso`, user })
     }
 
     // Bloquear
-    await User.updateOne({ name: mainUser.name }, { $push: { blocked_users: blockedUser._id } })
-    return res.status(200).json({ msg: `User ${blockedUser.name} foi bloqueado(a) com sucesso` })
+    const user = await User.updateOne({ name: mainUser.name }, { $push: { blocked_users: blockedUser._id } })
+    return res.status(200).json({ msg: `User ${blockedUser.name} foi bloqueado(a) com sucesso`, user })
   }catch (error) {
     return res.status(500).json({ msg: `${error}` })
   }

@@ -14,6 +14,8 @@ export default function UserInfo() {
   const { name: userNameFromParams } = useParams()
   const sameUser = userNameFromParams === user.name
   const [isFollowing, setIsFollowing] = useState(false)
+  const [isBlocked, setIsBlocked] = useState(false)
+  const [activeBlockButton, setActiveBlockButton] = useState(true)
   const [activeFollowButton, setActiveFollowButton] = useState(true)
   const [userInfo, setUserInfo]: any = useState({})
   const [loading, setLoading] = useState(true)
@@ -21,14 +23,17 @@ export default function UserInfo() {
   const [msg, setMsg] = useState('')
 
   const updateUserInfo = async()=>{
+    const loggedUser = await axios.get(`http://localhost:3000/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
     const responseUserInfo: any = await axios.get(`http://localhost:3000/${userNameFromParams}`, { headers: { Authorization: `Bearer ${token}` } })
     const following = await axios.get(`http://localhost:3000/${userNameFromParams}/following`, { headers: { Authorization: `Bearer ${token}` } })
 
-    const follow = responseUserInfo.data.user.followers.find( (userid: any) => userid == user.id)
-    setIsFollowing(follow)
+    setIsFollowing(responseUserInfo.data.user.followers.find( (userid: any) => userid == user.id))
+    setIsBlocked(loggedUser.data.user.blocked_users.find( (userid: any) => userid == responseUserInfo.data.user._id))
+
+    setActiveBlockButton(!(responseUserInfo.data.user._id == user.id)) // Não pode ser o mesmo usuário
 
     setActiveFollowButton(
-      !responseUserInfo.data.user._id != user.id && // Não pode ser o mesmo usuário
+      !(responseUserInfo.data.user._id == user.id) && // Não pode ser o mesmo usuário
       !responseUserInfo.data.user.follow_requests.find( (userid: any) => userid == user.id) && // não pode ter pedido para seguir
       !responseUserInfo.data.user.blocked_users.find( (userid: any) => userid == user.id) // não pode estar bloqueado
     )
@@ -56,8 +61,27 @@ export default function UserInfo() {
     try{
       const response: any = await axios.post(`http://localhost:3000/${userNameFromParams}/follow`, {},
       { headers: { Authorization: `Bearer ${token}` } })
+
       await updateUserInfo()
-      setIsFollowing(response.data.following)
+
+      setMsg(response.data.msg)
+    }catch(error: any){
+      setMsg(error.response.data.msg)
+    }
+
+    setLoading(false)
+  }
+
+  const handleBlock = async()=>{
+    setLoading(true)
+
+    try{
+      const response: any = await axios.post(`http://localhost:3000/${userNameFromParams}/block`, {},
+      { headers: { Authorization: `Bearer ${token}` } })
+
+      await updateUserInfo()
+
+      setMsg(response.data.msg)
     }catch(error: any){
       setMsg(error.response.data.msg)
     }
@@ -82,27 +106,51 @@ export default function UserInfo() {
         </StyledSubContainer>
 
         { !isFollowing ?
-          <StyledButton
-            disabled={!activeFollowButton}
-            style={{
-              margin: '1em',
-              padding: '1em',
-              width: '10vw',
-              fontSize: '1em'
-            }}
-            onClick={handleFollow}
-          >Follow</StyledButton>
+            <StyledButton
+              disabled={!activeFollowButton}
+              style={{
+                margin: '1em',
+                padding: '1em',
+                width: '10vw',
+                fontSize: '1em'
+              }}
+              onClick={handleFollow}
+            >Follow</StyledButton>
           :
-          <StyledButton
-            style={{
-              margin: '1em',
-              padding: '1em',
-              width: '10vw',
-              fontSize: '1em',
-              backgroundColor: 'red'
-            }}
-            onClick={handleFollow}
-          >Unfollow</StyledButton>
+            <StyledButton
+              style={{
+                margin: '1em',
+                padding: '1em',
+                width: '10vw',
+                fontSize: '1em',
+                backgroundColor: 'red'
+              }}
+              onClick={handleFollow}
+            >Unfollow</StyledButton>
+        }
+
+        { !isBlocked ?
+            <StyledButton
+              disabled={!activeBlockButton}
+              style={{
+                margin: '1em',
+                padding: '1em',
+                width: '10vw',
+                fontSize: '1em',
+                backgroundColor: 'red'
+              }}
+              onClick={handleBlock}
+            >Block</StyledButton>
+          :
+            <StyledButton
+              style={{
+                margin: '1em',
+                padding: '1em',
+                width: '10vw',
+                fontSize: '1em',
+              }}
+              onClick={handleBlock}
+            >Unblock</StyledButton>
         }
 
         {sameUser ?
