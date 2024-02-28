@@ -8,21 +8,21 @@ async function filterDay(posts, day){
 async function filterPosts(posts, loggedUserId){
     const mainUser = await User.findById(loggedUserId)
 
-    return posts
-        .filter( async(post) => {
-            const postUser = await User.findById(post.user)
+    const postPromises = posts.map(async(post) => {
+        const postUser = await User.findById(post.user)
 
-            if(
-                !postUser.blocked_users.includes(mainUser._id) && // se o cara não te bloqueou
-                !mainUser.blocked_users.includes(postUser._id) // se você não bloqueou o cara
-            ) return post
-        })
-        .filter( async(post) => {
-            const postUser = await User.findById(post.user)
+        if (
+            postUser.blocked_users.includes(mainUser._id) && // se o cara te bloqueou
+            mainUser.blocked_users.includes(postUser._id) // se você bloqueou o cara
+        ) return null
 
-            if(!postUser.private || postUser._id == mainUser._id) return post // caso não seja privado ou seja seu post
-            if(postUser.followers.includes(mainUser._id)) return post // caso seja privado e estiver seguindo
-        } )
+        if (!postUser.private || postUser._id == loggedUserId) return post // caso não seja privado ou seja seu post
+        if (postUser.followers.includes(loggedUserId)) return post // caso seja privado e estiver seguindo
+        return null
+    })
+
+    const filteredPosts = await Promise.all(postPromises)
+    return filteredPosts.filter(post => post !== null)
 }
 
 async function filterFollowing(posts, loggedUserId){

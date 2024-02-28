@@ -6,22 +6,24 @@ import {
   StyledButton,
   Alert,
   StyledLabel,
-  StyledReactions
+  StyledReactions,
+  StyledUserContainer,
+  StyledLink
 } from './postInfoCSS'
+import Page404 from "../../../404/Page404";
 import { useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Cookies from 'js-cookie'
 import axios from 'axios'
 
 export default function PostInfo({ togglePage }: any) {
-  const navigate = useNavigate()
   const token = Cookies.get('userToken')
   const user = useSelector((state: any) => state.userReducer)
   const { title: postTitleFromParams, name: username } = useParams()
   const [selectedReaction, setSelectedReaction] = useState(5)
   const [userCommentData, setUserCommentData]: any = useState([])
-  const [postInfo, setPostInfo] = useState({
+  const [postInfo, setPostInfo]: any = useState({
     title: '',
     data: '',
     images: [],
@@ -31,7 +33,7 @@ export default function PostInfo({ togglePage }: any) {
   const [sameUser, setSameUser] = useState(false)
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(false)
   const [msg, setMsg] = useState('')
 
   const updateLocalComments = async(response: any) => {
@@ -79,9 +81,10 @@ export default function PostInfo({ togglePage }: any) {
           const responsePostInfo = await axios.get(`http://localhost:3000/${username}/${postTitleFromParams}`,
             { headers: { Authorization: `Bearer ${token}` }
           })
-          setPostInfo(responsePostInfo.data.post)
+          const responseUser: any = await getUserComment(responsePostInfo.data.post.user)
+          setPostInfo({...responsePostInfo.data.post, user: responseUser})
 
-            // update selected reaction
+          // update selected reaction
           responsePostInfo.data.post.reactions.filter((reac: any)=>
             reac.user == user.id ? setSelectedReaction(reac.reaction) : reac
           )
@@ -95,7 +98,7 @@ export default function PostInfo({ togglePage }: any) {
 
         setLoading(false)
       }catch (error: any) {
-        return navigate('/message?msg=POST NÃO ENCONTRADO')
+        return setError(error.response.data.msg)
       }
     };
 
@@ -157,12 +160,17 @@ export default function PostInfo({ togglePage }: any) {
     setLoading(false)
   }
 
-  if (error) return <h1>{error}</h1>
+  if (error) return <Page404></Page404>
   if (loading || !postInfo) return <h1>...</h1>
 
   return (
     <div>
       { msg ? <Alert style={{ backgroundColor: 'green' }} msg={msg}></Alert> : <></> }
+
+      <StyledUserContainer>
+        <img src={postInfo.user.pfp}></img>
+        <StyledLink to={`/${postInfo.user.username}`}>{postInfo.user.username}</StyledLink>
+      </StyledUserContainer>
 
       { postInfo.images ? postInfo.images.map( (img: any) => <StyledImage src={img.url} key={Math.random()}></StyledImage> ) : <></> }
       <h2>{postInfo.title}</h2>

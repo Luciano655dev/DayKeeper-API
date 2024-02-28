@@ -24,7 +24,7 @@ export default function Search(){
     // Filters
     const order = queryParams.get('order') || 'recent' // recent or relevant
 
-    const [searchTxt, setSearchTxt] = useState('')
+    const [searchTxt, setSearchTxt] = useState(queryParams.get('q') || '')
 
     const [loading, setLoading] = useState(true)
     const [posts, setPosts]: any = useState([])
@@ -63,6 +63,9 @@ export default function Search(){
                 { headers: { Authorization: `Bearer ${token}` } }
             )
             await updatePosts(response)
+
+            const newUrl = `?page=1&q=${searchTxt}&order=${order}`
+            window.location.href = newUrl
         }catch(error: any){
             if(error.response.status !== 404) setError(`${error}`)
             setLoading(false)
@@ -73,17 +76,17 @@ export default function Search(){
     const handleChangePage = (newPage: String)=>{
         if(newPage === '<') {
             const nextPage = Math.max(Number(page) - 1, 1)
-            const newUrl = `?page=${nextPage}&order=${order}`
+            const newUrl = `?page=${nextPage}&q=${searchTxt}&order=${order}`
             window.location.href = newUrl
         } else {
             const nextPage = Math.min(Number(page) + 1, maxPages)
-            const newUrl = `?page=${nextPage}&order=${order}`
+            const newUrl = `?page=${nextPage}&q=${searchTxt}&order=${order}`
             window.location.href = newUrl
         }
     }
 
     const handleOrderChange = () => {
-        const newUrl = `?page=1&order=${order == 'recent' ? 'relevant' : 'recent'}`
+        const newUrl = `?page=1&q=${searchTxt}&order=${order == 'recent' ? 'relevant' : 'recent'}`
         window.location.href = newUrl
     }
 
@@ -111,7 +114,6 @@ export default function Search(){
             <StyledButton onClick={handleSearch}>Send</StyledButton>
         </StyledSearchBox>
 
-        {/* Filter buttons */}
         <div>
             <StyledButton onClick={() => handleOrderChange()}>{order == 'recent' ? 'Relevant' : 'Recent'}</StyledButton>
         </div>
@@ -122,7 +124,7 @@ export default function Search(){
                     <img src={post.user_info.profile_picture.url}></img>
                     <label>{post.user_info.name}</label>
                     <h1>{post.title}</h1>
-                    <StyledLink to={post.path}> <strong>Acesse aqui</strong> </StyledLink>
+                    <StyledLink to={`http://localhost:5173/${post.user_info.name}/${post.title}`}> <strong>Acesse aqui</strong> </StyledLink>
                 </StyledItem>
             )}
         </StyledContainer>

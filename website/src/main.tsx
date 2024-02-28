@@ -32,6 +32,7 @@ import ResetPassword from './pages/Auth/ResetPassword/ResetPassword.tsx'
 // User
 import UserInfo from './pages/User/Info/userInfo.tsx'
 import EditProfile from './pages/User/Edit/editProfile.tsx'
+import FollowRequests from './pages/User/FollowRequests/FollowRequests.tsx'
 
 // Posts
 import Post from './pages/Post/Render/Render.tsx'
@@ -61,7 +62,8 @@ const PrivateRoute = ({ element }: any) => {
       dispatch({ type: 'user', payload: {
         name: authenticated.response.data.user.name,
         id: authenticated.response.data.user._id,
-        pfp: authenticated.response.data.user.profile_picture
+        pfp: authenticated.response.data.user.profile_picture,
+        private: authenticated.response.data.user.private
       } })
       setLoading(false)
     })
@@ -104,6 +106,10 @@ const router = createBrowserRouter([
       {
         path: '/reset_password',
         element: <ResetPassword></ResetPassword>
+      },
+      {
+        path: '/follow_requests',
+        element: <FollowRequests></FollowRequests>
       },
       {
         path: '/message',

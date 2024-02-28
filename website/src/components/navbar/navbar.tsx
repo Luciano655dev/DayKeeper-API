@@ -43,6 +43,7 @@ export default function Navbar() {
             handleLogout={handleLogout}
             handleConfig={() => navigate('/profile')}
             handlePost={() => navigate('/publish')}
+            handleFollowRequest={()=>navigate('/follow_requests')}
           />
         ) : (
           <NotLogged />
@@ -52,8 +53,8 @@ export default function Navbar() {
   );
 }
 
-function Logged({ token, handleLogout, handleConfig, handlePost }: any) {
-  const [userInfo, setUserInfo] = useState({ name: '', profile_picture: { url: '' } });
+function Logged({ token, handleLogout, handleConfig, handlePost, handleFollowRequest }: any) {
+  const [userInfo, setUserInfo]: any = useState({ name: '', profile_picture: { url: '' } });
   const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError]: any = useState(null);
 
@@ -90,11 +91,15 @@ function Logged({ token, handleLogout, handleConfig, handlePost }: any) {
     {
       text: 'Log Out',
       func: handleLogout,
-    },
+    }
   ];
   return (
     <li>
-      <Dropdown text={userInfo.name} url={userInfo.profile_picture.url} options={options} />
+      <Dropdown text={userInfo.name} url={userInfo.profile_picture.url} options={
+        userInfo.private ?
+          [ ...options, { text: 'Follows', func: handleFollowRequest } ] :
+          options
+      } />
     </li>
   );
 }
@@ -102,7 +107,7 @@ function Logged({ token, handleLogout, handleConfig, handlePost }: any) {
 function NotLogged() {
   return (
     <div>
-      <p>(<StyledLink to='/login'>Login</StyledLink>, <StyledLink to='/register'>Register</StyledLink>)</p>
+      <p><StyledLink to='/login'>Login</StyledLink> | <StyledLink to='/register'>Register</StyledLink></p>
     </div>
   );
 }

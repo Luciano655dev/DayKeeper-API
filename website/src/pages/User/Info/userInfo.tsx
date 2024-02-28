@@ -14,15 +14,24 @@ export default function UserInfo() {
   const { name: userNameFromParams } = useParams()
   const sameUser = userNameFromParams === user.name
   const [isFollowing, setIsFollowing] = useState(false)
+  const [activeFollowButton, setActiveFollowButton] = useState(true)
   const [userInfo, setUserInfo]: any = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [msg, setMsg] = useState('')
 
   const updateUserInfo = async()=>{
-    const responseUserInfo = await axios.get(`http://localhost:3000/${userNameFromParams}`, { headers: { Authorization: `Bearer ${token}` } })
+    const responseUserInfo: any = await axios.get(`http://localhost:3000/${userNameFromParams}`, { headers: { Authorization: `Bearer ${token}` } })
     const following = await axios.get(`http://localhost:3000/${userNameFromParams}/following`, { headers: { Authorization: `Bearer ${token}` } })
-    setIsFollowing(responseUserInfo.data.user.followers.find( (userid: any) => userid == user.id))
+
+    const follow = responseUserInfo.data.user.followers.find( (userid: any) => userid == user.id)
+    setIsFollowing(follow)
+
+    setActiveFollowButton(
+      !responseUserInfo.data.user._id != user.id && // Não pode ser o mesmo usuário
+      !responseUserInfo.data.user.follow_requests.find( (userid: any) => userid == user.id) && // não pode ter pedido para seguir
+      !responseUserInfo.data.user.blocked_users.find( (userid: any) => userid == user.id) // não pode estar bloqueado
+    )
     setUserInfo({...responseUserInfo.data.user, following: following.data.usersFollowing})
   }
 
@@ -74,6 +83,7 @@ export default function UserInfo() {
 
         { !isFollowing ?
           <StyledButton
+            disabled={!activeFollowButton}
             style={{
               margin: '1em',
               padding: '1em',

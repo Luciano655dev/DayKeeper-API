@@ -13,13 +13,16 @@ export const StyledCommentSection = styled.div`
 `
 
 export const StyledLink = styled(Link)`
-  background-color: #4caf50;
-  color: white;
-  padding: 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 5px;
+  color: black;
+  text-decoration: none;
+  font-size: 2em;
+  margin-left: 0.5em;
   cursor: pointer;
+  transition: 0.3s;
+
+  &:hover{
+    text-decoration: underline;
+  }
 `
 
 export const StyledReactions = styled.div`
@@ -31,34 +34,34 @@ export const StyledReactions = styled.div`
 `
 
 export const StyledComment = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 50%;
+  margin: 10px;
+  border-bottom: 1px solid black;
+  
+  div {
     display: flex;
-    flex-direction: column;
-    max-width: 50%;
-    margin: 10px;
-    border-bottom: 1px solid black;
-    
-    div {
-      display: flex;
-      align-items: center;
-      flex-direction: row;
-    }
+    align-items: center;
+    flex-direction: row;
+  }
 
-    img {
-      margin: 0;
-      width: 40px;
-      height: 40px;
-      border-radius: 40px;
-    }
-    label {
-      margin: 0;
-      margin-left: 10px;
-      font-family: 'JetBrains Mono';
-    }
-    p{
-      margin: 0;
-      margin-left: 2em;
-      padding: 10px;
-    }
+  img {
+    margin: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+  }
+  label {
+    margin: 0;
+    margin-left: 10px;
+    font-family: 'JetBrains Mono';
+  }
+  p{
+    margin: 0;
+    margin-left: 2em;
+    padding: 10px;
+  }
 `
 
 export const StyledForm = styled.div`
@@ -102,6 +105,24 @@ export const StyledButton = styled.button`
     opacity: 1.0;
   }
   opacity: ${(props: any) => !props.enabled ? 0.5 : 1};
+`
+
+export const StyledUserContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  padding: 1em;
+
+  img{
+    width: 4em;
+    height: 4em;
+    border-radius: 100%;
+  }
+  h1{
+    font-size: 2em;
+    margin-left: 0.5em;
+  }
 `
 
 // ALERT
