@@ -1,4 +1,13 @@
-import { StyledBody, StyledContainer, StyledImage, StyledUsername, StyledEmail, StyledSubContainer, StyledEditProfileButton } from './userInfoCSS'
+import {
+  StyledBody,
+  StyledContainer,
+  StyledImage,
+  StyledUsername,
+  StyledEmail,
+  StyledSubContainer,
+  StyledEditProfileButton,
+  StyledFollowLink
+} from './userInfoCSS'
 import { StyledButton } from '../Edit/editProfileCSS';
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -100,10 +109,18 @@ export default function UserInfo() {
         <StyledUsername>{userInfo.name}</StyledUsername>
         <StyledEmail>{userInfo.email}</StyledEmail>
 
-        <StyledSubContainer>
-          <h1>{userInfo.followers.length}</h1>
-          <h1>{userInfo.following.length}</h1>
-        </StyledSubContainer>
+
+        { !userInfo.private || isFollowing || sameUser ?
+            <StyledSubContainer>
+              <StyledFollowLink to={`/${userInfo.name}/followers`}>{userInfo.followers.length}</StyledFollowLink>
+              <StyledFollowLink to={`/${userInfo.name}/following`}>{userInfo.following.length}</StyledFollowLink>
+            </StyledSubContainer>
+          :
+            <StyledSubContainer>
+              <h1>{userInfo.followers.length}</h1>
+              <h1>{userInfo.following.length}</h1>
+            </StyledSubContainer>
+        }
 
         { !isFollowing ?
             <StyledButton

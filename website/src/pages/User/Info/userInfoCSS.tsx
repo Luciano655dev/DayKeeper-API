@@ -22,8 +22,10 @@ export const StyledContainer = styled.div`
 `
 
 export const StyledImage = styled.img`
-    width: 20em;
-    height: 20em;
+    min-width: 20em;
+    min-height: 20em;
+    max-width: 20em;
+    max-height: 20em;
     margin: 0;
     border-radius: 100%;
 `
@@ -38,6 +40,19 @@ export const StyledEmail = styled.h2`
     font-family: 'JetBrains Mono';
     margin: 0;
     font-size: 1em;
+`
+
+export const StyledFollowLink = styled(Link)`
+    text-decoration: none;
+    color: black;
+    margin: 10px;
+    font-size: 3em;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    &:hover{
+        text-decoration: underline;
+    }
 `
 
 export const StyledSubContainer = styled.div`
