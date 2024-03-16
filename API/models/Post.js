@@ -3,7 +3,10 @@ const mongoose = require('mongoose')
 const postSchema = mongoose.Schema({
     title: String,
     data: String,
-    user: String,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     edited_at: {
         type: Date,
         required: false
@@ -23,14 +26,25 @@ const postSchema = mongoose.Schema({
     ],
     reactions: [
         {
-            user: String,
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
             reaction: Number
         }
     ],
     comments: [
         {
-            user: String,
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
             comment: String,
+            gif: {
+                name: String,
+                id: String,
+                url: String
+            },
             created_at: {
                 type: Date,
                 default: Date.now()

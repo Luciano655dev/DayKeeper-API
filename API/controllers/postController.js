@@ -38,13 +38,16 @@ const createPost = async(req, res)=>{
     })
 
     await post.save()
-    res.status(201).json({ msg: "Post postado com sucesso!", post })
+
+    return res.status(201).json({ msg: "Post postado com sucesso!", post })
+    // typeof 'user' == ObjectId
   } catch (error){
+
     // Deleta as imagens mandadas caso tenha algum erro
     for(let i in req.files)
       deleteImage(req.files[i].key)
 
-    res.status(500).json({ error, msg: "Erro no servidor, as imagens mandadas não foram postadas" })
+    return res.status(500).json({ error, msg: "Erro no servidor, as imagens mandadas não foram postadas" })
   }
 }
 
@@ -55,10 +58,7 @@ const updatePost = async(req, res)=>{
   const loggedUserId = req.id
 
   try{
-    const post = await Post.findOne({
-      title: posttitle,
-      user: loggedUserId
-    })
+    const post = await getPostByUserId(posttitle, loggedUserId)
     if(!post) return cb('Post não encontrado', false)
 
     // verifica se não ultrapassou o limite
@@ -87,7 +87,7 @@ const updatePost = async(req, res)=>{
   
     // Postar
     const updatedPost = await Post.findOneAndUpdate(
-      { title: post.title, user: post.user },
+      { title: posttitle, user: loggedUserId },
       {
         $set: {
           ...newData,
@@ -103,13 +103,16 @@ const updatePost = async(req, res)=>{
       },
       { new: true }
     )
+
     if(!updatePost) return res.status(404).json({ msg: "Post não encontrado" })
     if(JSON.stringify(post) == JSON.stringify(updatedPost)) return res.status(204).json({ msg: "O post não sofreu alteração" })
 
     await updatedPost.save()
-    res.status(200).json({ msg: 'Post atualizado com sucesso!', post: updatedPost })
+
+    return res.status(200).json({ msg: 'Post atualizado com sucesso!', post: updatedPost })
+    // typeof 'user' == ObjectId
   } catch (error){
-    res.status(500).json({ msg: error.message })
+    return res.status(500).json({ msg: error.message })
   }
 }
 
@@ -132,13 +135,15 @@ const deletePost = async(req, res)=>{
       deleteImage(deletedPost.images[i].key)
     
     if(!deletePost) return res.status(404).json({ msg: 'Post não encontrado' })
+
     return res.status(200).json({ msg: 'Post deletado com sucesso', post: deletedPost })
+    // typeof 'user' == ObjectId
   }catch(error){
     return res.status(500).json({ error: `${error}` })
   }
 }
 
-// likePost
+// reactPost
 const reactPost = async (req, res) => {
   const loggedUserId = req.id
   const { name: username, posttitle } = req.params
@@ -150,17 +155,17 @@ const reactPost = async (req, res) => {
 
   try {
     const user = await User.findOne({ name: username })
-
-    // Encontrar o post no banco de dados
-    let reactedPost = await Post.findOne({ title: posttitle, user: user._id })
+    let reactedPost = await getPostByUserId(posttitle, user._id)
 
     // Verificar se o usuário já reagiu
     const existingReactionIndex = reactedPost.reactions.findIndex(
-      (reaction) => reaction.user.toString() === loggedUserId
+      (reaction) =>
+        reaction.user._id == loggedUserId ||
+        reaction.user == loggedUserId
     )
 
+    // caso já tenha reagido
     if (existingReactionIndex !== -1) {
-      // Se o usuário já reagiu
       if (reactedPost.reactions[existingReactionIndex].reaction === reaction) {
         // Se a reação for a mesma, remover a reação existente
         reactedPost.reactions.splice(existingReactionIndex, 1)
@@ -173,12 +178,11 @@ const reactPost = async (req, res) => {
       reactedPost.reactions.push({ user: loggedUserId, reaction })
     }
 
-    // Salvar ou atualizar o documento no banco de dados
     await reactedPost.save()
 
-    res.status(200).json({ msg: 'A reação foi adicionada ou retirada do Post!', post: reactedPost })
+    return res.status(200).json({ msg: 'A reação foi adicionada ou retirada do Post!', post: reactedPost })
   } catch (error) {
-    res.status(500).json({ msg: error.message })
+    return res.status(500).json({ msg: error.message })
   }
 }
 
@@ -203,11 +207,9 @@ const commentPost = async(req, res)=>{
       comment
     }]
 
-    for(let i in post.comments){
-      if(post.comments[i].user == loggedUserId){
-        newComments = [...post.comments].filter( comment => comment.user != loggedUserId)
-      }
-    }
+    // retirar o comentário do usuário (caso tenha)
+    if(post.comments.findIndex(comment => comment.user._id == loggedUserId) !== -1)
+      newComments = [...post.comments].filter( comment => comment.user._id != loggedUserId)
 
     const user = await User.findOne({ name: username })
     const commentedPost = await Post.findOneAndUpdate(
@@ -216,63 +218,63 @@ const commentPost = async(req, res)=>{
         comments: newComments
       },
       { new: true }
-    )
+    ).populate('comments.user') // popula apenas os novos comentários
+    
     if (!commentedPost) return res.status(404).json({ msg: 'Post não encontrado' })
 
     await commentedPost.save()
-    res.status(200).json({ msg: 'O post foi comentado!', comment, post: commentedPost })
+
+    return res.status(200).json({ msg: 'O post foi comentado!', comment, post: commentedPost })
   } catch (error){
-    res.status(500).json({ msg: error.message })
+    return res.status(500).json({ msg: error.message })
   }
 }
 
 // reactComment
 const reactComment = async (req, res) => {
   const { name: username, posttitle, usercomment } = req.params
-  let userCommentId = await User.findOne({ name: usercomment })
-  userCommentId = userCommentId._id
   const loggedUserId = req.id
 
   // reaction
-  const reaction = req.body.reaction;
+  const reaction = req.body.reaction
   if (reaction < 0 || reaction > 5)
-    return res.status(422).json({ msg: "A reação não existe ou não foi preenchida" });
+    return res.status(422).json({ msg: "A reação não existe ou não foi preenchida" })
 
   try {
-    const post = await getPost(posttitle, username);
+    const userCommentId = (await User.findOne({ name: usercomment }))._id.toString()
 
-    // Encontrar o índice do comentário do usuário
-    const userCommentIndex = post.comments.findIndex((comment) => comment.user == userCommentId);
-    if (userCommentIndex === -1) return res.status(404).json({ msg: "O comentário não foi encontrado" });
+    const post = await getPost(posttitle, username)
+    console.log(post.comments.find( com => com.user._id == userCommentId ) != undefined)
+
+    const userCommentIndex = post.comments.findIndex((comment) => comment.user._id == userCommentId)
+    if (userCommentIndex === -1) return res.status(404).json({ msg: "O comentário não foi encontrado" })
 
     // Verificar se o usuário já reagiu ao comentário no índice atual
     const existingReactionIndex = post.comments[userCommentIndex].reactions.findIndex(
-      (reactionObj) => reactionObj.user.toString() === loggedUserId
-    );
+      (reactionObj) => reactionObj.user._id === loggedUserId
+    )
 
-    if (existingReactionIndex !== -1) {
-      // Se o usuário já reagiu
+    // Caso já tenha reagido
+    if (existingReactionIndex !== -1){
       if (post.comments[userCommentIndex].reactions[existingReactionIndex].reaction === reaction) {
         // Se a reação for a mesma, remover a reação existente
-        post.comments[userCommentIndex].reactions.splice(existingReactionIndex, 1);
+        post.comments[userCommentIndex].reactions.splice(existingReactionIndex, 1)
       } else {
         // Se a reação for diferente, apenas atualizar a reação existente
-        post.comments[userCommentIndex].reactions[existingReactionIndex].reaction = reaction;
+        post.comments[userCommentIndex].reactions[existingReactionIndex].reaction = reaction
       }
     } else {
       // Se o usuário não reagiu anteriormente, adicionar a nova reação
-      post.comments[userCommentIndex].reactions.push({ user: loggedUserId, reaction });
+      post.comments[userCommentIndex].reactions.push({ user: loggedUserId, reaction })
     }
 
-    // Atualizar o documento no banco de dados
-    await post.save();
+    await post.save()
 
-    res.status(200).json({ msg: 'A reação foi adicionada ou retirada do Comentário!', post });
+    return res.status(200).json({ msg: 'A reação foi adicionada ou retirada do Comentário!', post })
   } catch (error) {
-    res.status(500).json({ msg: error.message });
+    return res.status(500).json({ msg: error.message });
   }
 }
-
 
 // deleteComment
 const deleteComment = async (req, res) => {
@@ -313,19 +315,18 @@ const deleteComment = async (req, res) => {
         comments: [...post.comments],
       },
       { new: true }
-    );
+    ).populate('user')
 
     if (!updatedPost)
       return res.status(404).json({ msg: "Post não encontrado" })
 
     await updatedPost.save()
-    res
-      .status(200)
-      .json({ msg: "O comentário foi removido com sucesso!", post: updatedPost })
+
+    res.status(200).json({ msg: "O comentário foi removido com sucesso!", post: updatedPost })
   } catch (error) {
     res.status(500).json({ msg: error.message })
   }
-};
+}
 
 module.exports = {
   getPostByName,
@@ -343,6 +344,24 @@ async function getPost(posttitle, username){
   try{
     const user = await User.findOne({ name: username })
     const post = await Post.findOne({ user: user._id, title: posttitle })
+      .populate('user', '-password') // pegar o usuario que postou
+      .populate('reactions.user', '-password') // pegar os usuarios que reagiram
+      .populate('comments.user', '-password') // pegar os usuarios que comentaram
+      // .populate('comments.reactions.user', '-password') // pegar os usuarios que reagiram a comentarios
+  
+    return post
+  }catch(err){
+    return null
+  }
+}
+
+async function getPostByUserId(posttitle, userid){
+  try{
+    const post = await Post.findOne({ user: userid, title: posttitle })
+      .populate('user', '-password')
+      .populate('reactions.user', '-password') // pegar os usuarios que reagiram
+      .populate('comments.user', '-password') // pegar os usuarios que comentaram
+      // .populate('comments.reactions.user', '-password') // pegar os usuarios que reagiram a comentarios
   
     return post
   }catch(err){

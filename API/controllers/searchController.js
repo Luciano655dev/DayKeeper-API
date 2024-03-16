@@ -2,13 +2,22 @@ const Post = require('../models/Post')
 const User = require('../models/User')
 
 const bf = require('better-format')
+const axios = require('axios')
 const {
     filterPosts,
-    filterFollowing
+    filterFollowing,
+    filterDay
 } = require('../common/filterPosts')
 
-const performAggregation = async (sortStage = { _id: 1 }, searchQuery = '') => {
-    return await Post.aggregate([
+const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuery = '', pageNumber = 1, pageSize = 10, filterOptions = {}) => {
+    let mainUser = await User.findById(mainUserId)
+    mainUser.following = await User.distinct('_id', { followers: mainUserId })
+    const skipCount = (pageNumber - 1) * pageSize
+
+    let todayDate = bf.FormatDate(Date.now())
+    todayDate = `${todayDate.day}-${todayDate.month}-${todayDate.year}`
+
+    const pipeline = [
         {
             $lookup: {
                 from: 'users',
@@ -25,15 +34,34 @@ const performAggregation = async (sortStage = { _id: 1 }, searchQuery = '') => {
         },
         {
             $match: {
-                $or: [
-                    { title: { $regex: new RegExp(searchQuery, 'i') } },
-                    { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } }
+                $and: [
+                    { 'user': { $nin: mainUser.blocked_users } },
+                    { 'user': { $ne: mainUser._id } },
+                    {
+                        $or: [
+                            { title: { $regex: new RegExp(searchQuery, 'i') } },
+                            { data: { $regex: new RegExp(searchQuery, 'i') } },
+                            { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { 'user_info.private': false },
+                            { 
+                                $and: [
+                                    { 'user_info.private': true },
+                                    { 'user_info.followers': mainUser._id }
+                                ]
+                            }
+                        ]
+                    }
                 ]
             }
         },
         {
             $addFields: {
-                relevance: { $sum: ['$reactions', '$comments'] }
+                relevance: { $sum: ['$reactions', '$comments'] },
+                isToday: { $eq: ['$title', todayDate] }
             }
         },
         {
@@ -47,11 +75,24 @@ const performAggregation = async (sortStage = { _id: 1 }, searchQuery = '') => {
                 created_at: 1,
                 user_info: { $arrayElemAt: ['$user_info', 0] }
             }
-        },
-        sortStage
-    ]);
-}
+        }
+    ]
 
+    if (filterOptions.day)
+        pipeline.push({ $match: { title: filterOptions.day } })
+
+    if(filterOptions.following)
+        pipeline.push({ $match: { 'user': { $in: mainUser.following } } })
+
+    // Sorting
+    pipeline.push(
+        sortStage,
+        { $skip: skipCount },
+        { $limit: pageSize }
+    )
+
+    return await Post.aggregate(pipeline)
+}
 
 
 const algorithm = async (req, res) => {
@@ -65,54 +106,50 @@ const algorithm = async (req, res) => {
 
         if (order === 'relevant')
             posts = await performAggregation({ $sort: { relevance: -1 } })
-        else // recent
+        else if(order === 'recent') // recent
             posts = await performAggregation({ $sort: { created_at: -1 } })
-
-        if (following)
-            posts = await filterFollowing(posts, loggedUserId)
-        
 
         const filteredPosts = await filterPosts(posts, loggedUserId)
 
-        res.status(200).json({ posts: filteredPosts })
+        return res.status(200).json({ posts: filteredPosts })
     } catch (error) {
         return res.status(500).json({ error: `${error}` })
     }
-};
+}
 
 const search = async (req, res) => {
-    const day = req.query.day || bf.FormatDate(Date.now()).day
+    const page = Number(req.query.page) || 1
+    const pageSize = 10
+
+    const dayRegexFormat = /^\d{2}-\d{2}-\d{4}$/
+    let day = dayRegexFormat.test(req.query.day) ? req.query.day : undefined
+
     const searchQuery = req.query.q || ''
     const order = req.query.order || 'relevant'
     const following = req.query.following === 'true' || false
-    const filter = req.query.filter || 'posts'
 
     const loggedUserId = req.id
 
     try {
-        // SEARCH USER
-        if(filter == 'users'){
-            let users = await User.find({ name: { $regex: new RegExp(searchQuery, 'i'), }, })
-            return res.status(200).json({ users })
-        }
-
-        let posts = []
+        let sortPipeline = { $sort: { created_at: -1 } } // recent
 
         if (order === 'relevant')
-            posts = await performAggregation({ $sort: { relevance: -1 } }, searchQuery)
-        else if (order === 'recent')
-            posts = await performAggregation({ $sort: { created_at: -1 } }, searchQuery)
+            sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } } // relevant
 
-        if (following)
-            posts = await filterFollowing(posts, loggedUserId)
+        const posts = await performAggregation(
+            loggedUserId,
+            sortPipeline,
+            searchQuery,
+            page,
+            pageSize,
+            { day, following }
+        )
 
-        const filteredPosts = await filterPosts(posts, loggedUserId)
-
-        res.status(200).json({ posts: filteredPosts })
+        return res.status(200).json({ posts })
     } catch (error) {
         return res.status(500).json({ error: `${error}` })
     }
-};
+}
 
 module.exports = {
     algorithm,
