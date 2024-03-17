@@ -175,7 +175,6 @@ const resetPassword = async (req, res) => {
 
     res.status(200).json({ msg: 'Senha redefinida com sucesso' })
   } catch (error) {
-    console.error(error)
     res.status(400).json({ msg: 'Token inválido ou expirado' })
   }
 };

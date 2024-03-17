@@ -2,6 +2,7 @@ const User = require('../models/User')
 const Post = require('../models/Post')
 const deleteImage = require('../common/deleteImage')
 const bf = require('better-format')
+const axios = require('axios')
 
 // getPostByName
 const getPostByName = async(req, res)=>{
@@ -18,7 +19,7 @@ const getPostByName = async(req, res)=>{
 
 // submitPost
 const createPost = async(req, res)=>{
-  const { data } = req.body
+  const { data, gif } = req.body
   const images = req.files ? req.files.map( file => { return { name: file.originalname, size: file.size, key: file.key, url: file.location } }) : []
   const loggedUserId = req.id
 
@@ -188,7 +189,7 @@ const reactPost = async (req, res) => {
 
 //commentPost
 const commentPost = async(req, res)=>{
-  const { comment } = req.body
+  let { comment, gif } = req.body
   const { name: username, posttitle } = req.params
   const loggedUserId = req.id
 
@@ -200,11 +201,31 @@ const commentPost = async(req, res)=>{
     const post = await getPost(posttitle, username)
     if(!post) return res.status(404).json({ msg: "Post não encontrado" })
 
+    if(gif){
+      try {
+        const apiKey = process.env.GIPHY_API_KEY
+        gif = await axios.get(`https://api.giphy.com/v1/gifs/${gif}?api_key=${apiKey}`)
+        gif = {
+          name: gif.data.data.title,
+          id: gif.data.data.id,
+          url: gif.data.data.images.original.url
+        }
+      }catch(err){
+        gif = {
+          name: '404',
+          id: '',
+          url: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzc0OGh3NWQxbTdqcjZqaDZudXQyMHM3b3VpdXF4czczaGl4bHZicyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8L0Pky6C83SzkzU55a/giphy.gif'
+        }
+        console.log(err)
+      }
+    }
+
     let newComments = [ ...post.comments, {
-      user: loggedUserId,
       created_at: Date.now(),
+      user: loggedUserId,
       reactions: [],
-      comment
+      comment,
+      gif
     }]
 
     // retirar o comentário do usuário (caso tenha)

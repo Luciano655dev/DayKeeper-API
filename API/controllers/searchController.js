@@ -1,21 +1,15 @@
 const Post = require('../models/Post')
 const User = require('../models/User')
-
 const bf = require('better-format')
-const axios = require('axios')
-const {
-    filterPosts,
-    filterFollowing,
-    filterDay
-} = require('../common/filterPosts')
 
 const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuery = '', pageNumber = 1, pageSize = 10, filterOptions = {}) => {
     let mainUser = await User.findById(mainUserId)
     mainUser.following = await User.distinct('_id', { followers: mainUserId })
-    const skipCount = (pageNumber - 1) * pageSize
 
     let todayDate = bf.FormatDate(Date.now())
     todayDate = `${todayDate.day}-${todayDate.month}-${todayDate.year}`
+
+    const skipCount = (pageNumber - 1) * pageSize
 
     const pipeline = [
         {
@@ -94,29 +88,6 @@ const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuer
     return await Post.aggregate(pipeline)
 }
 
-
-const algorithm = async (req, res) => {
-    const day = req.query.day || bf.FormatDate(Date.now()).day
-    const loggedUserId = req.id
-    const order = req.query.order || 'relevant'
-    const following = req.query.following === 'true'
-
-    try {
-        let posts = []
-
-        if (order === 'relevant')
-            posts = await performAggregation({ $sort: { relevance: -1 } })
-        else if(order === 'recent') // recent
-            posts = await performAggregation({ $sort: { created_at: -1 } })
-
-        const filteredPosts = await filterPosts(posts, loggedUserId)
-
-        return res.status(200).json({ posts: filteredPosts })
-    } catch (error) {
-        return res.status(500).json({ error: `${error}` })
-    }
-}
-
 const search = async (req, res) => {
     const page = Number(req.query.page) || 1
     const pageSize = 10
@@ -152,6 +123,5 @@ const search = async (req, res) => {
 }
 
 module.exports = {
-    algorithm,
     search
 }
