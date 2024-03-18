@@ -2,8 +2,6 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const dotenv = require('dotenv')
-const multer = require('multer')
-
 dotenv.config()
 
 const app = express()
@@ -12,12 +10,14 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors())
 
 // Routes
+const dailyQuestionRoutes = require("./routes/dailyQuestionRoutes")
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const postRoutes = require('./routes/postRoutes')
 const searchRoutes = require('./routes/searchRoutes')
 
 app.use('/auth', authRoutes)
+app.use('/question', dailyQuestionRoutes)
 app.use('/', searchRoutes)
 app.use('/', userRoutes)
 app.use('/', postRoutes)
