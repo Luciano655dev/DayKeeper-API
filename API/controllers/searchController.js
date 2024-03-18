@@ -1,3 +1,4 @@
+require('dotenv').config()
 const Post = require('../models/Post')
 const User = require('../models/User')
 const bf = require('better-format')
@@ -7,7 +8,8 @@ const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuer
     mainUser.following = await User.distinct('_id', { followers: mainUserId })
 
     let todayDate = bf.FormatDate(Date.now())
-    todayDate = `${todayDate.day}-${todayDate.month}-${todayDate.year}`
+    const resetTime = process.env.RESET_TIME
+    todayDate = `${todayDate.hour < resetTime ? todayDate.day - 1 : todayDate.day}-${todayDate.month}-${todayDate.year}`
 
     const skipCount = (pageNumber - 1) * pageSize
     const totalPosts = await Post.countDocuments()
@@ -112,7 +114,6 @@ const search = async (req, res) => {
     const searchQuery = req.query.q || ''
     const order = req.query.order || 'relevant'
     const following = req.query.following
-    // following, friends, false
 
     const loggedUserId = req.id
 

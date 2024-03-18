@@ -1,3 +1,4 @@
+require('dotenv').config()
 const User = require('../models/User')
 const Post = require('../models/Post')
 const deleteImage = require('../common/deleteImage')
@@ -19,12 +20,13 @@ const getPostByName = async(req, res)=>{
 
 // submitPost
 const createPost = async(req, res)=>{
-  const { data, gif } = req.body
+  const { data } = req.body
   const images = req.files ? req.files.map( file => { return { name: file.originalname, size: file.size, key: file.key, url: file.location } }) : []
   const loggedUserId = req.id
 
   const titleDate = bf.FormatDate(Date.now())
-  const title = `${titleDate.day}-${titleDate.month}-${titleDate.year}`
+  const resetTime = process.env.RESET_TIME
+  const title = `${titleDate.hour < resetTime ? titleDate.day - 1 : titleDate.day}-${titleDate.month}-${titleDate.year}`
 
   try{
     // create the post
