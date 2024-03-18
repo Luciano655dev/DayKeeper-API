@@ -10,6 +10,9 @@ const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuer
     todayDate = `${todayDate.day}-${todayDate.month}-${todayDate.year}`
 
     const skipCount = (pageNumber - 1) * pageSize
+    const totalPosts = await Post.countDocuments()
+    const totalPages = Math.ceil(totalPosts / pageSize)
+
 
     const pipeline = [
         {
@@ -75,8 +78,14 @@ const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuer
     if (filterOptions.day)
         pipeline.push({ $match: { title: filterOptions.day } })
 
-    if(filterOptions.following)
+    if(filterOptions.following == 'following')
         pipeline.push({ $match: { 'user': { $in: mainUser.following } } })
+    else if(filterOptions.following == 'friends')
+        pipeline.push({ $match: { $and: [
+                { 'user': { $in: mainUser.following } }, // o mainUser esta seguindo ele
+                { 'user_info.followers': mainUser._id } // o outro user esta te seguindo
+            ]}
+        })
 
     // Sorting
     pipeline.push(
@@ -85,19 +94,25 @@ const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuer
         { $limit: pageSize }
     )
 
-    return await Post.aggregate(pipeline)
+    return {
+        posts: await Post.aggregate(pipeline),
+        page: pageNumber,
+        pageSize,
+        totalPages
+    }
 }
 
 const search = async (req, res) => {
     const page = Number(req.query.page) || 1
-    const pageSize = 10
+    const pageSize = req.query.pageSize || 10
 
     const dayRegexFormat = /^\d{2}-\d{2}-\d{4}$/
     let day = dayRegexFormat.test(req.query.day) ? req.query.day : undefined
 
     const searchQuery = req.query.q || ''
     const order = req.query.order || 'relevant'
-    const following = req.query.following === 'true' || false
+    const following = req.query.following
+    // following, friends, false
 
     const loggedUserId = req.id
 
@@ -107,7 +122,7 @@ const search = async (req, res) => {
         if (order === 'relevant')
             sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } } // relevant
 
-        const posts = await performAggregation(
+        const response = await performAggregation(
             loggedUserId,
             sortPipeline,
             searchQuery,
@@ -116,7 +131,7 @@ const search = async (req, res) => {
             { day, following }
         )
 
-        return res.status(200).json({ posts })
+        return res.status(200).json(response)
     } catch (error) {
         return res.status(500).json({ error: `${error}` })
     }
