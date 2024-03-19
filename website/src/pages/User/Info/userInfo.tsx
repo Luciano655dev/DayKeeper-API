@@ -61,7 +61,7 @@ export default function UserInfo() {
       }
     }
 
-    getUserInfo();
+    getUserInfo()
   }, [userNameFromParams])
 
   const handleFollow = async()=>{

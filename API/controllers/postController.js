@@ -265,16 +265,14 @@ const reactComment = async (req, res) => {
 
   try {
     const userCommentId = (await User.findOne({ name: usercomment }))._id.toString()
-
     const post = await getPost(posttitle, username)
-    console.log(post.comments.find( com => com.user._id == userCommentId ) != undefined)
 
     const userCommentIndex = post.comments.findIndex((comment) => comment.user._id == userCommentId)
     if (userCommentIndex === -1) return res.status(404).json({ msg: "O comentário não foi encontrado" })
 
     // Verificar se o usuário já reagiu ao comentário no índice atual
     const existingReactionIndex = post.comments[userCommentIndex].reactions.findIndex(
-      (reactionObj) => reactionObj.user._id === loggedUserId
+      (reactionObj) => reactionObj.user === loggedUserId
     )
 
     // Caso já tenha reagido

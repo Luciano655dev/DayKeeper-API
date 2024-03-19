@@ -64,6 +64,12 @@ export const StyledComment = styled.div`
   }
 `
 
+export const StyledGif = styled.img`
+  min-width: 5em;
+  min-height: 5em;
+  padding-left: 2em;
+`
+
 export const StyledForm = styled.div`
   background-color: #f4f4f4;
   padding: 20px;

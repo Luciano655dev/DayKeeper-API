@@ -8,7 +8,8 @@ import {
   StyledLabel,
   StyledReactions,
   StyledUserContainer,
-  StyledLink
+  StyledLink,
+  StyledGif
 } from './postInfoCSS'
 import Page404 from "../../../404/Page404";
 import { useSelector } from 'react-redux'
@@ -22,12 +23,11 @@ export default function PostInfo({ togglePage }: any) {
   const user = useSelector((state: any) => state.userReducer)
   const { title: postTitleFromParams, name: username } = useParams()
   const [selectedReaction, setSelectedReaction] = useState(5)
-  const [userCommentData, setUserCommentData]: any = useState([])
   const [postInfo, setPostInfo]: any = useState({
     title: '',
     data: '',
     images: [],
-    reactions: [], // cada indice é a lista da reação especifica
+    reactions: [],
     comments: []
   })
   const [sameUser, setSameUser] = useState(false)
@@ -36,68 +36,27 @@ export default function PostInfo({ togglePage }: any) {
   const [error, setError] = useState(false)
   const [msg, setMsg] = useState('')
 
-  const updateLocalComments = async(response: any) => {
-    try {
-      const comments = response.data.post.comments
-      const userPromises = comments.map((comment: any) => getUserComment(comment.user))
-      const users = await Promise.all(userPromises)
-
-      const userCommentData = users.map((user: { username: string; pfp: any }, index: number) => ({
-        username: user.username,
-        pfp: user.pfp,
-        comment: comments[index].comment,
-        reactions: comments[index].reactions
-      }))
-
-      // Coloca o comentário do usuário logado no topo
-      userCommentData.sort((a, b) => {
-        if (a.username === user.name) return -1;
-        if (b.username === user.name) return 1;
-        return b.reactions.length - a.reactions.length
-      })
-      
-      setUserCommentData(userCommentData)
-    } catch (error: any) {
-      setMsg(error.response.data.msg)
-    }
-  }
-
-  const getUserComment = async(id: String)=>{
-    try {
-      const response: any = await axios.get(`http://localhost:3000/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-      return {
-        username: response.data.user.name,
-        pfp: response.data.user.profile_picture.url,
-      }
-    } catch (error: any) {
-      setMsg(error.response.data.msg)
-    }
-  }
-
   useEffect(() => {
     const getPostInfo = async () => {
       try {
-        if (postTitleFromParams) {
-          const responsePostInfo = await axios.get(`http://localhost:3000/${username}/${postTitleFromParams}`,
-            { headers: { Authorization: `Bearer ${token}` }
-          })
-          const responseUser: any = await getUserComment(responsePostInfo.data.post.user)
-          setPostInfo({...responsePostInfo.data.post, user: responseUser})
+        if (!postTitleFromParams) return
 
-          // update selected reaction
-          responsePostInfo.data.post.reactions.filter((reac: any)=>
-            reac.user == user.id ? setSelectedReaction(reac.reaction) : reac
-          )
+        const responsePostInfo = await axios.get(`http://localhost:3000/${username}/${postTitleFromParams}`,
+          { headers: { Authorization: `Bearer ${token}` }
+        })
+        setPostInfo(responsePostInfo.data.post)
 
-          // fill the Data
-          await updateLocalComments(responsePostInfo)
+        // update selected reaction
+        responsePostInfo.data.post.reactions.filter((reac: any)=>
+          reac.user._id == user.id ? setSelectedReaction(reac.reaction) : reac
+        )
 
-          // set Same user
-          if (responsePostInfo.data.post.user == user.id) setSameUser(true)
-        }
+        // set Same user
+        if (responsePostInfo.data.post.user._id == user.id) setSameUser(true)
 
         setLoading(false)
       }catch (error: any) {
+        console.log(error)
         return setError(error.response.data.msg)
       }
     };
@@ -132,9 +91,6 @@ export default function PostInfo({ togglePage }: any) {
       setPostInfo({...postInfo, comments: response.data.post.comments})
       setComment('')
 
-      // fill the data of each user
-      await updateLocalComments(response)
-
       setMsg(response.data.msg)
     } catch (error: any) {
       setError(error.response.data.msg)
@@ -149,9 +105,7 @@ export default function PostInfo({ togglePage }: any) {
       const response = await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/reactcomment/${usercomment}`, {
         reaction
       }, { headers: { Authorization: `Bearer ${token}` } })
-
-      // fill the data of each user
-      await updateLocalComments(response)
+      setPostInfo({...postInfo, comments: response.data.post.comments})
 
       setMsg(response.data.msg)
     } catch (error: any) {
@@ -168,8 +122,8 @@ export default function PostInfo({ togglePage }: any) {
       { msg ? <Alert style={{ backgroundColor: 'green' }} msg={msg}></Alert> : <></> }
 
       <StyledUserContainer>
-        <img src={postInfo.user.pfp}></img>
-        <StyledLink to={`/${postInfo.user.username}`}>{postInfo.user.username}</StyledLink>
+        <img src={postInfo.user.profile_picture.url}></img>
+        <StyledLink to={`/${postInfo.user.name}`}>{postInfo.user.name}</StyledLink>
       </StyledUserContainer>
 
       { postInfo.images ? postInfo.images.map( (img: any) => <StyledImage src={img.url} key={Math.random()}></StyledImage> ) : <></> }
@@ -191,6 +145,7 @@ export default function PostInfo({ togglePage }: any) {
           <label>
             <input type="checkbox" name="reaction" value="2" checked={selectedReaction === 2} onChange={() => handleReaction(2)} />
             😂
+            { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 2).length }
           </label>
           <label>
             <input type="checkbox" name="reaction" value="3" checked={selectedReaction === 3} onChange={() => handleReaction(3)} />
@@ -211,7 +166,7 @@ export default function PostInfo({ togglePage }: any) {
         </div> : <></> }
 
         <StyledLabel>Comment</StyledLabel>
-        { userCommentData.filter((com: any) => com.username == user.name).length == 0 ? 
+        { postInfo.comments.filter((com: any) => com.username == user.name).length == 0 ? 
           <div>
             <StyledInput style={{ width: '15em', margin: '10px' }} type='text' placeholder='comment here' onChange={(e)=>setComment(e.target.value)}></StyledInput>
             <StyledButton onClick={() => handleComment()}>Send</StyledButton>
@@ -220,14 +175,19 @@ export default function PostInfo({ togglePage }: any) {
         }
 
         <StyledCommentSection>
-          { userCommentData.map( (com: any) => <StyledComment key={Math.random()}>
+          { postInfo.comments.map( (com: any) => <StyledComment key={Math.random()}>
             <div>
-              <img src={com.pfp}></img>
-              <label><strong>{com.username}</strong></label>
+              <img src={com.user.profile_picture.url}></img>
+              <label><strong>{com.user.name}</strong></label>
             </div>
             <div>
               <p>{com.comment}</p>
             </div>
+
+            { com.gif ? 
+              <StyledGif src={com.gif.url}/> : 
+              <></>
+            }
 
             <div>
               <label>
@@ -236,7 +196,7 @@ export default function PostInfo({ togglePage }: any) {
                   name="reaction"
                   value="0"
                   checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 0)).length > 0 }
-                  onChange={() => handleCommentReaction(com.username, 0)}
+                  onChange={() => handleCommentReaction(com.user.name, 0)}
                 />
                 😍
                 { com.reactions.filter((reaction: any)=>reaction.reaction == 0).length }
@@ -246,7 +206,7 @@ export default function PostInfo({ togglePage }: any) {
                   type="checkbox"
                   name="reaction" value="1"
                   checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 1)).length > 0 }
-                  onChange={() => handleCommentReaction(com.username, 1)}
+                  onChange={() => handleCommentReaction(com.user.name, 1)}
                 />
                 😄
                 { com.reactions.filter((reaction: any)=>reaction.reaction == 1).length }
@@ -257,7 +217,7 @@ export default function PostInfo({ togglePage }: any) {
                   name="reaction"
                   value="2"
                   checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 2)).length > 0 }
-                  onChange={() => handleCommentReaction(com.username, 2)}
+                  onChange={() => handleCommentReaction(com.user.name, 2)}
                 />
                 😂
                 { com.reactions.filter((reaction: any)=>reaction.reaction == 2).length }
@@ -268,7 +228,7 @@ export default function PostInfo({ togglePage }: any) {
                   name="reaction"
                   value="3"
                   checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 3)).length > 0 }
-                  onChange={() => handleCommentReaction(com.username, 3)}
+                  onChange={() => handleCommentReaction(com.user.name, 3)}
                 />
                 😢
                 { com.reactions.filter((reaction: any)=>reaction.reaction == 3).length }
@@ -279,7 +239,7 @@ export default function PostInfo({ togglePage }: any) {
                   name="reaction"
                   value="4"
                   checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 4)).length > 0 }
-                  onChange={() => handleCommentReaction(com.username, 4)}
+                  onChange={() => handleCommentReaction(com.user.name, 4)}
                 />
                 😠
                 { com.reactions.filter((reaction: any)=>reaction.reaction == 4).length }
