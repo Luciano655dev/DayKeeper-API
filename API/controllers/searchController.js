@@ -3,7 +3,7 @@ const Post = require('../models/Post')
 const User = require('../models/User')
 const bf = require('better-format')
 
-const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuery = '', pageNumber = 1, pageSize = 10, filterOptions = {}) => {
+const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuery = '', pageNumber = 1, pageSize = 10, filterOptions = {}) => {
     let mainUser = await User.findById(mainUserId)
     mainUser.following = await User.distinct('_id', { followers: mainUserId })
 
@@ -96,17 +96,65 @@ const performAggregation = async (mainUserId, sortStage = { _id: 1 }, searchQuer
         { $limit: pageSize }
     )
 
+    const posts = await Post.aggregate(pipeline)
+
     return {
-        posts: await Post.aggregate(pipeline),
+        posts,
         page: pageNumber,
-        pageSize,
+        pageSize: posts.length,
+        maxPageSize: pageSize,
+        totalPages
+    }
+}
+
+const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber = 1, pageSize = 10)=>{
+    let mainUser = await User.findById(mainUserId)
+
+    const skipCount = (pageNumber - 1) * pageSize
+    const totalPosts = await Post.countDocuments()
+    const totalPages = Math.ceil(totalPosts / pageSize)
+
+
+    const pipeline = [
+        {
+            $match: {
+                $and: [
+                    { '_id': { $nin: mainUser.blocked_users } },
+                    {
+                        name: { $regex: new RegExp(searchQuery, 'i') }
+                    },
+                    {
+                        $or: [
+                            { private: false },
+                            { 
+                                $and: [
+                                    { private: true },
+                                    { followers: mainUser._id }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        { $skip: skipCount },
+        { $limit: pageSize }
+    ]
+
+    const users = await User.aggregate(pipeline)
+
+    return {
+        users,
+        page: pageNumber,
+        pageSize: users.length,
+        maxPageSize: pageSize,
         totalPages
     }
 }
 
 const search = async (req, res) => {
     const page = Number(req.query.page) || 1
-    const pageSize = req.query.pageSize || 10
+    const pageSize = ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) || 2
 
     const dayRegexFormat = /^\d{2}-\d{2}-\d{4}$/
     let day = dayRegexFormat.test(req.query.day) ? req.query.day : undefined
@@ -114,6 +162,7 @@ const search = async (req, res) => {
     const searchQuery = req.query.q || ''
     const order = req.query.order || 'relevant'
     const following = req.query.following
+    const type = req.query.type || 'posts'
 
     const loggedUserId = req.id
 
@@ -123,14 +172,24 @@ const search = async (req, res) => {
         if (order === 'relevant')
             sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } } // relevant
 
-        const response = await performAggregation(
-            loggedUserId,
-            sortPipeline,
-            searchQuery,
-            page,
-            pageSize,
-            { day, following }
-        )
+        let response
+        if(type == 'posts'){
+            response = await PostsPerformAggregation(
+                loggedUserId,
+                sortPipeline,
+                searchQuery,
+                page,
+                pageSize,
+                { day, following }
+            )
+        } else { // type == users
+            response = await UsersPerformAggregation(
+                loggedUserId,
+                searchQuery,
+                page,
+                pageSize
+            )
+        }
 
         return res.status(200).json(response)
     } catch (error) {
