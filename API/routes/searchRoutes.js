@@ -9,6 +9,7 @@ const {
 const checkTokenMW = require('../middlewares/checkTokenMW')
 
 // Routes
+router.get('/', checkTokenMW, search)
 router.get('/search', checkTokenMW, search)
 
 module.exports = router

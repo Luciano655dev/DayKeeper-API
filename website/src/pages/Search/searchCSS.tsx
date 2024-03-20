@@ -68,7 +68,7 @@ export const StyledButton = styled.button`
   background-color: #4caf50;
   color: white;
   padding: 10px;
-  margin-top: 10px;
+  margin: 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;

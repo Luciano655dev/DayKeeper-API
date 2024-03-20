@@ -12,8 +12,6 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
     todayDate = `${todayDate.hour < resetTime ? todayDate.day - 1 : todayDate.day}-${todayDate.month}-${todayDate.year}`
 
     const skipCount = (pageNumber - 1) * pageSize
-    const totalPosts = await Post.countDocuments()
-    const totalPages = Math.ceil(totalPosts / pageSize)
 
 
     const pipeline = [
@@ -89,6 +87,11 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
             ]}
         })
 
+    // Aggregating the count without sorting, skipping, or limiting
+    const totalPostsAggregationResult = await Post.aggregate([...pipeline, { $count: "total" }])
+    const totalPosts = (totalPostsAggregationResult.length > 0) ? totalPostsAggregationResult[0].total : 0
+    const totalPages = Math.ceil(totalPosts / pageSize)
+
     // Sorting
     pipeline.push(
         sortStage,
@@ -113,7 +116,6 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
     const skipCount = (pageNumber - 1) * pageSize
     const totalPosts = await Post.countDocuments()
     const totalPages = Math.ceil(totalPosts / pageSize)
-
 
     const pipeline = [
         {
@@ -154,7 +156,7 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
 
 const search = async (req, res) => {
     const page = Number(req.query.page) || 1
-    const pageSize = ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) || 2
+    const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 1
 
     const dayRegexFormat = /^\d{2}-\d{2}-\d{4}$/
     let day = dayRegexFormat.test(req.query.day) ? req.query.day : undefined

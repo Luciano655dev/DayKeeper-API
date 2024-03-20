@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@giphy/js-fetch-api": "^5.4.0",
+    "@giphy/react-components": "^9.3.0",
     "axios": "^1.6.3",
     "cors": "^2.8.5",
     "js-cookie": "^3.0.5",
