@@ -7,8 +7,8 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
     let mainUser = await User.findById(mainUserId)
     mainUser.following = await User.distinct('_id', { followers: mainUserId })
 
-    let todayDate = bf.FormatDate(Date.now())
     const resetTime = process.env.RESET_TIME
+    let todayDate = bf.FormatDate(Date.now())
     todayDate = `${todayDate.hour < resetTime ? todayDate.day - 1 : todayDate.day}-${todayDate.month}-${todayDate.year}`
 
     const skipCount = (pageNumber - 1) * pageSize
@@ -74,9 +74,6 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
             }
         }
     ]
-
-    if (filterOptions.day)
-        pipeline.push({ $match: { title: filterOptions.day } })
 
     if(filterOptions.following == 'following')
         pipeline.push({ $match: { 'user': { $in: mainUser.following } } })
@@ -164,9 +161,6 @@ const search = async (req, res) => {
     const page = Number(req.query.page) || 1
     const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 1
 
-    const dayRegexFormat = /^\d{2}-\d{2}-\d{4}$/
-    let day = dayRegexFormat.test(req.query.day) ? req.query.day : undefined
-
     const searchQuery = req.query.q || ''
     const order = req.query.order || 'relevant'
     const following = req.query.following
@@ -188,7 +182,7 @@ const search = async (req, res) => {
                 searchQuery,
                 page,
                 pageSize,
-                { day, following }
+                { following }
             )
         } else { // type == users
             response = await UsersPerformAggregation(
