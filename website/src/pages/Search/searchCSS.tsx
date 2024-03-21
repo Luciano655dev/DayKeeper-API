@@ -88,3 +88,33 @@ export const StyledInput = styled.input`
     border: 1px solid #ccc;
     border-radius: 5px;
 `
+
+export const StyledSelectContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+
+    select {
+        padding: 10px;
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+        border: none;
+        border-bottom: 1px solid #4caf50;
+        border-radius: 5px;
+    }
+
+    option {
+        border-bottom: 1px solid #4caf50;
+        border-radius: 5px;
+    }
+
+    input {
+        width: 6em;
+
+        border: none;
+        border-bottom: 1px solid black;
+        border-radius: 0.5em;
+
+        padding: 0.5em;
+        font-size: 1em;
+    }
+`

@@ -102,7 +102,7 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
     const posts = await Post.aggregate(pipeline)
 
     return {
-        posts,
+        data: posts,
         page: pageNumber,
         pageSize: posts.length,
         maxPageSize: pageSize,
@@ -112,16 +112,14 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
 
 const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber = 1, pageSize = 10)=>{
     let mainUser = await User.findById(mainUserId)
-
     const skipCount = (pageNumber - 1) * pageSize
-    const totalPosts = await Post.countDocuments()
-    const totalPages = Math.ceil(totalPosts / pageSize)
 
     const pipeline = [
         {
             $match: {
                 $and: [
                     { '_id': { $nin: mainUser.blocked_users } },
+                    { '_id': { $ne: mainUser._id } },
                     {
                         name: { $regex: new RegExp(searchQuery, 'i') }
                     },
@@ -138,15 +136,23 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
                     }
                 ]
             }
-        },
+        }
+    ]
+
+    // Aggregating the count without sorting, skipping, or limiting
+    const totalUsersAggregationResult = await User.aggregate([...pipeline, { $count: "total" }])
+    const totalUsers = (totalUsersAggregationResult.length > 0) ? totalUsersAggregationResult[0].total : 0
+    const totalPages = Math.ceil(totalUsers / pageSize)
+
+    pipeline.push(
         { $skip: skipCount },
         { $limit: pageSize }
-    ]
+    )
 
     const users = await User.aggregate(pipeline)
 
     return {
-        users,
+        data: users,
         page: pageNumber,
         pageSize: users.length,
         maxPageSize: pageSize,
