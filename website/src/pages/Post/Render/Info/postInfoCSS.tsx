@@ -52,11 +52,13 @@ export const StyledComment = styled.div`
     height: 40px;
     border-radius: 40px;
   }
+
   label {
     margin: 0;
     margin-left: 10px;
     font-family: 'JetBrains Mono';
   }
+
   p{
     margin: 0;
     margin-left: 2em;
@@ -69,6 +71,7 @@ export const StyledGif = styled.img`
   min-height: 10em;
   max-width: 20em;
   padding-left: 2em;
+  object-fit: cover;
 `
 
 export const StyledForm = styled.div`
@@ -155,23 +158,37 @@ export const StyledGifContainer = styled.div`
 
   overflow-y: scroll;
 
-  input{
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    width: 20em;
-    height: 1em;
-
-    padding: 0.5em;
-    text-align: center;
-  }
-
   img{
     margin: 1em;
     max-width: 7em;
     max-height: 7em;
     min-width: 3em;
     min-height: 3em;
+  }
+`
+
+export const StyledGifSearchContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  input{
+    width: 15em;
+    height: 1em;
+
+    padding: 0.5em;
+    text-align: center;
+  }
+
+  button {
+    width: 5em;
+    height: 2.3em;
+
+    padding: 0.5em;
+    text-align: center;
   }
 `
 

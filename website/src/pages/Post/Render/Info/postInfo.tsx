@@ -12,6 +12,7 @@ import {
   StyledGif,
   StyledGifContainer,
   StyledGifArea,
+  StyledGifSearchContainer,
   StyledGifPreview
 } from './postInfoCSS'
 import Page404 from "../../../404/Page404";
@@ -40,6 +41,7 @@ export default function PostInfo({ togglePage }: any) {
   const [gifs, setGifs] = useState([])
   const [selectedGif, setSelectedGif]: any = useState(undefined)
   const [gifSearch, setGifSearch]: any = useState('')
+  const [gifSearchTxt, setGifSearchTxt]: any = useState('')
   const [openGifSection, setOpenGifSection] = useState(false)
   const [gifsLoading, setGifsLoading] = useState(true)
 
@@ -172,8 +174,8 @@ export default function PostInfo({ togglePage }: any) {
     setOpenGifSection(!openGifSection)
   }
 
-  const handleSearchGif = (searchTxt: String)=>{
-    setGifSearch(searchTxt)
+  const handleSearchGif = ()=>{
+    setGifSearch(gifSearchTxt)
   }
 
   if (error) return <Page404></Page404>
@@ -249,11 +251,16 @@ export default function PostInfo({ togglePage }: any) {
                 openGifSection ?
                   <StyledGifArea>
                     <StyledGifContainer>
-                      <input
-                        type='text'
-                        placeholder='search for gif'
-                        onChange={(e)=>handleSearchGif(e.target.value)}
-                      ></input>
+                      <StyledGifSearchContainer>
+                        <input
+                          type='text'
+                          placeholder='search for gif'
+                          onChange={(e)=>setGifSearchTxt(e.target.value)}
+                        ></input>
+                        <button
+                          onClick={handleSearchGif}
+                        >Search</button>
+                      </StyledGifSearchContainer>
                       {
                         !gifsLoading ?
                           gifs.map((gif: any)=>
