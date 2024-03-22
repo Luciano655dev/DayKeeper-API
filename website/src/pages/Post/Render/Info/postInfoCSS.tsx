@@ -65,8 +65,9 @@ export const StyledComment = styled.div`
 `
 
 export const StyledGif = styled.img`
-  min-width: 5em;
-  min-height: 5em;
+  min-width: 10em;
+  min-height: 10em;
+  max-width: 20em;
   padding-left: 2em;
 `
 
@@ -99,11 +100,16 @@ export const StyledCheckbox = styled.input`
 export const StyledButton = styled.button`
   background-color: #4caf50;
   color: white;
+
   padding: 10px;
-  margin-top: 10px;
+  margin: 0.5em;
+  min-width: 5em;
+
   border: none;
   border-radius: 5px;
+
   cursor: pointer;
+
   &:disabled {
     opacity: 0.5;
   }
@@ -128,6 +134,81 @@ export const StyledUserContainer = styled.div`
   h1{
     font-size: 2em;
     margin-left: 0.5em;
+  }
+`
+
+export const StyledGifArea = styled.div`
+  display: flex;
+  flex-direction: row;
+`
+
+export const StyledGifContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+
+  width: 20em;
+  height: 15em;
+
+  background-color: black;
+
+  overflow-y: scroll;
+
+  input{
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    width: 20em;
+    height: 1em;
+
+    padding: 0.5em;
+    text-align: center;
+  }
+
+  img{
+    margin: 1em;
+    max-width: 7em;
+    max-height: 7em;
+    min-width: 3em;
+    min-height: 3em;
+  }
+`
+
+export const StyledGifPreview = styled.div`
+  position: relative;
+  overflow: hidden;
+  width: 15em;
+  height: calc(15em - 2px);
+
+  margin-left: 1em;
+
+  border: 1px solid black;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  button {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    right: 0;
+
+    background-color: white;
+    border: 1px solid red;
+    font-size: 1em;
+    color: red;
+
+    &:hover {
+      background-color: darkgray;
+    }
+
+    &:active {
+      background-color: gray;
+    }
   }
 `
 

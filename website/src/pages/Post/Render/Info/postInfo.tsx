@@ -9,7 +9,10 @@ import {
   StyledReactions,
   StyledUserContainer,
   StyledLink,
-  StyledGif
+  StyledGif,
+  StyledGifContainer,
+  StyledGifArea,
+  StyledGifPreview
 } from './postInfoCSS'
 import Page404 from "../../../404/Page404";
 import { useSelector } from 'react-redux'
@@ -32,6 +35,14 @@ export default function PostInfo({ togglePage }: any) {
   })
   const [sameUser, setSameUser] = useState(false)
   const [comment, setComment] = useState('')
+
+  const loadingGifSrc = 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTM3a2JjYnR3OHdrbTFyZzVieHpsd3h2c21uYmZuZXBpOTE2MDk3diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3AMRa6DRUhMli/giphy.gif'
+  const [gifs, setGifs] = useState([])
+  const [selectedGif, setSelectedGif]: any = useState()
+  const [gifSearch, setGifSearch]: any = useState('')
+  const [openGifSection, setOpenGifSection] = useState(true)
+  const [gifsLoading, setGifsLoading] = useState(true)
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [msg, setMsg] = useState('')
@@ -64,6 +75,35 @@ export default function PostInfo({ togglePage }: any) {
     getPostInfo()
   }, [postTitleFromParams])
 
+  useEffect(()=>{
+    const updateGifs = async()=>{
+      setGifsLoading(true)
+
+      try{
+        let reqStr = `http://api.giphy.com/v1/gifs/trending?api_key=fzRhwakZC0q3AvSUuBo03vp6IIkAAG36`
+
+        if(gifSearch != '')
+          reqStr = `http://api.giphy.com/v1/gifs/search?q=${gifSearch}&api_key=fzRhwakZC0q3AvSUuBo03vp6IIkAAG36`
+
+        const response = await axios.get(reqStr)
+  
+        setGifs(response.data.data.map((gifObj: any) => {
+          return {
+            name: gifObj.title,
+            id: gifObj.id,
+            url: gifObj.images.original.url
+          }
+        }))
+      }catch (error: any) {
+        setError(error.response.data.msg)
+      }
+
+      setGifsLoading(false)
+    }
+
+    updateGifs()
+  }, [gifSearch])
+
   
   const handleReaction = async (reaction: number) => {
     setLoading(true)
@@ -86,7 +126,8 @@ export default function PostInfo({ togglePage }: any) {
 
     try {
       const response: any = await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/comment`, {
-        comment: comment || 'a'
+        comment: comment || 'a',
+        gif: selectedGif.id || undefined
       }, { headers: { Authorization: `Bearer ${token}` } })
       setPostInfo({...postInfo, comments: response.data.post.comments})
       setComment('')
@@ -112,6 +153,25 @@ export default function PostInfo({ togglePage }: any) {
       setError(error.response.data.msg)
     }
     setLoading(false)
+  }
+
+  const handleSelectGif = (gif: any)=>{
+    setSelectedGif(gif)
+  }
+
+  const handleRemoveGif = ()=>{
+    setSelectedGif(undefined)
+  }
+
+  const handleOpenGifSection = ()=>{
+    if(openGifSection)
+      setSelectedGif(undefined)
+    
+    setOpenGifSection(!openGifSection)
+  }
+
+  const handleSearchGif = (searchTxt: String)=>{
+    setGifSearch(searchTxt)
   }
 
   if (error) return <Page404></Page404>
@@ -166,11 +226,72 @@ export default function PostInfo({ togglePage }: any) {
         </div> : <></> }
 
         <StyledLabel>Comment</StyledLabel>
-        { postInfo.comments.filter((com: any) => com.username == user.name).length == 0 ? 
-          <div>
-            <StyledInput style={{ width: '15em', margin: '10px' }} type='text' placeholder='comment here' onChange={(e)=>setComment(e.target.value)}></StyledInput>
-            <StyledButton onClick={() => handleComment()}>Send</StyledButton>
-          </div> :
+        { postInfo.comments.filter((com: any) => com.user.name == user.name).length == 0 ? 
+            <div>
+              <StyledInput
+                style={{ width: '15em', margin: '10px' }}
+                type='text'
+                placeholder='comment here'
+                onChange={(e)=>setComment(e.target.value)}
+              ></StyledInput>
+
+              <StyledButton
+                style={{
+                  backgroundColor: openGifSection ? 'red' : '#4caf50'
+                }}
+                onClick={()=>handleOpenGifSection()}
+              >Gifs</StyledButton>
+
+              <StyledButton onClick={() => handleComment()}>Send</StyledButton>
+              {
+                openGifSection ?
+                  <StyledGifArea>
+                    <StyledGifContainer>
+                      <input
+                        type='text'
+                        placeholder='search for gif'
+                        onChange={(e)=>handleSearchGif(e.target.value)}
+                      ></input>
+                      {
+                        !gifsLoading ?
+                          gifs.map((gif: any)=>
+                            <div onClick={() => handleSelectGif(gif)}>
+                              <img src={gif.url}></img>
+                            </div>
+                          )
+                        :
+                          <div>
+                            <img
+                              src={loadingGifSrc}
+                            ></img>
+                            <img
+                              src={loadingGifSrc}
+                            ></img>
+                            <img
+                              src={loadingGifSrc}
+                            ></img>
+                            <img
+                              src={loadingGifSrc}
+                            ></img>
+                          </div>
+                      }
+                    </StyledGifContainer>
+
+                    {
+                      selectedGif ?
+                        <StyledGifPreview>
+                          <img src={selectedGif.url}></img>
+                          <button onClick={handleRemoveGif}>X</button>
+                        </StyledGifPreview>
+                      :
+                      <></>
+                    }
+                  </StyledGifArea>
+                  :
+                  <></>
+              }
+            </div>
+          :
           <StyledButton style={{ backgroundColor: 'red', margin: '10px', width: '15em' }} onClick={() => handleComment()}>Delete Comment</StyledButton>
         }
 
