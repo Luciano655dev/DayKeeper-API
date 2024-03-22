@@ -38,9 +38,9 @@ export default function PostInfo({ togglePage }: any) {
 
   const loadingGifSrc = 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTM3a2JjYnR3OHdrbTFyZzVieHpsd3h2c21uYmZuZXBpOTE2MDk3diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3AMRa6DRUhMli/giphy.gif'
   const [gifs, setGifs] = useState([])
-  const [selectedGif, setSelectedGif]: any = useState()
+  const [selectedGif, setSelectedGif]: any = useState(undefined)
   const [gifSearch, setGifSearch]: any = useState('')
-  const [openGifSection, setOpenGifSection] = useState(true)
+  const [openGifSection, setOpenGifSection] = useState(false)
   const [gifsLoading, setGifsLoading] = useState(true)
 
   const [loading, setLoading] = useState(true)
@@ -127,14 +127,16 @@ export default function PostInfo({ togglePage }: any) {
     try {
       const response: any = await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/comment`, {
         comment: comment || 'a',
-        gif: selectedGif.id || undefined
+        gif: selectedGif ? selectedGif.id : undefined
       }, { headers: { Authorization: `Bearer ${token}` } })
+
       setPostInfo({...postInfo, comments: response.data.post.comments})
       setComment('')
 
       setMsg(response.data.msg)
     } catch (error: any) {
-      setError(error.response.data.msg)
+      console.log(error)
+      setError(error)
     }
 
     setLoading(false)
@@ -165,7 +167,7 @@ export default function PostInfo({ togglePage }: any) {
 
   const handleOpenGifSection = ()=>{
     if(openGifSection)
-      setSelectedGif(undefined)
+      handleRemoveGif()
     
     setOpenGifSection(!openGifSection)
   }
