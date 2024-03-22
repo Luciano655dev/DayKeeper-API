@@ -298,7 +298,12 @@ export default function PostInfo({ togglePage }: any) {
         }
 
         <StyledCommentSection>
-          { postInfo.comments.map( (com: any) => <StyledComment key={Math.random()}>
+          { [...postInfo.comments].sort((a: any)=>{
+            if(a.user.name == user.name)
+              return -1
+
+            return 0
+          }).map( (com: any) => <StyledComment key={Math.random()}>
             <div>
               <img src={com.user.profile_picture.url}></img>
               <label><strong>{com.user.name}</strong></label>
