@@ -10,10 +10,17 @@ const getUserByName = async(req, res) => {
   try {
     const { name } = req.params
     let user = await User.findOne({ name }).select("-password")
-    if (!user) user = await User.findById(name).select("-password") // ver se o nome é um ID
+    if (!user) user = await User.findById(name).select("-password")
+
+    /*
+      NOTA: Estou fazendo a pesquisa do user dessa forma pois, ao colocar um $or e passar uma string,
+      a pesquisa falha e essa foi a maneira mais prática que encontrei sem precisar
+      importar nada do mongoose para verificar se era ObjectId
+    */
+
     if (!user) return res.status(404).json({ msg: "Usuário não encontrado" })
 
-    res.status(200).json({ user })
+    return res.status(200).json({ user })
   } catch (error) {
     return res.status(500).json({ msg: `${error}` })
   }
@@ -260,6 +267,27 @@ const getFollowing = async(req, res)=>{
   }
 }
 
+// getFollowers
+const getFollowers = async(req, res)=>{
+  const { name } = req.params
+
+  try{
+    let user = await User.findOne({ name })
+      .populate('followers')
+      .select('-password')
+
+    if(!user) user = await User.findOne({ _id: name })
+      .populate('followers')
+      .select('-password')
+
+    if(!user) return res.status(404).json({ msg: 'Usuário não encontrado' })
+
+    return res.status(200).json({ user })
+  } catch (error) {
+    return res.status(500).json({ msg: `${error}` })
+  }
+}
+
 // blockUser
 const blockUser = async(req, res)=>{
   const { name } = req.params
@@ -296,6 +324,7 @@ module.exports = {
   deleteUser,
   followUser,
   getFollowing,
+  getFollowers,
   respondFollowRequest,
   removeFollower,
   blockUser

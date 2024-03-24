@@ -7,6 +7,7 @@ const {
     deleteUser,
     followUser,
     getFollowing,
+    getFollowers,
     respondFollowRequest,
     removeFollower,
     blockUser
@@ -26,10 +27,11 @@ router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
 router.delete("/delete_user", checkTokenMW, deleteUser)
 
 // Follows
+router.get("/:name/followers", checkTokenMW, getFollowers)
+router.get("/:name/following", checkTokenMW, getFollowing)
 router.post("/:name/follow", checkTokenMW, followUser)
 router.post("/:name/respond_follow", checkTokenMW, respondFollowRequest)
 router.delete("/:name/remove_follow", checkTokenMW, removeFollower)
-router.get("/:name/following", checkTokenMW, getFollowing)
 
 // Blocks
 router.post("/:name/block", checkTokenMW, blockUser)

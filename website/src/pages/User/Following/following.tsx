@@ -1,4 +1,4 @@
-import { StyledContainer, StyledLink } from './followingCSS'
+import { StyledBody, StyledContainer, StyledLink } from './followingCSS'
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
@@ -70,17 +70,19 @@ export default function Followers() {
     if(error) return <Page404></Page404>
     if(loading) return <div>...</div>
 
-    return <div>
+    return <StyledBody>
         { msg ? <h1>{msg}</h1> : <></> }
         <h1>Following: </h1>
         {followRequests.map((followReq: any)=><StyledContainer key={followReq.id}>
             <img src={followReq.pfp}></img>
             <StyledLink to={`/${followReq.username}`}>{followReq.username}</StyledLink>
-            { user.private && sameUser ? 
-                <button onClick={()=>handleUnfollow(followReq.username)}>Delete</button>
+            { sameUser ? 
+                <button
+                    onClick={()=>handleUnfollow(followReq.username)}
+                >Unfollow</button>
                 :
                 <></>
             }
         </StyledContainer>)}
-    </div>
+    </StyledBody>
 }

@@ -33,7 +33,6 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
             $match: {
                 $and: [
                     { 'user': { $nin: mainUser.blocked_users } },
-                    { 'user': { $ne: mainUser._id } },
                     {
                         $or: [
                             { title: { $regex: new RegExp(searchQuery, 'i') } },
@@ -116,7 +115,6 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
             $match: {
                 $and: [
                     { '_id': { $nin: mainUser.blocked_users } },
-                    { '_id': { $ne: mainUser._id } },
                     {
                         name: { $regex: new RegExp(searchQuery, 'i') }
                     },

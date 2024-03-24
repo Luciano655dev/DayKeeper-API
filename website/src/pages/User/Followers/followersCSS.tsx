@@ -1,10 +1,20 @@
 import styled from "styled-components"
 import { Link } from 'react-router-dom'
 
+export const StyledBody = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+`
+
 export const StyledContainer = styled.div`
     display: flex;
     flex-direction: column;
-    width: 50%;
+    justify-content: center;
+    align-items: center;
+
+    width: 50em;
     border-bottom: 1px solid black;
     margin: 1em;
 
@@ -14,8 +24,21 @@ export const StyledContainer = styled.div`
         border-radius: 100%;
     }
     button{
-        padding: 10px;
-        width: 5vw;
+        background-color: red;
+        color: white;
+        border: none;
+        border-radius: 1em;
+
+        padding: 1em;
+        margin: 1em;
+        width: 100%;
+
+        transition: 0.1s;
+
+        &:hover {
+            background-color: darkred;
+            transform: translateY(3px);
+        }
     }
 `
 

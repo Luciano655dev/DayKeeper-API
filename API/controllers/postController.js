@@ -12,9 +12,25 @@ const getPostByName = async(req, res)=>{
     const post = await getPost(posttitle, username)
     if (!post) return res.status(404).json({ msg: "Post não encontrado" })
 
-    else res.status(200).json({ post })
+    return res.status(200).json({ post })
   } catch (error) {
-    res.status(500).json({ msg: error })
+    return res.status(500).json({ msg: error })
+  }
+}
+
+// getUserPosts
+const getUserPosts = async(req, res)=>{
+  try {
+    const { name } = req.params
+    const userId = await User.findOne({ name })
+    const post = await Post.find({ user: userId._id })
+      .populate('user', '-password')
+      .populate('reactions.user', '-password')
+      .populate('comments.user', '-password')
+
+    return res.status(200).json({ post })
+  } catch (error) {
+    return res.status(500).json({ msg: error })
   }
 }
 
@@ -351,6 +367,7 @@ const deleteComment = async (req, res) => {
 
 module.exports = {
   getPostByName,
+  getUserPosts,
   createPost,
   updatePost,
   deletePost,

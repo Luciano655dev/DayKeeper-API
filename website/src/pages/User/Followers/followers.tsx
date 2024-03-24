@@ -1,4 +1,4 @@
-import { StyledContainer, StyledLink } from './followersCSS'
+import { StyledBody, StyledContainer, StyledLink } from './followersCSS'
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
@@ -16,26 +16,13 @@ export default function Followers() {
     const [msg, setMsg] = useState('')
     const [error, setError] = useState(false)
 
-    const getUser = async(id: String)=>{
-        try {
-          const response: any = await axios.get(`http://localhost:3000/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-          return {
-            username: response.data.user.name,
-            pfp: response.data.user.profile_picture.url,
-            id,
-          }
-        } catch (error: any) {
-            console.log(error)
-            setError(true)
-        }
-    }
 
     useEffect(()=>{
         const getFollowers = async()=>{
             setLoading(true)
 
             try{
-                const response: any = await axios.get(`http://localhost:3000/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
+                const response: any = await axios.get(`http://localhost:3000/${userNameFromParams}/followers`, { headers: { Authorization: `Bearer ${token}` } })
 
                 if(
                     !sameUser && (
@@ -44,10 +31,9 @@ export default function Followers() {
                     )
                 ) return setError(true)
 
-                const usersPromises = response.data.user.followers.map((followReq: String) => getUser(followReq))
-                const users = await Promise.all(usersPromises)
+                console.log(response)
 
-                setFollowRequests(users || [])
+                setFollowRequests(response.data.user.followers || [])
             }catch(err: any){
                 console.log(err)
                 setError(true)
@@ -78,17 +64,23 @@ export default function Followers() {
     if(error) return <Page404></Page404>
     if(loading) return <div>...</div>
 
-    return <div>
+    return <StyledBody>
         { msg ? <h1>{msg}</h1> : <></> }
         <h1>Followers: </h1>
-        {followRequests.map((followReq: any)=><StyledContainer key={followReq.id}>
-            <img src={followReq.pfp}></img>
-            <StyledLink to={`/${followReq.username}`}>{followReq.username}</StyledLink>
-            { user.private && sameUser ? 
-                <button onClick={()=>handleDelete(followReq.username)}>Delete</button>
-                :
-                <></>
-            }
-        </StyledContainer>)}
-    </div>
+        {
+            followRequests.map((followReq: any)=>
+                <StyledContainer key={followReq.id}>
+                    <img src={followReq.profile_picture.url}></img>
+
+                    <StyledLink to={`/${followReq.name}`}>{followReq.name}</StyledLink>
+
+                    { user.private && sameUser ? 
+                        <button onClick={()=>handleDelete(followReq.name)}>Delete</button>
+                        :
+                        <></>
+                    }
+                </StyledContainer>
+            )
+        }
+    </StyledBody>
 }
