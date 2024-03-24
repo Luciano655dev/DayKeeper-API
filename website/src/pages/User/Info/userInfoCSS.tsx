@@ -55,15 +55,38 @@ export const StyledFollowLink = styled(Link)`
     }
 `
 
+export const StyledPostsLink = styled(Link)`
+    text-decoration: none;
+    color: black;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 1em;
+
+    &:hover{
+        text-decoration: underline;
+    }
+`
+
 export const StyledSubContainer = styled.div`
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 
     h1 {
         margin: 10px;
         font-size: 3em;
         padding-left: 20px;
         padding-right: 20px;
+    }
+
+    h2 {
+        font-size: 0.5em;
+    }
+
+    div {
+        display: flex;
+        flex-direction: row;
     }
 `
 

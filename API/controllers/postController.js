@@ -18,22 +18,6 @@ const getPostByName = async(req, res)=>{
   }
 }
 
-// getUserPosts
-const getUserPosts = async(req, res)=>{
-  try {
-    const { name } = req.params
-    const userId = await User.findOne({ name })
-    const post = await Post.find({ user: userId._id })
-      .populate('user', '-password')
-      .populate('reactions.user', '-password')
-      .populate('comments.user', '-password')
-
-    return res.status(200).json({ post })
-  } catch (error) {
-    return res.status(500).json({ msg: error })
-  }
-}
-
 // submitPost
 const createPost = async(req, res)=>{
   const { data } = req.body
@@ -367,7 +351,6 @@ const deleteComment = async (req, res) => {
 
 module.exports = {
   getPostByName,
-  getUserPosts,
   createPost,
   updatePost,
   deletePost,

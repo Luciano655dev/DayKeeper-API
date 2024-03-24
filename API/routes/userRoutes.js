@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {
     getUserByName,
+    getUserPosts,
     updateUser,
     reseteProfilePicture,
     deleteUser,
@@ -35,5 +36,8 @@ router.delete("/:name/remove_follow", checkTokenMW, removeFollower)
 
 // Blocks
 router.post("/:name/block", checkTokenMW, blockUser)
+
+// posts
+router.get("/:name/posts", checkTokenMW, getUserPosts)
 
 module.exports = router

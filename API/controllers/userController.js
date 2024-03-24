@@ -26,6 +26,96 @@ const getUserByName = async(req, res) => {
   }
 }
 
+const getUserPosts = async (req, res)=>{
+  let mainUser = await User.findById(req.id)
+
+  const page = Number(req.query.page) || 1
+  const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 1
+  const skipCount = (page - 1) * pageSize
+
+  const order = req.query.order || 'relevant'
+  const { name } = req.params
+
+  let sortPipeline = { $sort: { created_at: -1 } } // recent
+
+  if (order === 'relevant')
+    sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } } // relevant
+  
+  const pipeline = [
+      {
+        $lookup: {
+          from: 'users',
+          let: { userId: { $toObjectId: '$user' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$_id', '$$userId'] }
+              }
+            },
+            {
+              $project: {
+                password: 0
+              }
+            }
+          ],
+          as: 'user_info'
+        }
+    },
+    {
+      $addFields: {
+        user_info: { $arrayElemAt: ['$user_info', 0] } // Seleciona o primeiro elemento da array 'user_info'
+      }
+    },
+    {
+      $match: {
+          $and: [
+              { 'user': { $nin: mainUser.blocked_users } },
+              {
+                'user_info.name': name
+              },
+              {
+                $or: [
+                  { 'user_info.private': false },
+                  { 
+                    $and: [
+                      { 'user_info.private': true },
+                      { 'user_info.followers': mainUser._id }
+                    ]
+                  }
+                ]
+              }
+          ]
+      }
+    }
+  ]
+
+  try{
+    // Aggregating the count without sorting, skipping, or limiting
+    const totalPostsAggregationResult = await Post.aggregate([...pipeline, { $count: "total" }])
+    const totalPosts = (totalPostsAggregationResult.length > 0) ? totalPostsAggregationResult[0].total : 0
+    const totalPages = Math.ceil(totalPosts / pageSize)
+
+    pipeline.push(
+      sortPipeline,
+      { $skip: skipCount },
+      { $limit: pageSize }
+    )
+
+    const posts = await Post.aggregate(pipeline)
+
+    return res.status(200).json({
+      data: posts,
+      page,
+      pageSize: posts.length,
+      maxPageSize: pageSize,
+      totalPages
+    })
+  }catch(error){
+    console.log(error)
+    return res.status(500).json({ error })
+  }
+}
+
 // updateUser
 const updateUser = async(req, res) => {
   const newData = req.body
@@ -319,6 +409,7 @@ const blockUser = async(req, res)=>{
 
 module.exports = {
   getUserByName,
+  getUserPosts,
   updateUser,
   reseteProfilePicture,
   deleteUser,

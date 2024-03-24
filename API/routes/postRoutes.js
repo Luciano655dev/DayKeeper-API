@@ -2,7 +2,6 @@ const express = require('express')
 const router = express.Router()
 const {
     getPostByName,
-    getUserPosts,
     createPost,
     updatePost,
     deletePost,
@@ -25,7 +24,6 @@ const checkPrivatePostMW = require('../middlewares/checkPrivatePostMW')
 const checkBlockedUserMW = require('../middlewares/checkBlockedUserMW')
 
 // Routes
-router.get("/:name/posts", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, getUserPosts) // Get user's posts
 router.get("/:name/:posttitle", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, getPostByName) // One Post
 router.post('/create', checkTokenMW, multer(multerConfig).array('files', 5), handleMulterError, postValidation, createPost) // Create Post
 router.put("/:posttitle", checkTokenMW, verifyUserOwnershipMW, multer(multerConfig).array('files', 5), handleMulterError, postEditValidation, updatePost) // Edit Post

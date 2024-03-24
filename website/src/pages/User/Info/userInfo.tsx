@@ -6,7 +6,8 @@ import {
   StyledEmail,
   StyledSubContainer,
   StyledEditProfileButton,
-  StyledFollowLink
+  StyledFollowLink,
+  StyledPostsLink
 } from './userInfoCSS'
 import { StyledButton } from '../Edit/editProfileCSS';
 import { useParams } from 'react-router-dom';
@@ -22,11 +23,13 @@ export default function UserInfo() {
   const user = useSelector((state: any) => state.userReducer)
   const { name: userNameFromParams } = useParams()
   const sameUser = userNameFromParams === user.name
+
   const [isFollowing, setIsFollowing] = useState(false)
   const [isBlocked, setIsBlocked] = useState(false)
   const [activeBlockButton, setActiveBlockButton] = useState(true)
   const [activeFollowButton, setActiveFollowButton] = useState(true)
   const [userInfo, setUserInfo]: any = useState({})
+  
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [msg, setMsg] = useState('')
@@ -112,13 +115,19 @@ export default function UserInfo() {
 
         { !userInfo.private || isFollowing || sameUser ?
             <StyledSubContainer>
-              <StyledFollowLink to={`/${userInfo.name}/followers`}>{userInfo.followers.length}</StyledFollowLink>
-              <StyledFollowLink to={`/${userInfo.name}/following`}>{userInfo.following.length}</StyledFollowLink>
+              <StyledPostsLink to={`/${userInfo.name}/posts`}>POSTS</StyledPostsLink>
+              <div>
+                <StyledFollowLink to={`/${userInfo.name}/followers`}>{userInfo.followers.length}</StyledFollowLink>
+                <StyledFollowLink to={`/${userInfo.name}/following`}>{userInfo.following.length}</StyledFollowLink>
+              </div>
             </StyledSubContainer>
           :
             <StyledSubContainer>
-              <h1>{userInfo.followers.length}</h1>
-              <h1>{userInfo.following.length}</h1>
+              <h2>POSTS</h2>
+              <div>
+                <h1>{userInfo.followers.length}</h1>
+                <h1>{userInfo.following.length}</h1>
+              </div>
             </StyledSubContainer>
         }
 

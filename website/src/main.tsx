@@ -31,6 +31,7 @@ import ResetPassword from './pages/Auth/ResetPassword/ResetPassword.tsx'
 
 // User
 import UserInfo from './pages/User/Info/userInfo.tsx'
+import UserPosts from './pages/User/Posts/UserPosts.tsx'
 import EditProfile from './pages/User/Edit/editProfile.tsx'
 import Followers from './pages/User/Followers/followers.tsx'
 import Following from './pages/User/Following/following.tsx'
@@ -132,6 +133,10 @@ const router = createBrowserRouter([
       {
         path: '/:name/following',
         element: <PrivateRoute element={<Following />}></PrivateRoute>
+      },
+      {
+        path: '/:name/posts',
+        element: <PrivateRoute element={<UserPosts />}></PrivateRoute>
       },
       {
         path: '/profile',

@@ -25,6 +25,11 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                             $expr: { $eq: ['$_id', '$$userId'] }
                         }
                     },
+                    {
+                      $project: {
+                        password: 0
+                      }
+                    }
                 ],
                 as: 'user_info'
             }
@@ -36,7 +41,6 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                     {
                         $or: [
                             { title: { $regex: new RegExp(searchQuery, 'i') } },
-                            { data: { $regex: new RegExp(searchQuery, 'i') } },
                             { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } }
                         ]
                     },
@@ -131,6 +135,11 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
                     }
                 ]
             }
+        },
+        {
+          $project: {
+            password: 0
+          }
         }
     ]
 
