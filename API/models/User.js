@@ -40,6 +40,16 @@ const userSchema = mongoose.Schema({
       ref: 'User',
       required: true
     }
+  ],
+
+  reports: [{
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      reason: String
+    }
   ]
 })
 

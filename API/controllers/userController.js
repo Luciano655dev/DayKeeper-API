@@ -352,6 +352,54 @@ const removeFollower = async(req, res)=>{
   }
 }
 
+// report User
+const reportUser = async(req, res)=>{
+  const { name } = req.params
+  const reason = req.body.reason || ''
+  const loggedUserId = req.id
+
+  if(reason.length > 1000)
+    return res.status(400).json({ msg: "A razão só pode ter até 1000 caracteres" })
+
+  try{
+    const userReported = await User.findOne({ name })
+    if(!userReported) return res.status(404).json("Usuario não encontrado")
+
+    if(userReported.reports.find( report => report.user == loggedUserId ))
+      return res.status(400).json({ msg: "Você já reportou este usuario antes" })
+
+    // bloquear o usuario
+    await User.findByIdAndUpdate(loggedUserId,
+      {
+        $addToSet: {
+          blocked_users: userReported._id
+        }
+      }
+    )
+
+    // denuncia-lo
+    await User.updateOne({ name },
+      {
+        $push: {
+          reports: {
+            user: loggedUserId,
+            reason
+          }
+        }
+      }
+    )
+
+    return res.status(200).json({
+      msg: "Usuario reportado e bloqueado com sucesso",
+      reason,
+      user: userReported
+    })
+
+  }catch(error){
+    return res.status(500).json({ msg: `${error}` })
+  }
+}
+
 // getFollowing
 const getFollowing = async(req, res)=>{
   const { name } = req.params
@@ -428,5 +476,6 @@ module.exports = {
   getFollowers,
   respondFollowRequest,
   removeFollower,
-  blockUser
+  blockUser,
+  reportUser
 }

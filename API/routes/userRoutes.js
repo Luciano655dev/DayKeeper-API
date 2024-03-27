@@ -11,7 +11,8 @@ const {
     getFollowers,
     respondFollowRequest,
     removeFollower,
-    blockUser
+    blockUser,
+    reportUser
 } = require('../controllers/userController')
 
 // Middlewares
@@ -34,8 +35,9 @@ router.post("/:name/follow", checkTokenMW, followUser)
 router.post("/:name/respond_follow", checkTokenMW, respondFollowRequest)
 router.delete("/:name/remove_follow", checkTokenMW, removeFollower)
 
-// Blocks
+// Interactions
 router.post("/:name/block", checkTokenMW, blockUser)
+router.post("/:name/report", checkTokenMW, reportUser)
 
 // posts
 router.get("/:name/posts", checkTokenMW, getUserPosts)
