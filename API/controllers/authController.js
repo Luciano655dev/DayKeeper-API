@@ -46,6 +46,7 @@ const register = async(req, res) => {
       email,
       private,
       profile_picture: img,
+      roles: [ 'user' ],
       followers: [],
       follow_requests: ( private ? [] : undefined ),
       blocked_users: [],
@@ -55,9 +56,9 @@ const register = async(req, res) => {
     })
 
     await user.save()
-    res.status(201).json({ msg: "Ative sua conta no seu Email", info: user })
+    return res.status(201).json({ msg: "Ative sua conta no seu Email", info: user })
   } catch (error) {
-    res.status(500).json({ msg: error })
+    return res.status(500).json({ msg: error })
   }
 }
 

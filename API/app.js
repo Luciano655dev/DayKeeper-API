@@ -25,8 +25,9 @@ app.use('/', postRoutes)
 // ==================== MongoDB Connection ====================
 const DBuser = process.env.DB_USER
 const DBpass = process.env.DB_PASS
+const DBclusterName = process.env.DB_CLUSTER_NAME
 
-mongoose.connect(`mongodb+srv://${DBuser}:${DBpass}@cluster0.iyslifi.mongodb.net/?retryWrites=true&w=majority`)
+mongoose.connect(`mongodb+srv://${DBuser}:${DBpass}@${DBclusterName}.iyslifi.mongodb.net/?retryWrites=true&w=majority`)
   .then(() => {
     console.log('\x1b[36mBanco de dados conectado\x1b[0m')
   })
@@ -35,4 +36,7 @@ mongoose.connect(`mongodb+srv://${DBuser}:${DBpass}@cluster0.iyslifi.mongodb.net
 // ==================== Start Server ====================
 const PORT = process.env.PORT || 3000
 
-app.listen(PORT, () => console.log(`\x1b[36mServidor rodando em http://localhost:${PORT}\x1b[0m`)) 
+app.listen(PORT, () => {
+  console.clear()
+  console.log(`\x1b[36mServidor rodando em http://localhost:${PORT}\x1b[0m`)
+}) 

@@ -9,10 +9,18 @@ const userSchema = mongoose.Schema({
     size: Number,
     key: String,
     url: String
-  }, // Image on Base64
+  },
   verified_email: Boolean,
   password: String,
   private: Boolean,
+  roles: [ String ], // ['user', 'admin']
+
+  creation_date: {
+    type: Date,
+    default: Date.now,
+    required: true
+  },
+
   followers: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -26,18 +34,14 @@ const userSchema = mongoose.Schema({
       required: false
     }
   ],
+
   blocked_users: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
     }
-  ],
-  creation_date: {
-    type: Date,
-    default: Date.now,
-    required: true
-  }
+  ]
 })
 
 const User = mongoose.model('User', userSchema)

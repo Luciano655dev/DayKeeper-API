@@ -123,7 +123,7 @@ export default function UserInfo() {
             </StyledSubContainer>
           :
             <StyledSubContainer>
-              <h2>POSTS</h2>
+            <h2>POSTS</h2>
               <div>
                 <h1>{userInfo.followers.length}</h1>
                 <h1>{userInfo.following.length}</h1>

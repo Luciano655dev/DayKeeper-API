@@ -129,8 +129,8 @@ const updateUser = async(req, res) => {
     if(newData.email && (user.email != newData.email))
       sendVerificationEmail(newData.name, newData.email)
 
+    // check and create password
     if(newData.password){
-      // create password
       const salt = await bcrypt.genSalt(12)
       const passwordHash = await bcrypt.hash(newData.password, salt)
       newData.password = passwordHash
@@ -140,14 +140,20 @@ const updateUser = async(req, res) => {
       loggedUserId,
       {
         $set: {
-          ...newData,
-          profile_picture: ( req.file ? { name: req.file.originalname, size: req.file.size, key: req.file.key, url: req.file.location } : user.profile_picture ),
-          creation_date: user.creation_date,
-          followers: user.followers,
+          name: newData.name || user.name,
+          email: newData.email || user.email,
+          password: newData.password || user.password,
+          profile_picture: (
+            req.file ?
+            {
+              name: req.file.originalname,
+              size: req.file.size,
+              key: req.file.key,
+              url: req.file.location
+            } : user.profile_picture
+          ),
           follow_requests: ( newData.private ? user.follow_requests || [] : undefined ),
-          blocked_users: user.blocked_users,
           verified_email: ( user.email == newData.email ),
-          _id: loggedUserId
         },
       },
       { new: true }
@@ -155,7 +161,7 @@ const updateUser = async(req, res) => {
     if (!updatedUser) return res.status(404).json({ msg: 'Usuario não encontrado' })
 
     await updatedUser.save()
-    res.status(200).json({ msg: 'Usuario atualizado com sucesso!', user: updatedUser })
+    return res.status(200).json({ msg: 'Usuario atualizado com sucesso!', user: updatedUser })
   } catch (error){
     return res.status(500).json({ msg: `${error}` })
   }
