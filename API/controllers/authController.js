@@ -14,22 +14,20 @@ const register = async(req, res) => {
   if(!req.file){
     req.file = {
       originalname: 'Doggo.jpg',
-      size: 9012,
       key: 'Doggo.jpg',
       location: "https://daykeeper.s3.amazonaws.com/Doggo.jpg"
+      // size: 9012
     }
   }
   
   const {
     originalname,
-    size,
     key,
     location: url
   } = req.file
 
   const img = {
     name: originalname,
-    size,
     key,
     url
   }

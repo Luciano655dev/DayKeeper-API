@@ -21,7 +21,7 @@ const getPostByName = async(req, res)=>{
 // submitPost
 const createPost = async(req, res)=>{
   const { data } = req.body
-  const images = req.files ? req.files.map( file => { return { name: file.originalname, size: file.size, key: file.key, url: file.location } }) : []
+  const images = req.files ? req.files.map( file => { return { name: file.originalname, key: file.key, url: file.location } }) : []
   const loggedUserId = req.id
 
   const titleDate = bf.FormatDate(Date.now())
@@ -85,7 +85,7 @@ const updatePost = async(req, res)=>{
     }
     
     const newPostImages = images.filter((el, index)=>keep_files.includes(index))
-    const newFiles = req.files.map( file => { return { name: file.originalname, size: file.size, key: file.key, url: file.location } })
+    const newFiles = req.files.map( file => { return { name: file.originalname, key: file.key, url: file.location } })
     images = [...newPostImages, ...newFiles]
   
     // Postar

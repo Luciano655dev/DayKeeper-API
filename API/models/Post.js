@@ -19,7 +19,6 @@ const postSchema = mongoose.Schema({
     images: [
         {
             name: String,
-            size: Number,
             key: String,
             url: String
         }

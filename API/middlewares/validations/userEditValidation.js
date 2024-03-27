@@ -6,7 +6,7 @@ const userValidation = async(req, res, next)=>{
     const { name: username, email, password, private } = req.body
 
     try{
-            // accounts validator
+        // accounts validator
         const loggedUser = await User.findById(req.id)
         if(
             (await User.findOne({ email }) && email != loggedUser.email) ||

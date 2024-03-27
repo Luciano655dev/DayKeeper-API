@@ -147,7 +147,6 @@ const updateUser = async(req, res) => {
             req.file ?
             {
               name: req.file.originalname,
-              size: req.file.size,
               key: req.file.key,
               url: req.file.location
             } : user.profile_picture
@@ -185,7 +184,12 @@ const reseteProfilePicture = async(req, res)=>{
     const updatedUser = await User.findByIdAndUpdate(loggedUserId,
       {
         $set: {
-          profile_picture: { name: 'Doggo.jpg', size: 9012, key: 'Doggo.jpg', url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg" },
+          profile_picture: {
+            name: 'Doggo.jpg',
+            key: 'Doggo.jpg',
+            url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg"
+            // size: 9012,
+          },
         },
       }
     )
@@ -194,7 +198,7 @@ const reseteProfilePicture = async(req, res)=>{
     return res.status(200).json({ msg: `foto de perfil do usuario(a) ${user.name} resetada com sucesso` })
 
   } catch (error){
-    res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({ msg: `${error}` })
   }
 }
 
@@ -203,7 +207,7 @@ const deleteUser = async (req, res) => {
   const loggedUserId = req.id
 
   if(!req.id)
-    return res.sstatus(404).json({ msg: "Você precisa fazer login antes!" })
+    return res.status(404).json({ msg: "Você precisa fazer login antes!" })
 
   try {
     const user = await User.findById(loggedUserId)
@@ -239,7 +243,7 @@ const deleteUser = async (req, res) => {
     // Delete account
     const deletedUser = await User.findByIdAndDelete(loggedUserId)
 
-    res.status(200).json({
+    return res.status(200).json({
       msg: 'O usuário e suas interações foram deletadas com sucesso',
       user: deletedUser,
       posts: deletedPosts,
@@ -248,7 +252,7 @@ const deleteUser = async (req, res) => {
       commentReactions: deletedCommentReactions
     })
   } catch (error) {
-    res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({ msg: `${error}` })
   }
 }
 
