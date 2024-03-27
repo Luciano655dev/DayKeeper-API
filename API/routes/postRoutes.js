@@ -5,6 +5,7 @@ const {
     createPost,
     updatePost,
     deletePost,
+    reportPost,
     reactPost,
     commentPost,
     reactComment,
@@ -30,6 +31,7 @@ router.put("/:posttitle", checkTokenMW, verifyUserOwnershipMW, multer(multerConf
 router.delete("/:posttitle", checkTokenMW, verifyUserOwnershipMW, deletePost) // Delete Post
 
 // interaction
+router.post("/:name/:posttitle/report", checkTokenMW, checkPrivatePostMW, reportPost) // Report a post
 router.post("/:name/:posttitle/react", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, reactPost) // React to a Post
 router.post("/:name/:posttitle/comment", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, commentPost) // Comment in a post
 router.delete("/:name/:posttitle/comment/:usercomment", checkPrivatePostMW, checkBlockedUserMW, checkTokenMW, deleteComment) // Delete a comment

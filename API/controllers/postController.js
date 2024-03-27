@@ -146,6 +146,45 @@ const deletePost = async(req, res)=>{
   }
 }
 
+// report Post
+const reportPost = async(req, res)=>{
+  const { name: username, posttitle } = req.params
+  const reason = req.body.reason || ''
+  const loggedUserId = req.id
+
+  if(reason.length > 1000)
+    return res.status(400).json({ msg: "A razão só pode ter até 1000 caracteres" })
+
+  try{
+    const postUser = await User.findOne({ name: username })
+    const reportedPost = await Post.findOne({
+      user: postUser._id,
+      title: posttitle
+    })
+    if(!reportedPost) return res.status(404).json({ msg: 'Post não encontrado' })
+
+    if(reportedPost.reports.find(report => report.user == loggedUserId))
+      return res.status(400).json({ msg: "Você já reportou este post antes" })
+
+    await Post.findByIdAndUpdate(reportedPost._id, {
+      $addToSet: {
+        reports: {
+          user: loggedUserId,
+          reason
+        }
+      }
+    })
+
+    return res.status(200).json({
+      msg: "Post denunciado com sucesso",
+      reason,
+      post: reportedPost
+    })
+  }catch(error){
+    return res.status(500).json({ error: `${error}` })
+  }
+}
+
 // reactPost
 const reactPost = async (req, res) => {
   const loggedUserId = req.id
@@ -354,6 +393,7 @@ module.exports = {
   createPost,
   updatePost,
   deletePost,
+  reportPost,
   reactPost,
   commentPost,
   reactComment,

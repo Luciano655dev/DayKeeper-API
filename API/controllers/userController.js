@@ -380,7 +380,7 @@ const reportUser = async(req, res)=>{
     // denuncia-lo
     await User.updateOne({ name },
       {
-        $push: {
+        $addToSet: {
           reports: {
             user: loggedUserId,
             reason
@@ -392,7 +392,7 @@ const reportUser = async(req, res)=>{
     return res.status(200).json({
       msg: "Usuario reportado e bloqueado com sucesso",
       reason,
-      user: userReported
+      user: reportedUser
     })
 
   }catch(error){

@@ -23,6 +23,16 @@ const postSchema = mongoose.Schema({
             url: String
         }
     ],
+
+    reports: [{
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
+            reason: String
+        }
+    ],
+
     reactions: [
         {
             user: {
