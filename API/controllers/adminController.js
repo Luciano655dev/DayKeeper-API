@@ -106,6 +106,38 @@ const deleteBannedUser = async(req, res)=>{
     }
 }
 
+const deleteUserReport = async(req, res)=>{
+    const { name: username, reportId } = req.params
+
+    try{
+        const updatedUser = await User.findOneAndUpdate({ name: username }, {
+            $pull: {
+                reports: { _id: reportId }
+            }
+        }, { new: true })
+
+        if(!updatedUser)
+            return res.status(404).json({ msg: "Usuario não encontrado" })
+
+        return res.status(200).json({
+            msg: "Report excluido com sucesso",
+            user: updatedUser
+        })
+    } catch (error) {
+        return res.status(500).json({ msg: error.message })
+    }
+}
+
+// Get Users Reports
+// Get Users that The Admin Banned
+// Delete user Report
+
+module.exports = {
+    banOrUnbanUser,
+    deleteBannedUser,
+    deleteUserReport
+}
+
 const deleteUser = async(user)=>{
     // Delete Profile Picture
     if (user.profile_picture.name != 'Doggo.jpg')
@@ -151,12 +183,4 @@ const deleteUser = async(user)=>{
 
     // Delete account
     await User.findByIdAndDelete(user._id)
-}
-
-// Get Users Reports
-// Delete User (After 15 days)
-
-module.exports = {
-    banOrUnbanUser,
-    deleteBannedUser
 }

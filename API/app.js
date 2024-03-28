@@ -19,7 +19,7 @@ const searchRoutes = require('./routes/searchRoutes')
 
 app.use('/auth', authRoutes)
 app.use('/question', dailyQuestionRoutes)
-app.use('', adminRoutes)
+app.use('/admin', adminRoutes)
 app.use('/', searchRoutes)
 app.use('/', userRoutes)
 app.use('/', postRoutes)
