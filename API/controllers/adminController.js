@@ -3,9 +3,10 @@ const Post = require('../models/Post')
 
 const {
     sendBanEmail,
-    sendUnbanEmail
-    // send exclusion email
+    sendUnbanEmail,
+    sendOptOutEmail
 } = require('../common/emailHandler')
+const deleteImage = require('../common/deleteImage')
 
 const banOrUnbanUser = async(req, res)=>{
     const { name: username } = req.params
@@ -17,10 +18,10 @@ const banOrUnbanUser = async(req, res)=>{
 
     try {
         const mainUser = await User.findById(loggedUserId)
-        const postUser = await User.findOne({ name: username })
-        if(!mainUser || !postUser) return res.status(404).json({ msg: "Usuario não encontrado" })
+        const bannedUser = await User.findOne({ name: username })
+        if(!mainUser || !bannedUser) return res.status(404).json({ msg: "Usuario não encontrado" })
 
-        if(postUser.banned){
+        if(bannedUser.banned){
             await User.updateOne({ name: username }, {
                 $set: {
                     unbanned_by: loggedUserId,
@@ -35,11 +36,11 @@ const banOrUnbanUser = async(req, res)=>{
                 }
             })
 
-            // await sendUnbanEmail(postUser.email, postUser.name, mainUser.name, message)
+            // await sendUnbanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
 
             const userUpdated = await User.findOne({ name: username }) 
             return res.status(200).json({
-                msg: `Usuário ${postUser.name} desbanido com sucesso`,
+                msg: `Usuário ${bannedUser.name} desbanido com sucesso`,
                 user: userUpdated
             })
         }
@@ -58,11 +59,11 @@ const banOrUnbanUser = async(req, res)=>{
             }
         })
 
-        // await sendBanEmail(postUser.email, postUser.name, mainUser.name, message)
+        // await sendBanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
 
         const userUpdated = await User.findOne({ name: username }) 
         return res.status(200).json({
-            msg: `Usuario ${postUser.name} banido com sucesso`,
+            msg: `Usuario ${bannedUser.name} banido com sucesso`,
             user: userUpdated
         })
     } catch (error) {
@@ -70,10 +71,92 @@ const banOrUnbanUser = async(req, res)=>{
     }
 }
 
+const deleteBannedUser = async(req, res)=>{
+    const { name: username } = req.params
+    const loggedUserId = req.id
+
+    try{
+        const bannedUser = await User.findOne({ name: username })
+
+        if(!bannedUser) return res.status(400).json({ msg: "Usuario não encontrado" })
+        if(!bannedUser.banned) return res.status(400).json({ msg: "Este usuario não foi banido" })
+
+        let adminUser = await User.findById(bannedUser.banned_by)
+
+        // caso o admin quebaniu não existe, esse novo admin tomará o lugar dele
+        if(!adminUser) adminUser = await User.findById(loggedUserId)
+
+        if(adminUser._id != loggedUserId)
+            return res.status(400).json({ msg: "Apenaso admin que baniu o usuario pode exclui-lo" })
+
+        const diffInDays = Math.abs(new Date() - bannedUser.ban_date) / (1000 * 3600 * 24)
+        if(diffInDays < 30)
+            return res.status(400).json({ msg: "Você só pode excluir um usuario caso ele esteja + de 30 dias banido" })
+
+        await deleteUser(bannedUser)
+
+        // await sendOptOutEmail(bannedUser.email, bannedUser.name, adminUser.name, bannedUser.ban_message)
+        
+        return res.status(200).json({
+            msg: "O usuario banido e suas ações foram deletadas com sucesso, um email foi enviado notificando o usuario",
+            user: bannedUser
+        })
+    } catch (error) {
+        return res.status(500).json({ msg: error.message })
+    }
+}
+
+const deleteUser = async(user)=>{
+    // Delete Profile Picture
+    if (user.profile_picture.name != 'Doggo.jpg')
+      deleteImage(user.profile_picture.key)
+
+    // Delete all reactions by the user in any post
+    await Post.updateMany({}, {
+      $pull: {
+        reactions: { user: user._id }
+      }
+    })
+    
+    // Delete all comments by the user in any post
+    await Post.updateMany({}, {
+      $pull: {
+        comments: { user: user._id }
+      }
+    })
+
+    // Delete all reactions by the user in any comment
+    await Post.updateMany({}, {
+      $pull: {
+        'comments.$[].reactions': { user: user._id }
+      }
+    })
+
+    // delete all his followers
+    await Post.updateMany({}, {
+      $pull: {
+        followers: { user: user._id }
+      }
+    })
+
+    // delete all his follow requests
+    await Post.updateMany({}, {
+      $pull: {
+        follow_requests: { user: user._id }
+      }
+    })
+
+    // Delete user's posts
+    await Post.deleteMany({ user: user._id })
+
+    // Delete account
+    await User.findByIdAndDelete(user._id)
+}
+
 // Get Users Reports
-// Get +15days banned users
 // Delete User (After 15 days)
 
 module.exports = {
-    banOrUnbanUser
+    banOrUnbanUser,
+    deleteBannedUser
 }

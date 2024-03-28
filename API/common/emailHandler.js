@@ -98,9 +98,33 @@ const sendUnbanEmail = async(email, bannedUsername, adminUsername, message) => {
   })
 }
 
+const sendOptOutEmail = async(email, bannedUsername, adminUsername, message) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Sua conta ${bannedUsername} foi permanentemente excluida do DayKeeper`,
+    text: ` Após uma analise da sua conta por nossos admininstradores, decidimos excluir sua conta
+            Sua conta de nome ${bannedUsername} já havia sido banida antes e, após analises, ela foi excluida.
+
+            Sua conta, banida e revisada por ${adminUsername}, foi banida pelo seguinte motivo:
+
+            "${message}"
+
+            Hoje, todas as ações interações pertencentes a ela foram excluidas
+            Infelizmente, não há possibilidade de volta de nenhuma das informações
+            Desculpe-nos por qualquer inconveniência
+
+            Obrigado pela compreensão
+            DayKeeper`,
+  })
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendBanEmail,
-  sendUnbanEmail
+  sendUnbanEmail,
+  sendOptOutEmail
 }
