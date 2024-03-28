@@ -32,6 +32,12 @@ const postSchema = mongoose.Schema({
             reason: String
         }
     ],
+    banned: { type: String, required: false },
+    bannde_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false
+    },
 
     reactions: [
         {

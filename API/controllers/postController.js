@@ -222,7 +222,10 @@ const reactPost = async (req, res) => {
 
     await reactedPost.save()
 
-    return res.status(200).json({ msg: 'A reação foi adicionada ou retirada do Post!', post: reactedPost })
+    return res.status(200).json({
+      msg: 'A reação foi adicionada ou retirada do Post!',
+      post: reactedPost
+    })
   } catch (error) {
     return res.status(500).json({ msg: error.message })
   }
@@ -405,10 +408,16 @@ async function getPost(posttitle, username){
   try{
     const user = await User.findOne({ name: username })
     const post = await Post.findOne({ user: user._id, title: posttitle })
-      .populate('user', '-password') // pegar o usuario que postou
-      .populate('reactions.user', '-password') // pegar os usuarios que reagiram
-      .populate('comments.user', '-password') // pegar os usuarios que comentaram
-      // .populate('comments.reactions.user', '-password') // pegar os usuarios que reagiram a comentarios
+      .populate('user', '-password')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          match: { banned: { $ne: true } }, // Excluir comentários feitos por usuários banidos
+          select: '-password'
+        }
+      })
+      .populate('reactions.user', '-password')
   
     return post
   }catch(err){
@@ -420,9 +429,15 @@ async function getPostByUserId(posttitle, userid){
   try{
     const post = await Post.findOne({ user: userid, title: posttitle })
       .populate('user', '-password')
-      .populate('reactions.user', '-password') // pegar os usuarios que reagiram
-      .populate('comments.user', '-password') // pegar os usuarios que comentaram
-      // .populate('comments.reactions.user', '-password') // pegar os usuarios que reagiram a comentarios
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          match: { banned: { $ne: true } }, // Excluir comentários feitos por usuários banidos
+          select: '-password'
+        }
+      })
+      .populate('reactions.user', '-password')
   
     return post
   }catch(err){

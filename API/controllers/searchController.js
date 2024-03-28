@@ -38,6 +38,7 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
             $match: {
                 $and: [
                     { 'user': { $nin: mainUser.blocked_users } },
+                    { 'user_info.banned': { $ne: "true" } },
                     {
                         $or: [
                             { title: { $regex: new RegExp(searchQuery, 'i') } },
@@ -70,9 +71,9 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                 title: 1,
                 data: 1,
                 user: 1,
-                reactions: 1,
-                comments: 1,
                 created_at: 1,
+                reactions: { $size: '$reactions' },
+                comments: { $size: '$comments' },
                 user_info: { $arrayElemAt: ['$user_info', 0] }
             }
         }
@@ -119,6 +120,7 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
             $match: {
                 $and: [
                     { '_id': { $nin: mainUser.blocked_users } },
+                    { 'banned': { $ne: true } },
                     {
                         name: { $regex: new RegExp(searchQuery, 'i') }
                     },

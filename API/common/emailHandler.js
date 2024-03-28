@@ -14,9 +14,9 @@ const transporterOptions = {
 
 async function sendVerificationEmail(name, email, imgSrc = ''){
   const emailToken = jwt.sign(
-      { email },
-      process.env.EMAIL_SECRET,
-      { expiresIn: 3 * 60 } // 3 minutes
+    { email },
+    process.env.EMAIL_SECRET,
+    { expiresIn: 3 * 60 } // 3 minutes
   )
 
   const transporter = nodemailer.createTransport(transporterOptions)
@@ -57,7 +57,50 @@ const sendPasswordResetEmail = async (email, resetToken) => {
   })
 }
 
+const sendBanEmail = async(email, bannedUsername, adminUsername, message) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Sua conta ${bannedUsername} foi banida no DayKeeper :(`,
+    text: `Você está recebendo este email pois <strong>Sua conta de nome ${bannedUsername} foi banida no DayKeeper</strong>
+            Sua conta foi revisada e banida do DayKeeper por ${adminUsername} pelo seguinte motivo:
+
+            ${message}
+
+            Você ainda pode solicitar o desbanimento da sua conta respondendo este Gmail
+            Caso isso não seja feito, sua conta e suas interações serão <strong>permanentemente excluidas</strong> em 1(um) mês
+
+            Obrigado pela compreensão
+            DayKeeper`,
+  })
+}
+
+const sendUnbanEmail = async(email, bannedUsername, adminUsername, message) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Sua conta ${bannedUsername} foi DESBANIDA do DayKeeper ;)`,
+    text: `Temos boas noticias! <strong>Sua conta de nome ${bannedUsername} foi DESBANIDA no DayKeeper</strong>
+            Sua conta foi revisada por ${adminUsername} e, concluimos que, pelo seguinte motivo:
+
+            ${message}
+
+            Sua conta foi desbanida
+            Todos os seus posts e interações voltaram ao ar!
+            Desculpe-nos por qualquer inconveniência, espero que aproveite a conta!
+
+            Obrigado
+            DayKeeper`,
+  })
+}
+
 module.exports = {
   sendVerificationEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendBanEmail,
+  sendUnbanEmail
 }

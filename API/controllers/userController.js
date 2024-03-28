@@ -237,6 +237,20 @@ const deleteUser = async (req, res) => {
       }
     })
 
+    // delete all his followers
+    const deletedFollowers = await Post.updateMany({}, {
+      $pull: {
+        followers: { user: loggedUserId }
+      }
+    })
+
+    // delete all his follow requests
+    const deletedFollowRequests = await Post.updateMany({}, {
+      $pull: {
+        follow_requests: { user: loggedUserId }
+      }
+    })
+
     // Delete user's posts
     const deletedPosts = await Post.deleteMany({ user: loggedUserId })
 
@@ -247,9 +261,11 @@ const deleteUser = async (req, res) => {
       msg: 'O usuário e suas interações foram deletadas com sucesso',
       user: deletedUser,
       posts: deletedPosts,
-      postReactions: deletedPostReactions,
+      post_reactions: deletedPostReactions,
       comments: deletedComments,
-      commentReactions: deletedCommentReactions
+      comment_reactions: deletedCommentReactions,
+      followers: deletedFollowers,
+      follow_requests: deletedFollowRequests
     })
   } catch (error) {
     return res.status(500).json({ msg: `${error}` })

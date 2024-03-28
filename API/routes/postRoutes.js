@@ -23,18 +23,19 @@ const checkTokenMW = require('../middlewares/checkTokenMW')
 const verifyUserOwnershipMW = require('../middlewares/verifyUserOwnershipMW')
 const checkPrivatePostMW = require('../middlewares/checkPrivatePostMW')
 const checkBlockedUserMW = require('../middlewares/checkBlockedUserMW')
+const checkBannedUserMW = require('../middlewares/checkBannedUserMW')
 
 // Routes
-router.get("/:name/:posttitle", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, getPostByName) // One Post
+router.get("/:name/:posttitle", checkTokenMW, checkBannedUserMW, checkPrivatePostMW, checkBlockedUserMW, getPostByName) // One Post
 router.post('/create', checkTokenMW, multer(multerConfig).array('files', 5), handleMulterError, postValidation, createPost) // Create Post
 router.put("/:posttitle", checkTokenMW, verifyUserOwnershipMW, multer(multerConfig).array('files', 5), handleMulterError, postEditValidation, updatePost) // Edit Post
 router.delete("/:posttitle", checkTokenMW, verifyUserOwnershipMW, deletePost) // Delete Post
 
 // interaction
-router.post("/:name/:posttitle/report", checkTokenMW, checkPrivatePostMW, reportPost) // Report a post
-router.post("/:name/:posttitle/react", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, reactPost) // React to a Post
-router.post("/:name/:posttitle/comment", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, commentPost) // Comment in a post
-router.delete("/:name/:posttitle/comment/:usercomment", checkPrivatePostMW, checkBlockedUserMW, checkTokenMW, deleteComment) // Delete a comment
-router.post("/:name/:posttitle/reactcomment/:usercomment", checkTokenMW, checkPrivatePostMW, checkBlockedUserMW, reactComment) // React to a comment in a Post
+router.post("/:name/:posttitle/report", checkTokenMW, checkBannedUserMW, checkPrivatePostMW, reportPost) // Report a post
+router.post("/:name/:posttitle/react", checkTokenMW, checkBannedUserMW, checkPrivatePostMW, checkBlockedUserMW, reactPost) // React to a Post
+router.post("/:name/:posttitle/comment", checkTokenMW, checkBannedUserMW, checkPrivatePostMW, checkBlockedUserMW, commentPost) // Comment in a post
+router.delete("/:name/:posttitle/comment/:usercomment", checkBannedUserMW, checkPrivatePostMW, checkBlockedUserMW, checkTokenMW, deleteComment) // Delete a comment
+router.post("/:name/:posttitle/reactcomment/:usercomment", checkTokenMW, checkBannedUserMW, checkPrivatePostMW, checkBlockedUserMW, reactComment) // React to a comment in a Post
 
 module.exports = router
