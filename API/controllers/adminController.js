@@ -21,20 +21,20 @@ const banOrUnbanUser = async(req, res)=>{
         const bannedUser = await User.findOne({ name: username })
         if(!mainUser || !bannedUser) return res.status(404).json({ msg: "Usuario não encontrado" })
 
-        if(bannedUser.banned){
-            await User.updateOne({ name: username }, {
-                $set: {
-                    unbanned_by: loggedUserId,
-                    unban_date: Date.now(),
-                    unban_message: message
+        if(bannedUser.banned == "true"){
+            await User.updateOne({ name: username },
+                {
+                    $set: {
+                        banned: false,
+                        "ban_history.$[elem].unban_date": Date.now(),
+                        "ban_history.$[elem].unbanned_by": loggedUserId,
+                        "ban_history.$[elem].unban_message": message
+                    }
                 },
-                $unset: {
-                    banned: '',
-                    banned_by: '',
-                    ban_date: '',
-                    ban_message: ''
+                {
+                    arrayFilters: [{ "elem.unban_date": { $exists: false } }]
                 }
-            })
+            )
 
             // await sendUnbanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
 
@@ -48,14 +48,13 @@ const banOrUnbanUser = async(req, res)=>{
         await User.updateOne({ name: username }, {
             $set: {
                 banned: true,
-                banned_by: loggedUserId,
-                ban_date: Date.now(),
-                ban_message: message
             },
-            $unset: {
-                unbanned_by: '',
-                unban_date: '',
-                unban_message: ''
+            $push: {
+                ban_history: {
+                    banned_by: loggedUserId,
+                    ban_date: Date.now(),
+                    ban_message: message
+                }
             }
         })
 
@@ -81,9 +80,9 @@ const deleteBannedUser = async(req, res)=>{
         if(!bannedUser) return res.status(400).json({ msg: "Usuario não encontrado" })
         if(!bannedUser.banned) return res.status(400).json({ msg: "Este usuario não foi banido" })
 
-        let adminUser = await User.findById(bannedUser.banned_by)
+        let adminUser = await User.findById(bannedUser.banHistory[bannedUser.banHistory.length-1].banned_by)
 
-        // caso o admin quebaniu não existe, esse novo admin tomará o lugar dele
+        // caso o admin que baniu pela última vez não exista mais, o adm logado tomará seu lugar
         if(!adminUser) adminUser = await User.findById(loggedUserId)
 
         if(adminUser._id != loggedUserId)
@@ -130,7 +129,6 @@ const deleteUserReport = async(req, res)=>{
 
 // Get Users Reports
 // Get Users that The Admin Banned
-// Delete user Report
 
 module.exports = {
     banOrUnbanUser,
