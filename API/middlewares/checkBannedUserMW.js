@@ -6,7 +6,7 @@ async function checkBannedUserMW(req, res, next){
     try{
         const user = await User.findOne({ name })
 
-        if(user.banned)
+        if(user.banned == "true")
             return res.status(401).json({ msg: "Este usuario foi banido" })
 
         next()

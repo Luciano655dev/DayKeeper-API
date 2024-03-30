@@ -408,7 +408,7 @@ const reportUser = async(req, res)=>{
     return res.status(200).json({
       msg: "Usuario reportado e bloqueado com sucesso",
       reason,
-      user: reportedUser
+      user: userReported
     })
 
   }catch(error){
