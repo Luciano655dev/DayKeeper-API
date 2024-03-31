@@ -136,8 +136,6 @@ const deletePost = async(req, res)=>{
 
     for(let i in deletedPost.images)
       deleteImage(deletedPost.images[i].key)
-    
-    if(!deletePost) return res.status(404).json({ msg: 'Post não encontrado' })
 
     return res.status(200).json({ msg: 'Post deletado com sucesso', post: deletedPost })
     // typeof 'user' == ObjectId

@@ -121,10 +121,56 @@ const sendOptOutEmail = async(email, bannedUsername, adminUsername, message) => 
   })
 }
 
+const sendPostBanEmail = async(email, bannedUsername, bannedPostTitle, adminUsername, message) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Seu post do dia ${bannedPostTitle} foi banido do DayKeeper`,
+    text: ` Após uma analise da sua conta por nossos admininstradores, decidimos banir seu post
+            do dia ${bannedPostTitle}, pertencente a sua conta de nome ${bannedUsername}, do DayKeeper.
+
+            Esse post, revisado por ${adminUsername}, foi banido pelo seguinte motivo:
+
+            "${message}"
+
+            Caso você acredite que esse banimento foi feito de forma equivocada, contate-nos
+            em um período de até uma semana
+            Caso contrário, o post será permanentemente excluido da plataforma.
+
+            Obrigado pela compreensão
+            DayKeeper`,
+  })
+}
+
+const sendPostDeletionEmail = async(email, bannedUsername, bannedPostTitle, adminUsername, message) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Seu post do dia ${bannedPostTitle} foi excluido permanentemente do DayKeeper`,
+    text: ` Por falta de resposta ou por confirmação de admininstradores, decidimos excluir permanentemente
+            seu post do dia ${bannedPostTitle}, pertencente a sua conta de nome ${bannedUsername}, do DayKeeperr.
+
+            Esse post, que já havia sido banido por ${adminUsername}, foi permanentemente excluido pelo seguinte motivo:
+
+            "${message}"
+
+            Infelizmente, esta ação não poderá ser revertida
+
+            Obrigado pela compreensão
+            DayKeeper`,
+  })
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendBanEmail,
   sendUnbanEmail,
-  sendOptOutEmail
+  sendOptOutEmail,
+  sendPostBanEmail,
+  sendPostDeletionEmail
 }
