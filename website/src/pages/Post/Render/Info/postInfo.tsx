@@ -313,7 +313,7 @@ export default function PostInfo({ togglePage }: any) {
           }).map( (com: any) => <StyledComment key={Math.random()}>
             <div>
               <img src={com.user.profile_picture.url}></img>
-              <label><strong>{com.user.name}</strong></label>
+              <StyledLink to={`/${com.user.name}`}>{com.user.name}</StyledLink>
             </div>
             <div>
               <p>{com.comment}</p>

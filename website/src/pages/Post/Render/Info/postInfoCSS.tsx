@@ -15,7 +15,7 @@ export const StyledCommentSection = styled.div`
 export const StyledLink = styled(Link)`
   color: black;
   text-decoration: none;
-  font-size: 2em;
+  font-size: 1.5em;
   margin-left: 0.5em;
   cursor: pointer;
   transition: 0.3s;
@@ -63,6 +63,17 @@ export const StyledComment = styled.div`
     margin: 0;
     margin-left: 2em;
     padding: 10px;
+  }
+
+  Link{
+    text-decoration: none;
+    color: black;
+    border-bottom: 1px solid white;
+    transition: 0.3s;
+
+    &:hover{
+      border-bottom: 1px solid black;
+    }
   }
 `
 

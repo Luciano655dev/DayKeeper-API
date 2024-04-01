@@ -7,7 +7,8 @@ import {
   StyledSubContainer,
   StyledEditProfileButton,
   StyledFollowLink,
-  StyledPostsLink
+  StyledPostsLink,
+  StyledReportButton
 } from './userInfoCSS'
 import { StyledButton } from '../Edit/editProfileCSS';
 import { useParams } from 'react-router-dom';
@@ -35,7 +36,7 @@ export default function UserInfo() {
   const [msg, setMsg] = useState('')
 
   const updateUserInfo = async()=>{
-    const loggedUser = await axios.get(`http://localhost:3000/${user.id}`, { headers: { Authorization: `Bearer ${token}` } })
+    const loggedUser = await axios.get(`http://localhost:3000/${user.name}`, { headers: { Authorization: `Bearer ${token}` } })
     const responseUserInfo: any = await axios.get(`http://localhost:3000/${userNameFromParams}`, { headers: { Authorization: `Bearer ${token}` } })
     const following = await axios.get(`http://localhost:3000/${userNameFromParams}/following`, { headers: { Authorization: `Bearer ${token}` } })
 
@@ -89,6 +90,23 @@ export default function UserInfo() {
 
     try{
       const response: any = await axios.post(`http://localhost:3000/${userNameFromParams}/block`, {},
+      { headers: { Authorization: `Bearer ${token}` } })
+
+      await updateUserInfo()
+
+      setMsg(response.data.msg)
+    }catch(error: any){
+      setMsg(error.response.data.msg)
+    }
+
+    setLoading(false)
+  }
+
+  const handleReport = async()=>{
+    setLoading(true)
+
+    try{
+      const response: any = await axios.post(`http://localhost:3000/${userNameFromParams}/report`, {},
       { headers: { Authorization: `Bearer ${token}` } })
 
       await updateUserInfo()
@@ -178,6 +196,8 @@ export default function UserInfo() {
               onClick={handleBlock}
             >Unblock</StyledButton>
         }
+
+        <StyledReportButton onClick={handleReport}>REPORT USER</StyledReportButton>
 
         {sameUser ?
           <StyledEditProfileButton to={"/profile"}>EDITAR PERFIL</StyledEditProfileButton> :

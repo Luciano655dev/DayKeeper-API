@@ -98,3 +98,15 @@ export const StyledEditProfileButton = styled(Link)`
     font: bold;
     background-color: green;
 `
+
+export const StyledReportButton = styled.button `
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: red;
+    padding: 1em;
+
+    &:hover{
+        text-decoration: underline;
+    }
+`

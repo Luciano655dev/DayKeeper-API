@@ -35,7 +35,7 @@ export default function Navbar() {
           <StyledLink to='/about'>About Us</StyledLink>
         </li>
         <li>
-          <StyledLink to='/search'>Posts</StyledLink>
+          <StyledLink to='/search'>Search</StyledLink>
         </li>
         {loadingToken ? null : token.length ? (
           <Logged
