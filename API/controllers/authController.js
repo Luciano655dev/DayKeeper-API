@@ -1,4 +1,5 @@
 const User = require('../models/User')
+const BannedUser = require('../models/BannedUser')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const {
@@ -33,7 +34,8 @@ const register = async(req, res) => {
   }
 
   try {
-    await sendVerificationEmail(username, email, img.url)
+    const emailIsBanned = (await BannedUser.findOne({ email })) == 'null'
+    if(emailIsBanned) return res.status(400).json({ msg: "Este email foi banido" })
 
     // create password
     const salt = await bcrypt.genSalt(12)
@@ -52,11 +54,14 @@ const register = async(req, res) => {
       password: passwordHash,
       creation_date: Date.now()
     })
-
     await user.save()
+
+    await sendVerificationEmail(username, email, img.url)
+
     return res.status(201).json({ msg: "Ative sua conta no seu Email", info: user })
   } catch (error) {
-    return res.status(500).json({ msg: error })
+    console.log(error)
+    return res.status(500).json({ error })
   }
 }
 
@@ -172,9 +177,9 @@ const resetPassword = async (req, res) => {
 
     await user.save()
 
-    res.status(200).json({ msg: 'Senha redefinida com sucesso' })
+    return res.status(200).json({ msg: 'Senha redefinida com sucesso' })
   } catch (error) {
-    res.status(400).json({ msg: 'Token inválido ou expirado' })
+    return res.status(400).json({ msg: 'Token inválido ou expirado' })
   }
 };
 

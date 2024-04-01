@@ -1,5 +1,6 @@
 const User = require('../models/User')
 const Post = require('../models/Post')
+const BannedUser = require('../models/BannedUser')
 const mongoose = require('mongoose')
 
 const {
@@ -24,6 +25,9 @@ const banOrUnbanUser = async(req, res)=>{
         const mainUser = await User.findById(loggedUserId)
         const bannedUser = await User.findOne({ name: username })
         if(!mainUser || !bannedUser) return res.status(404).json({ msg: "Usuario não encontrado" })
+
+        if(bannedUser.roles.find('admin'))
+            return res.status(400).json({ msg: "Você não pode banir um Admininstrador" })
 
         if(bannedUser.banned == "true"){
             await User.updateOne({ name: username },
@@ -84,7 +88,7 @@ const deleteBannedUser = async(req, res)=>{
         if(!bannedUser) return res.status(400).json({ msg: "Usuario não encontrado" })
         if(!bannedUser.banned) return res.status(400).json({ msg: "Este usuario não foi banido" })
 
-        const latestBan = bannedUser.banHistory[bannedUser.banHistory.length-1]
+        const latestBan = bannedUser.ban_history[bannedUser.ban_history.length-1]
 
         let adminUser = await User.findById(latestBan.banned_by)
         if(!adminUser) adminUser = await User.findById(loggedUserId)
@@ -92,16 +96,27 @@ const deleteBannedUser = async(req, res)=>{
         if(adminUser._id != loggedUserId)
             return res.status(400).json({ msg: "Apenaso admin que baniu o usuario pode exclui-lo" })
 
+        /*
         const diffInDays = Math.abs(new Date() - latestBan.ban_date) / (1000 * 3600 * 24)
         if(diffInDays < 30)
             return res.status(400).json({ msg: "Você só pode excluir um usuario caso ele esteja + de 30 dias banido" })
+        */
 
         await deleteUser(bannedUser)
+
+        const newBannedUser = new BannedUser({
+            email: bannedUser.email,
+            ban_message: latestBan.ban_message,
+            ban_date: latestBan.ban_date,
+            banned_by: latestBan.banned_by
+        })
+        await newBannedUser.save()
 
         // await sendOptOutEmail(bannedUser.email, bannedUser.name, adminUser.name, bannedUser.ban_message)
         
         return res.status(200).json({
             msg: "O usuario banido e suas ações foram deletadas com sucesso, um email foi enviado notificando o usuario",
+            ban_info: bannedUser,
             user: bannedUser
         })
     } catch (error) {

@@ -22,7 +22,6 @@ const userValidation = async(req, res, next)=>{
       return handleBadRequest(req, res, 'A senha está muito longa ou não existe');
 
     function handleBadRequest(req, res, msg) {
-      console.log(msg)
       if(req.file) deleteImage(req.file.key)
         return res.status(400).json({ msg })
     }
@@ -34,8 +33,8 @@ const userValidation = async(req, res, next)=>{
   }catch(error){
     // deleta a imagem enviada anteriormente
     if(req.file) deleteImage(req.file.key)
-
-    return res.status(500).json({ msg: `${error}` })
+    
+    return res.status(500).json({ error })
   }
 }
 
