@@ -11,7 +11,7 @@ import {
 } from './postCommentsCSS'
 import { useState } from "react"
 import { useSelector } from 'react-redux'
-import PostGifs from "./Gifs/postGifs"
+import PostGifs from "./Gifs/commentsGifs"
 
 export default function PostComments({ postInfo, handleComment, handleCommentReaction }: any){
     const user = useSelector((state: any) => state.userReducer)
@@ -79,7 +79,11 @@ export default function PostComments({ postInfo, handleComment, handleCommentRea
                 <StyledButton disabled={loading} onClick={() => handleSendComment()}>Send</StyledButton>
             </div>
           :
-          <StyledButton style={{ backgroundColor: 'red', margin: '10px', width: '15em' }} onClick={() => handleComment()}>Delete Comment</StyledButton>
+          <StyledButton
+            disabled={loading}
+            style={{ backgroundColor: 'red', margin: '10px', width: '15em' }}
+            onClick={() => handleComment()}
+          >Delete Comment</StyledButton>
         }
 
         <StyledCommentSection>

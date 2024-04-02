@@ -1,6 +1,6 @@
 const awsS3Config = require('../config/awsS3Config')
 
-const deleteImage = (key) => {
+const deleteFile = (key) => {
     if (process.env.STORAGE_TYPE === "s3"){
       awsS3Config
         .deleteObject({
@@ -21,4 +21,4 @@ const deleteImage = (key) => {
     }
 }
 
-module.exports = deleteImage
+module.exports = deleteFile

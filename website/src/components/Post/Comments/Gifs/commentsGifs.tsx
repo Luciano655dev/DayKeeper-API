@@ -2,7 +2,7 @@ import {
     StyledGifContainer,
     StyledGifSearchContainer,
     StyledButton
-} from './postGifsCSS'
+} from './commentsGifsCSS'
 import Page404 from '../../../../pages/404/Page404'
 import { useEffect, useState } from "react"
 import axios from 'axios'
@@ -17,14 +17,8 @@ export default function PostGifs({ handleSelectGif }: any){
 
     const [error, setError] = useState(false)
 
-    const handleOpenGifSection = ()=>{
-    
-        setOpenGifSection(!openGifSection)
-    }
-
-    const handleSearchGif = ()=>{
-        setGifSearch(gifSearchTxt)
-    }
+    const handleOpenGifSection = ()=>setOpenGifSection(!openGifSection)
+    const handleSearchGif = ()=> setGifSearch(gifSearchTxt)
 
     useEffect(()=>{
         const updateGifs = async()=>{

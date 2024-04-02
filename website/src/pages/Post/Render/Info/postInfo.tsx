@@ -1,5 +1,5 @@
 import {
-  StyledImage,
+  StyledFile,
   StyledButton,
   Alert,
   StyledUserContainer,
@@ -23,7 +23,7 @@ export default function PostInfo({ togglePage }: any) {
   const [postInfo, setPostInfo]: any = useState({
     title: '',
     data: '',
-    images: [],
+    files: [],
     reactions: [],
     comments: []
   })
@@ -117,8 +117,15 @@ export default function PostInfo({ togglePage }: any) {
         <StyledLink to={`/${postInfo.user.name}`}>{postInfo.user.name}</StyledLink>
       </StyledUserContainer>
 
-      { postInfo.images ? postInfo.images.map( (img: any) => <StyledImage src={img.url} key={Math.random()}></StyledImage> ) : <></> }
       <h2>{postInfo.title}</h2>
+
+      {
+        postInfo.files ?
+          postInfo.files.map( (img: any) => <StyledFile data={img.url} key={Math.random()}></StyledFile> )
+        :
+          <></>
+      }
+      
       <p>{postInfo.data}</p>
 
       <div>

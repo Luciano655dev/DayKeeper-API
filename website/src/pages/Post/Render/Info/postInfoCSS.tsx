@@ -2,9 +2,9 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import styled, { keyframes } from "styled-components"
 
-export const StyledImage = styled.img`
-  max-width: 100px;
-  max-height: 100px;
+export const StyledFile = styled.object`
+  max-width: 20em;
+  max-height: 20em;
 `
 
 export const StyledCommentSection = styled.div`

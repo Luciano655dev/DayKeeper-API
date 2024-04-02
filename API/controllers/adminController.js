@@ -10,7 +10,7 @@ const {
     sendPostBanEmail,
     sendPostDeletionEmail
 } = require('../common/emailHandler')
-const deleteImage = require('../common/deleteImage')
+const deleteFile = require('../common/deleteFile')
 
 // ========== USERS ==========
 const banOrUnbanUser = async(req, res)=>{
@@ -369,7 +369,7 @@ const deleteBannedPost = async(req, res)=>{
         })
 
         for(let i in deletedPost.images)
-            deleteImage(deletedPost.images[i].key)
+            deleteFile(deletedPost.files[i].key)
 
         const adminUser = await User.findById(latestBan.banned_by)
         if(!adminUser) adminUser = await User.findById(loggedUserId)
@@ -518,7 +518,7 @@ module.exports = {
 const deleteUser = async(user)=>{
     // Delete Profile Picture
     if (user.profile_picture.name != 'Doggo.jpg')
-      deleteImage(user.profile_picture.key)
+      deleteFile(user.profile_picture.key)
 
     // Delete all reactions by the user in any post
     await Post.updateMany({}, {

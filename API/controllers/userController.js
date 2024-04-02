@@ -3,7 +3,7 @@ const User = require('../models/User')
 const Post = require('../models/Post')
 const bcrypt = require('bcrypt')
 const { sendVerificationEmail } = require('../common/emailHandler')
-const deleteImage = require('../common/deleteImage')
+const deleteFile = require('../common/deleteFile')
 
 // getUserByName
 const getUserByName = async(req, res) => {
@@ -179,7 +179,7 @@ const reseteProfilePicture = async(req, res)=>{
 
     // deleteLastPFP
     if (user.profile_picture.name != 'Doggo.jpg')
-      deleteImage(user.profile_picture.key)
+      deleteFile(user.profile_picture.key)
 
     const updatedUser = await User.findByIdAndUpdate(loggedUserId,
       {
@@ -214,7 +214,7 @@ const deleteUser = async (req, res) => {
 
     // Delete Profile Picture
     if (user.profile_picture.name != 'Doggo.jpg')
-      deleteImage(user.profile_picture.key)
+      deleteFile(user.profile_picture.key)
 
     // Delete all reactions by the user in any post
     const deletedPostReactions = await Post.updateMany({}, {

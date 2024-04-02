@@ -16,7 +16,7 @@ const postSchema = mongoose.Schema({
         default: Date.now(),
         required: true
     },
-    images: [
+    files: [
         {
             name: String,
             key: String,

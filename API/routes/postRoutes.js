@@ -27,8 +27,8 @@ const checkBannedUserMW = require('../middlewares/checkBannedUserMW')
 
 // Routes
 router.get("/:name/:posttitle", checkTokenMW, checkBannedUserMW, checkPrivatePostMW, checkBlockedUserMW, getPostByName) // One Post
-router.post('/create', checkTokenMW, multer(multerConfig).array('files', 5), handleMulterError, postValidation, createPost) // Create Post
-router.put("/:posttitle", checkTokenMW, verifyUserOwnershipMW, multer(multerConfig).array('files', 5), handleMulterError, postEditValidation, updatePost) // Edit Post
+router.post('/create', checkTokenMW, multer(multerConfig("both")).array('files', 5), handleMulterError, postValidation, createPost) // Create Post
+router.put("/:posttitle", checkTokenMW, verifyUserOwnershipMW, multer(multerConfig("both")).array('files', 5), handleMulterError, postEditValidation, updatePost) // Edit Post
 router.delete("/:posttitle", checkTokenMW, verifyUserOwnershipMW, deletePost) // Delete Post
 
 // interaction

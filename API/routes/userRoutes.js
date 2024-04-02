@@ -25,7 +25,7 @@ const checkBannedUserMW = require('../middlewares/checkBannedUserMW')
 
 // Routes
 router.get("/:name", checkTokenMW, checkBannedUserMW, getUserByName)
-router.put("/update_user", checkTokenMW, multer(multerConfig).single('file'), handleMulterError, userEditValidation, updateUser)
+router.put("/update_user", checkTokenMW, multer(multerConfig("image")).single('file'), handleMulterError, userEditValidation, updateUser)
 router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
 router.delete("/delete_user", checkTokenMW, deleteUser)
 

@@ -1,6 +1,6 @@
 const Post = require('../../models/Post')
 const bf = require('better-format')
-const deleteImage = require('../../common/deleteImage')
+const deleteFile = require('../../common/deleteFile')
 
 const postValidation = async(req, res, next)=>{
     const { data } = req.body
@@ -11,7 +11,7 @@ const postValidation = async(req, res, next)=>{
         if( data.length <= 0 || data.length > 5000 ){
             // deleta as imagens mandadas anteriormente
             for(let i in req.files)
-                deleteImage(req.files[i].key)
+                deleteFile(req.files[i].key)
             
             return res.status(400).json({ msg: "O texto está muito longo" })
         }
@@ -25,7 +25,7 @@ const postValidation = async(req, res, next)=>{
             if(lastPost.title == title){
                 // deleta as imagens mandadas anteriormente
                 for(let i in req.files)
-                    deleteImage(req.files[i].key)
+                    deleteFile(req.files[i].key)
                 
                 return res.status(400).json({ msg: "Você só pode fazer um Post por dia" })
             }
@@ -36,7 +36,7 @@ const postValidation = async(req, res, next)=>{
         // deleta as imagens mandadas anteriormente
         if(req.files)
             for(let i in req.files)
-                deleteImage(req.files[i].key)
+                deleteFile(req.files[i].key)
 
         return res.status(500).json({ msg: `${error}` })
     }

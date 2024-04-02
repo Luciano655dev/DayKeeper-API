@@ -1,6 +1,6 @@
-const deleteImage = require('../../common/deleteImage')
 const User = require('../../models/User')
 const bf = require('better-format')
+const deleteFile = require('../../common/deleteFile')
 
 const userValidation = async(req, res, next)=>{
   const { name: username, email, password, private } = req.body
@@ -22,7 +22,7 @@ const userValidation = async(req, res, next)=>{
       return handleBadRequest(req, res, 'A senha está muito longa ou não existe');
 
     function handleBadRequest(req, res, msg) {
-      if(req.file) deleteImage(req.file.key)
+      if(req.file) deleteFile(req.file.key)
         return res.status(400).json({ msg })
     }
   
@@ -32,7 +32,7 @@ const userValidation = async(req, res, next)=>{
     return next()
   }catch(error){
     // deleta a imagem enviada anteriormente
-    if(req.file) deleteImage(req.file.key)
+    if(req.file) deleteFile(req.file.key)
     
     return res.status(500).json({ error })
   }

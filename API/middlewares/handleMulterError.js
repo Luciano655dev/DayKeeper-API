@@ -1,4 +1,4 @@
-const deleteImage = require('../common/deleteImage')
+const deleteImage = require('../common/deleteFile')
 
 const handleMulterError = (err, req, res, next)=>{
     if (err instanceof multer.MulterError) {

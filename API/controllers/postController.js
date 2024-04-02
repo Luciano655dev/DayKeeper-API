@@ -1,7 +1,7 @@
 require('dotenv').config()
 const User = require('../models/User')
 const Post = require('../models/Post')
-const deleteImage = require('../common/deleteImage')
+const deleteFile = require('../common/deleteFile')
 const bf = require('better-format')
 const axios = require('axios')
 
@@ -48,7 +48,7 @@ const createPost = async(req, res)=>{
 
     // Deleta as imagens mandadas caso tenha algum erro
     for(let i in req.files)
-      deleteImage(req.files[i].key)
+      deleteFile(req.files[i].key)
 
     return res.status(500).json({ error, msg: "Erro no servidor, as imagens mandadas não foram postadas" })
   }
@@ -66,22 +66,22 @@ const updatePost = async(req, res)=>{
 
     // verifica se não ultrapassou o limite
     const keep_files = req.body.keep_files.split('').map(Number) || []
-    const maxFiles = ((post.images.length - 1) - (post.images.length - keep_files.length)) + req.files.length
+    const maxFiles = ((post.files.length - 1) - (post.files.length - keep_files.length)) + req.files.length
     if(maxFiles > 5){
       // deleta os arquivos enviados antes
       for(let i in req.files)
-        deleteImage(req.files[i].key)
+        deleteFile(req.files[i].key)
 
       return res.status(400).json({ msg: "você ultrapassou o limite máximo de arquivos" })
     }
 
     // deleta os arquivos removidos do Post original
-    let images = post.images
+    let images = post.files
 
-    for(let i=0; i<post.images.length; i++){
+    for(let i=0; i<post.files.length; i++){
       if(keep_files.includes(i)) continue
 
-      deleteImage(post.images[i].key)
+      deleteFile(post.files[i].key)
     }
     
     const newPostImages = images.filter((el, index)=>keep_files.includes(index))
@@ -134,8 +134,8 @@ const deletePost = async(req, res)=>{
     if(!deletedPost)
       return res.status(404).json({ msg: "Post não encontrado" })
 
-    for(let i in deletedPost.images)
-      deleteImage(deletedPost.images[i].key)
+    for(let i in deletedPost.files)
+      deleteFile(deletedPost.files[i].key) .images
 
     return res.status(200).json({ msg: 'Post deletado com sucesso', post: deletedPost })
     // typeof 'user' == ObjectId

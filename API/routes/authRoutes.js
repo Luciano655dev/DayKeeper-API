@@ -17,7 +17,7 @@ const userValidation = require('../middlewares/validations/userValidation')
 const checkTokenMW = require('../middlewares/checkTokenMW')
 
 // Routes
-router.post("/register", multer(multerConfig).single('file'), handleMulterError, userValidation, register)
+router.post("/register", multer(multerConfig("image")).single('file'), handleMulterError, userValidation, register)
 router.post("/login", login)
 router.get("/confirm_email", confirmEmail)
 router.post('/forget-password', forgetPassword)

@@ -1,6 +1,6 @@
 const User = require('../../models/User')
 const bf = require('better-format')
-const deleteImage = require('../../common/deleteImage')
+const deleteFile = require('../../common/deleteFile')
 
 const userValidation = async(req, res, next)=>{
     const { name: username, email, password, private } = req.body
@@ -28,12 +28,12 @@ const userValidation = async(req, res, next)=>{
 
         // Delete last pfp if user uploads a new pfp
         if(loggedUser.profile_picture.name != 'Doggo.jpg' && req.file)
-            deleteImage(loggedUser.profile_picture.key)
+            deleteFile(loggedUser.profile_picture.key)
 
         return next()
     }catch(error){
         // deleta a imagem anterior
-        if(req.file) deleteImage(req.file.key)
+        if(req.file) deleteFile(req.file.key)
 
         return res.status(500).json({ msg: `${error}` })
     }
