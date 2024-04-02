@@ -1,21 +1,14 @@
 import {
   StyledImage,
-  StyledCommentSection,
-  StyledComment,
-  StyledInput,
   StyledButton,
   Alert,
-  StyledLabel,
-  StyledReactions,
   StyledUserContainer,
-  StyledLink,
-  StyledGif,
-  StyledGifContainer,
-  StyledGifArea,
-  StyledGifSearchContainer,
-  StyledGifPreview
+  StyledLink
 } from './postInfoCSS'
+import PostComments from '../../../../components/Post/Comments/postComments'
+import PostReactions from '../../../../components/Post/Reactions/postReactions';
 import Page404 from "../../../404/Page404";
+
 import { useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { useState, useEffect } from 'react'
@@ -35,15 +28,6 @@ export default function PostInfo({ togglePage }: any) {
     comments: []
   })
   const [sameUser, setSameUser] = useState(false)
-  const [comment, setComment] = useState('')
-
-  const loadingGifSrc = 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTM3a2JjYnR3OHdrbTFyZzVieHpsd3h2c21uYmZuZXBpOTE2MDk3diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3AMRa6DRUhMli/giphy.gif'
-  const [gifs, setGifs] = useState([])
-  const [selectedGif, setSelectedGif]: any = useState(undefined)
-  const [gifSearch, setGifSearch]: any = useState('')
-  const [gifSearchTxt, setGifSearchTxt]: any = useState('')
-  const [openGifSection, setOpenGifSection] = useState(false)
-  const [gifsLoading, setGifsLoading] = useState(true)
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -69,7 +53,6 @@ export default function PostInfo({ togglePage }: any) {
 
         setLoading(false)
       }catch (error: any) {
-        console.log(error)
         return setError(error.response.data.msg)
       }
     };
@@ -77,38 +60,8 @@ export default function PostInfo({ togglePage }: any) {
     getPostInfo()
   }, [postTitleFromParams])
 
-  useEffect(()=>{
-    const updateGifs = async()=>{
-      setGifsLoading(true)
-
-      try{
-        let reqStr = `http://api.giphy.com/v1/gifs/trending?api_key=fzRhwakZC0q3AvSUuBo03vp6IIkAAG36`
-
-        if(gifSearch != '')
-          reqStr = `http://api.giphy.com/v1/gifs/search?q=${gifSearch}&api_key=fzRhwakZC0q3AvSUuBo03vp6IIkAAG36`
-
-        const response = await axios.get(reqStr)
-  
-        setGifs(response.data.data.map((gifObj: any) => {
-          return {
-            name: gifObj.title,
-            id: gifObj.id,
-            url: gifObj.images.original.url
-          }
-        }))
-      }catch (error: any) {
-        setError(error.response.data.msg)
-      }
-
-      setGifsLoading(false)
-    }
-
-    updateGifs()
-  }, [gifSearch])
-
-  
+  // ========== REACTION FUNCTION ==========
   const handleReaction = async (reaction: number) => {
-    setLoading(true)
     try {
       const response: any = await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/react`, {
         reaction
@@ -120,12 +73,10 @@ export default function PostInfo({ togglePage }: any) {
     } catch (error: any) {
       setError(error.response.data.msg)
     }
-    setLoading(false)
   }
 
-  const handleComment = async()=>{
-    setLoading(true)
-
+  // ========== COMMENT FUNCTIONS ==========
+  const handleComment = async(comment: String, selectedGif: any)=>{
     try {
       const response: any = await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/comment`, {
         comment: comment || 'a',
@@ -133,19 +84,15 @@ export default function PostInfo({ togglePage }: any) {
       }, { headers: { Authorization: `Bearer ${token}` } })
 
       setPostInfo({...postInfo, comments: response.data.post.comments})
-      setComment('')
 
       setMsg(response.data.msg)
     } catch (error: any) {
       console.log(error)
       setError(error)
     }
-
-    setLoading(false)
   }
 
   const handleCommentReaction = async(usercomment: String, reaction: Number)=>{
-    setLoading(true)
     try{
       const response = await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/reactcomment/${usercomment}`, {
         reaction
@@ -156,26 +103,6 @@ export default function PostInfo({ togglePage }: any) {
     } catch (error: any) {
       setError(error.response.data.msg)
     }
-    setLoading(false)
-  }
-
-  const handleSelectGif = (gif: any)=>{
-    setSelectedGif(gif)
-  }
-
-  const handleRemoveGif = ()=>{
-    setSelectedGif(undefined)
-  }
-
-  const handleOpenGifSection = ()=>{
-    if(openGifSection)
-      handleRemoveGif()
-    
-    setOpenGifSection(!openGifSection)
-  }
-
-  const handleSearchGif = ()=>{
-    setGifSearch(gifSearchTxt)
   }
 
   if (error) return <Page404></Page404>
@@ -195,33 +122,11 @@ export default function PostInfo({ togglePage }: any) {
       <p>{postInfo.data}</p>
 
       <div>
-        <StyledReactions>
-          <label>
-            <input type="checkbox" name="reaction" value="0" checked={selectedReaction === 0} onChange={() => handleReaction(0)} />
-            😍
-            { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 0).length }
-          </label>
-          <label>
-            <input type="checkbox" name="reaction" value="1" checked={selectedReaction === 1} onChange={() => handleReaction(1)} />
-            😄
-            { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 1).length }
-          </label>
-          <label>
-            <input type="checkbox" name="reaction" value="2" checked={selectedReaction === 2} onChange={() => handleReaction(2)} />
-            😂
-            { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 2).length }
-          </label>
-          <label>
-            <input type="checkbox" name="reaction" value="3" checked={selectedReaction === 3} onChange={() => handleReaction(3)} />
-            😢
-            { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 3).length }
-          </label>
-          <label>
-            <input type="checkbox" name="reaction" value="4" checked={selectedReaction === 4} onChange={() => handleReaction(4)} />
-            😠
-            { postInfo.reactions.filter((reaction: any)=>reaction.reaction == 4).length }
-          </label>
-        </StyledReactions>
+        <PostReactions
+          postInfo={postInfo}
+          selectedReaction={selectedReaction}
+          handleReaction={handleReaction}
+        ></PostReactions>
 
         { sameUser ? <div>
           <br></br><br></br>
@@ -229,159 +134,11 @@ export default function PostInfo({ togglePage }: any) {
           <br></br><br></br>
         </div> : <></> }
 
-        <StyledLabel>Comment</StyledLabel>
-        { postInfo.comments.filter((com: any) => com.user.name == user.name).length == 0 ? 
-            <div>
-              <StyledInput
-                style={{ width: '15em', margin: '10px' }}
-                type='text'
-                placeholder='comment here'
-                onChange={(e)=>setComment(e.target.value)}
-              ></StyledInput>
-
-              <StyledButton
-                style={{
-                  backgroundColor: openGifSection ? 'red' : '#4caf50'
-                }}
-                onClick={()=>handleOpenGifSection()}
-              >Gifs</StyledButton>
-
-              <StyledButton onClick={() => handleComment()}>Send</StyledButton>
-              {
-                openGifSection ?
-                  <StyledGifArea>
-                    <StyledGifContainer>
-                      <StyledGifSearchContainer>
-                        <input
-                          type='text'
-                          placeholder='search for gif'
-                          onChange={(e)=>setGifSearchTxt(e.target.value)}
-                        ></input>
-                        <button
-                          onClick={handleSearchGif}
-                        >Search</button>
-                      </StyledGifSearchContainer>
-                      {
-                        !gifsLoading ?
-                          gifs.map((gif: any)=>
-                            <div onClick={() => handleSelectGif(gif)}>
-                              <img src={gif.url}></img>
-                            </div>
-                          )
-                        :
-                          <div>
-                            <img
-                              src={loadingGifSrc}
-                            ></img>
-                            <img
-                              src={loadingGifSrc}
-                            ></img>
-                            <img
-                              src={loadingGifSrc}
-                            ></img>
-                            <img
-                              src={loadingGifSrc}
-                            ></img>
-                          </div>
-                      }
-                    </StyledGifContainer>
-
-                    {
-                      selectedGif ?
-                        <StyledGifPreview>
-                          <img src={selectedGif.url}></img>
-                          <button onClick={handleRemoveGif}>X</button>
-                        </StyledGifPreview>
-                      :
-                      <></>
-                    }
-                  </StyledGifArea>
-                  :
-                  <></>
-              }
-            </div>
-          :
-          <StyledButton style={{ backgroundColor: 'red', margin: '10px', width: '15em' }} onClick={() => handleComment()}>Delete Comment</StyledButton>
-        }
-
-        <StyledCommentSection>
-          { [...postInfo.comments].sort((a: any)=>{
-            if(a.user.name == user.name)
-              return -1
-
-            return 0
-          }).map( (com: any) => <StyledComment key={Math.random()}>
-            <div>
-              <img src={com.user.profile_picture.url}></img>
-              <StyledLink to={`/${com.user.name}`}>{com.user.name}</StyledLink>
-            </div>
-            <div>
-              <p>{com.comment}</p>
-            </div>
-
-            { com.gif ? 
-              <StyledGif src={com.gif.url}/> : 
-              <></>
-            }
-
-            <div>
-              <label>
-                <input
-                  type="checkbox"
-                  name="reaction"
-                  value="0"
-                  checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 0)).length > 0 }
-                  onChange={() => handleCommentReaction(com.user.name, 0)}
-                />
-                😍
-                { com.reactions.filter((reaction: any)=>reaction.reaction == 0).length }
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="reaction" value="1"
-                  checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 1)).length > 0 }
-                  onChange={() => handleCommentReaction(com.user.name, 1)}
-                />
-                😄
-                { com.reactions.filter((reaction: any)=>reaction.reaction == 1).length }
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="reaction"
-                  value="2"
-                  checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 2)).length > 0 }
-                  onChange={() => handleCommentReaction(com.user.name, 2)}
-                />
-                😂
-                { com.reactions.filter((reaction: any)=>reaction.reaction == 2).length }
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="reaction"
-                  value="3"
-                  checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 3)).length > 0 }
-                  onChange={() => handleCommentReaction(com.user.name, 3)}
-                />
-                😢
-                { com.reactions.filter((reaction: any)=>reaction.reaction == 3).length }
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="reaction"
-                  value="4"
-                  checked={ com.reactions.filter((reac: any) => (reac.user == user.id) && (reac.reaction == 4)).length > 0 }
-                  onChange={() => handleCommentReaction(com.user.name, 4)}
-                />
-                😠
-                { com.reactions.filter((reaction: any)=>reaction.reaction == 4).length }
-              </label>
-            </div>
-          </StyledComment> ) }
-        </StyledCommentSection>
+        <PostComments
+          postInfo={postInfo}
+          handleComment={handleComment}
+          handleCommentReaction={handleCommentReaction}
+        ></PostComments>
       </div>
     </div>
   )

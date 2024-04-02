@@ -273,7 +273,7 @@ export const StyledAlert: any = styled.div`
 
 // Componente de Alerta
 export const Alert = ({ msg }: any) => {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible]: any = useState(true)
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -284,7 +284,7 @@ export const Alert = ({ msg }: any) => {
   }, []);
 
   return (
-    <StyledAlert visible={visible}>
+    <StyledAlert visible={visible.toString()}>
       {msg || ''}
     </StyledAlert>
   );
