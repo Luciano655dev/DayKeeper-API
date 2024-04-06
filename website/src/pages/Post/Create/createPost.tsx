@@ -11,7 +11,11 @@ export default function createPost(){
     const [images, setImages]: any = useState(null)
     const [errMsg, setErrMsg] = useState('')
 
-    const handleImageChange = (e: any) => setImages(e.target.files)
+    const handleImageChange = (e: any) => {
+        const fileList = e.target.files
+        const imagesArray = Array.from(fileList)
+        setImages(imagesArray)
+    }
 
     const handleForm = async () =>{
         try{

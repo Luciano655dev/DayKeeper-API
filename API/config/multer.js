@@ -48,7 +48,7 @@ const MulterConfig = (mediaType) => {
       "image/png",
       // "image/gif"
     ]
-  } else if (mediaType === "both") {
+  } if (mediaType === "both") {
     allowedMimes = [
       "image/jpeg",
       "image/pjpeg",

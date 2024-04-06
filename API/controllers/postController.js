@@ -21,7 +21,7 @@ const getPostByName = async(req, res)=>{
 // submitPost
 const createPost = async(req, res)=>{
   const { data } = req.body
-  const images = req.files ? req.files.map( file => { return { name: file.originalname, key: file.key, url: file.location } }) : []
+  const files = req.files ? req.files.map( file => { return { name: file.originalname, key: file.key, url: file.location } }) : []
   const loggedUserId = req.id
 
   const titleDate = bf.FormatDate(Date.now())
@@ -33,7 +33,7 @@ const createPost = async(req, res)=>{
     const post = new Post({
       title,
       data,
-      images,
+      files,
       user: loggedUserId,
       created_at: Date.now(),
       reactions: [],
@@ -76,7 +76,7 @@ const updatePost = async(req, res)=>{
     }
 
     // deleta os arquivos removidos do Post original
-    let images = post.files
+    let files = post.files
 
     for(let i=0; i<post.files.length; i++){
       if(keep_files.includes(i)) continue
@@ -84,9 +84,9 @@ const updatePost = async(req, res)=>{
       deleteFile(post.files[i].key)
     }
     
-    const newPostImages = images.filter((el, index)=>keep_files.includes(index))
+    const newPostfiles = files.filter((el, index)=>keep_files.includes(index))
     const newFiles = req.files.map( file => { return { name: file.originalname, key: file.key, url: file.location } })
-    images = [...newPostImages, ...newFiles]
+    files = [...newPostfiles, ...newFiles]
   
     // Postar
     const updatedPost = await Post.findOneAndUpdate(
@@ -95,7 +95,7 @@ const updatePost = async(req, res)=>{
         $set: {
           ...newData,
           title: posttitle,
-          images,
+          files,
           user: loggedUserId,
           created_at: post.created_at,
           edited_at: Date.now(),
@@ -135,7 +135,7 @@ const deletePost = async(req, res)=>{
       return res.status(404).json({ msg: "Post não encontrado" })
 
     for(let i in deletedPost.files)
-      deleteFile(deletedPost.files[i].key) .images
+      deleteFile(deletedPost.files[i].key) .files
 
     return res.status(200).json({ msg: 'Post deletado com sucesso', post: deletedPost })
     // typeof 'user' == ObjectId
@@ -250,7 +250,7 @@ const commentPost = async(req, res)=>{
         gif = {
           name: gif.data.data.title,
           id: gif.data.data.id,
-          url: gif.data.data.images.original.url
+          url: gif.data.data.files.original.url
         }
       }catch(err){
         gif = {
