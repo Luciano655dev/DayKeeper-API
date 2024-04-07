@@ -10,14 +10,11 @@ const {
 } = require('../controllers/authController')
 
 // Middlewares
-const multer = require('multer')
-const multerConfig = require('../config/multer')
-const handleMulterError = require('../middlewares/handleMulterError')
 const userValidation = require('../middlewares/validations/userValidation')
 const checkTokenMW = require('../middlewares/checkTokenMW')
 
 // Routes
-router.post("/register", multer(multerConfig("image")).single('file'), handleMulterError, userValidation, register)
+router.post("/register", userValidation, register)
 router.post("/login", login)
 router.get("/confirm_email", confirmEmail)
 router.post('/forget-password', forgetPassword)

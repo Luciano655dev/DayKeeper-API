@@ -122,7 +122,7 @@ const updateUser = async(req, res) => {
   const loggedUserId = req.id
 
   try{
-    const user = await User.findById(loggedUserId).select("-password")
+    const user = await User.findById(loggedUserId)
     if(!user) return res.status(404).json({ msg: 'usuario não encontrado' })
 
     // Check Email

@@ -1,54 +1,66 @@
-import { StyledForm, StyledInput, StyledButton, StyledAlert, StyledLabel } from './registerCSS';
+import {
+    StyledBody,
+    StyledForm,
+    StyledInput,
+    StyledButton,
+    StyledAlert,
+    StyledCheckboxContainer
+} from './registerCSS';
 import axios from "axios"
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Register(){
-    const [Form, SetForm] = useState({ name: '', email: '', password: '', private: '' })
-    const [Image, setImage] = useState(null)
+    const [form, SetForm] = useState({ name: '', email: '', password: '' })
+    const [checkboxValue, setCheckboxValue] = useState(false)
     const [errMsg, setErrMsg] = useState('')
     const navigate = useNavigate()
 
     const handleForm = async () => {
         try {
-            const formData = new FormData()
-            formData.append('name', Form.name)
-            formData.append('email', Form.email)
-            formData.append('password', Form.password)
-            formData.append('private', Form.private || 'false')
-            if(Image) formData.append('file', Image) // Assuming Image is the file object
+            if(!checkboxValue) return setErrMsg("Aceite os termos de serviço para continuar")
 
-            const response = await axios.post('http://localhost:3000/auth/register', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
+            const response = await axios.post('http://localhost:3000/auth/register', form)
 
             if(response.status === 201)
                 return navigate('/message?msg=USUARIO CRIADO, VERIFIQUE SEU EMAIL')
         } catch(err: any) {
             console.log(err)
-            setErrMsg(err.response.data.msg);
+            setErrMsg(err.response.data.msg)
         }
     }
 
-    const handleImageChange = (e: any) => setImage(e.target.files[0])
-
     return (
-        <div>
+        <StyledBody>
             <StyledForm>
-                {errMsg ? <StyledAlert>{errMsg}</StyledAlert> : <></>}
-                <StyledInput type="file" onChange={handleImageChange} />
-                <StyledInput type="text" name="name" placeholder="username" onChange={(e)=>SetForm({...Form, name: e.target.value})}></StyledInput>
-                <StyledInput type="text" name="email" placeholder="email" onChange={(e)=>SetForm({...Form, email: e.target.value})}></StyledInput>
-                <StyledInput type="text" name="password" placeholder="password" onChange={(e)=>SetForm({...Form, password: e.target.value})}></StyledInput>
-                <StyledLabel>
-                    <input type="checkbox" name="private" placeholder="private" onChange={(e)=>SetForm({...Form, private: e.target.value})}></input>
-                    Private
-                </StyledLabel>
+                <h1>Register · DayKeeper</h1>
+                
+                <div className='inputClass'>
+                    <label>Username</label>
+                    <StyledInput type="text" name="name" placeholder="username" onChange={(e)=>SetForm({...form, name: e.target.value})}></StyledInput>
+                </div>
+                <div className='inputClass'>
+                    <label>Email</label>
+                    <StyledInput type="text" name="email" placeholder="email" onChange={(e)=>SetForm({...form, email: e.target.value})}></StyledInput>
+                </div>
+                <div className="inputClass">
+                    <label>Password</label>
+                    <StyledInput type="text" name="password" placeholder="password" onChange={(e)=>SetForm({...form, password: e.target.value})}></StyledInput>
+                </div>
+
+                <StyledCheckboxContainer>
+                    <input type="checkbox" id="checkbox" onChange={(e: any)=>setCheckboxValue(e.target.value)}></input>
+                    <label for="checkbox">Eu li e concordo com os <a href="/termos_e_condicoes">Termos e Condições</a>.</label>
+                </StyledCheckboxContainer>
+
                 <StyledButton onClick={handleForm}>Submit</StyledButton>
+                {errMsg ? <StyledAlert>{errMsg}</StyledAlert> : <></>}
+
+                <div className="linksContainer">
+                    <label>Já tem uma conta? </label><Link to='/register'>Faça login</Link>
+                </div>
             </StyledForm>
-        </div>
+        </StyledBody>
     )
 }
 

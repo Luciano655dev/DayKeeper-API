@@ -1,4 +1,12 @@
-import { StyledForm, StyledInput, StyledButton, StyledAlert, StyledTitle, StyledLabel } from './editProfileCSS';
+import {
+    StyledBody,
+    StyledForm,
+    StyledInput,
+    StyledButton,
+    StyledAlert,
+    StyledCheckboxContainer,
+    StyledTextArea
+} from './editProfileCSS';
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
@@ -11,12 +19,24 @@ export default function EditProfile() {
         name: '',
         email: '',
         password: '',
+        bio: '',
+        lastPassword: '',
         private: ''
     })
-    const [userInfo, setUserInfo] = useState({ name: '...', email: '...', private: '' })
+    const [userInfo, setUserInfo] = useState({
+        name: '...',
+        email: '...',
+        bio: '...',
+        private: '',
+        profile_picture: { url: '' }
+    })
+    const [image, setImage] = useState(null)
+    const [previewImg, setPreviewImg]: any = useState(null)
     const [loading, setLoading] = useState(true)
     const [errMsg, setErrMsg] = useState('')
-    const [image, setImage] = useState(null)
+
+    // UI
+    const [seePasswordArea, setSeePasswordArea] = useState(false)
 
     useEffect(() => {
         const getUserInfo = async () => {
@@ -27,6 +47,7 @@ export default function EditProfile() {
                 setForm({
                     name: responseLoggedInUser.data.user.name,
                     email: responseLoggedInUser.data.user.email,
+                    bio: responseLoggedInUser.data.user.bio,
                     private: responseLoggedInUser.data.user.private
                 })
 
@@ -43,10 +64,14 @@ export default function EditProfile() {
 
     const handleEdit = async () => {
         try {
-            const formData = new FormData();
-            formData.append('name', form.name);
-            formData.append('email', form.email);
-            if(form.password) formData.append('password', form.password)
+            const formData = new FormData()
+            formData.append('name', form.name)
+            formData.append('email', form.email)
+            formData.append('bio', form.bio)
+            if(form.password) {
+                formData.append('password', form.password)
+                formData.append('lastPassword', form.lastPassword)
+            }
             if(image) formData.append('file', image)
 
             await axios.put(`http://localhost:3000/update_user`, formData, { headers: { Authorization: `Bearer ${token}` } })
@@ -57,7 +82,7 @@ export default function EditProfile() {
         }
     }
 
-    const handleDelete = async () => {
+    const handleDeleteUser = async () => {
         try {
             await axios.delete(`http://localhost:3000/delete_user`, { headers: { Authorization: `Bearer ${token}` } })
             Cookies.remove('userToken')
@@ -65,10 +90,6 @@ export default function EditProfile() {
         } catch (err: any) {
             setErrMsg(err.response.data.msg)
         }
-    }
-
-    const handleImageChange = (e: any) => {
-        setImage(e.target.files[0])
     }
 
     const resetePfp = async () => {
@@ -81,53 +102,105 @@ export default function EditProfile() {
         }
     }
 
+    const handleChangePreviewImage = (e: any) => {
+        const file = e.target.files[0]
+        setImage(file)
+
+        const reader = new FileReader()
+        reader.onloadend = () => {
+            setPreviewImg(reader.result)
+        }
+        reader.readAsDataURL(file)
+    }
+
     if (loading || !form) return <p>...</p>
 
     return (
-        <StyledForm>
-            { errMsg ? <StyledAlert>{errMsg}</StyledAlert> : <></> }
-            <StyledTitle>Edit user</StyledTitle>
-            <StyledInput type="file" onChange={handleImageChange}/>
-            <StyledInput
-                type='text'
-                name='name'
-                placeholder='username'
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-            ></StyledInput>
+        <StyledBody>
+            <StyledForm>
+                <div className='imageContainer'>
+                    <img src={previewImg || userInfo.profile_picture.url}></img>
+                    <StyledInput type="file" id="imageUpload" onChange={(e: any)=>handleChangePreviewImage(e)}/>
+                    <label for="imageUpload">U</label>
 
-            <StyledInput
-                type='text'
-                name='email'
-                placeholder='email'
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-            ></StyledInput>
+                    <StyledButton onClick={resetePfp} style={{ backgroundColor: 'red'}} >R</StyledButton>
+                </div>
 
-            <StyledInput
-                type='password'
-                name='password'
-                placeholder='password'
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-            ></StyledInput>
+                <div className='inputClass'>
+                    <label>Username</label>
+                    <StyledInput
+                        type='text'
+                        name='name'
+                        placeholder='username'
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    ></StyledInput>
+                </div>
 
-            <StyledLabel>
-                <input
-                    type='checkbox'
-                    name='private'
-                    value={form.private}
-                    onChange={(e) => setForm({ ...form, private: e.target.value })}
-                ></input>
-                Private
-            </StyledLabel>
+                <div className='inputClass'>
+                    <label>Bio</label>
+                    <StyledTextArea
+                        name='bio'
+                        placeholder='bio'
+                        value={form.bio}
+                        onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                        
+                    ></StyledTextArea>
+                </div>
 
-            <StyledButton onClick={handleEdit}>SEND</StyledButton>
+                <div className='inputClass'>
+                    <label>Email</label>
+                    <StyledInput
+                        type='text'
+                        name='email'
+                        placeholder='email'
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    ></StyledInput>
+                </div>
 
-            <StyledTitle>RESET PROFILE PICTURE</StyledTitle>
-            <StyledButton onClick={resetePfp} backgroundColor={'red'}>Reset</StyledButton>
+                <StyledCheckboxContainer>
+                    <input
+                        type='checkbox'
+                        name='private'
+                        value={form.private}
+                        onChange={(e) => setForm({ ...form, private: e.target.value })}
+                    ></input>
+                    <label>Private</label>
+                </StyledCheckboxContainer>
 
-            <StyledTitle>Delete profile</StyledTitle>
-            <StyledButton onClick={handleDelete} backgroundColor={'red'}>DELETE USER (PERMANENT)</StyledButton>
-        </StyledForm>
+                <StyledButton
+                    style={{ backgroundColor: 'blue' }}  
+                    onClick={()=>setSeePasswordArea(!seePasswordArea)}
+                >ChangePassword</StyledButton>
+                { seePasswordArea ? <>
+                    <div className="inputClass">
+                        <label>Old Password</label>
+                        <StyledInput
+                            type='password'
+                            name='lastPassword'
+                            placeholder='Last Password'
+                            onChange={(e) => setForm({ ...form, lastPassword: e.target.value })}
+                        ></StyledInput>
+                    </div>
+                    <div className='inputClass'>
+                        <label>New Password</label>
+                        <StyledInput
+                            type='password'
+                            name='password'
+                            placeholder='password'
+                            onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        ></StyledInput>
+                    </div>
+                </> : <></>
+                }
+
+                <StyledButton onClick={handleEdit}>SEND</StyledButton>
+                { errMsg ? <StyledAlert>{errMsg}</StyledAlert> : <></> }
+
+                <h1>Delete profile</h1>
+                <StyledButton onClick={handleDeleteUser} style={{ backgroundColor: 'red'}} >DELETE USER (PERMANENT)</StyledButton>
+            </StyledForm>
+        </StyledBody>
     );
 }

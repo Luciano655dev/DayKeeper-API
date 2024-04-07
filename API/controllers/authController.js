@@ -10,27 +10,11 @@ const {
 // register
 const register = async(req, res) => {
   const { name: username, email, password } = req.body
-  const private = req.body.private == 'true'
-
-  if(!req.file){
-    req.file = {
-      originalname: 'Doggo.jpg',
-      key: 'Doggo.jpg',
-      location: "https://daykeeper.s3.amazonaws.com/Doggo.jpg"
-      // size: 9012
-    }
-  }
-  
-  const {
-    originalname,
-    key,
-    location: url
-  } = req.file
 
   const img = {
-    name: originalname,
-    key,
-    url
+    name: 'Doggo.jpg',
+    key: 'Doggo.jpg',
+    url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg"
   }
 
   try {
@@ -44,11 +28,10 @@ const register = async(req, res) => {
     const user = new User({
       name: username,
       email,
-      private,
+      private: false,
       profile_picture: img,
       roles: [ 'user' ],
       followers: [],
-      follow_requests: ( private ? [] : undefined ),
       blocked_users: [],
       verified_email: false,
       password: passwordHash,

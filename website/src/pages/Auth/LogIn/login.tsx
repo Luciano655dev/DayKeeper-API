@@ -1,4 +1,10 @@
-import { StyledForm, StyledInput, StyledButton, StyledAlert } from './loginCSS';
+import {
+    StyledBody,
+    StyledForm,
+    StyledInput,
+    StyledButton,
+    StyledAlert
+} from './loginCSS';
 import axios from 'axios'
 import { useDispatch } from 'react-redux'
 import { useState } from 'react'
@@ -15,6 +21,7 @@ function LogIn(){
         try{
             const response = await axios.post('http://localhost:3000/auth/login', form)
             Cookies.set('userToken', response.data.token, { expires: 7 })
+            
             dispatch({ type: 'user', payload: {
                 name: response.data.user.name,
                 id: response.data.user._id,
@@ -26,25 +33,48 @@ function LogIn(){
         }
     }
 
-    return <div>
-    {!Cookies.get('userToken') ?
+    if(Cookies.get('userToken')) return <div>
+        <h1>VOCÊ JÁ ESTÁ LOGADO, FAÇA LOG-OUT PARA FAZER LOGIN NOVAMENTE</h1>
+    </div>
+
+    return <StyledBody>
         <StyledForm>
-            { errMsg ? <StyledAlert>{errMsg}</StyledAlert> : <></> }
-            
-            <StyledInput type='text' name='name' placeholder='username' onChange={(e: any)=>setForm({...form, name: e.target.value })}></StyledInput>
-            <StyledInput type='text' name='password' placeholder='password' onChange={(e: any)=>setForm({...form, password: e.target.value })}></StyledInput>
+            <h1>Login · DayKeeper</h1>
+
+            <div className='inputClass'>
+                <label>Username</label>
+                <StyledInput
+                    required
+                    type='text'
+                    name='name'
+                    placeholder='username'
+                    onChange={(e: any)=>setForm({...form, name: e.target.value })}
+                ></StyledInput>
+            </div>
+
+            <div className='inputClass'>
+                <label>Password</label>
+                <StyledInput
+                    required
+                    type='text'
+                    name='password'
+                    placeholder='password'
+                    onChange={(e: any)=>setForm({...form, password: e.target.value })}
+                ></StyledInput>
+            </div>
 
             <StyledButton onClick={handleForm}>Submit</StyledButton>
+            { errMsg ? <StyledAlert>{errMsg}</StyledAlert> : <></> }
 
-            <br></br><br></br>
-            <Link to='/forget_password'>Forget password</Link>
+            <div className='linksContainer'>
+                <label>Esqueceu sua senha? </label><Link to='/forget_password'> Clique aqui</Link>
+            </div>
+
+            <div className="linksContainer">
+                <label>Novo por aqui? </label><Link to='/register'> Crie sua conta</Link>
+            </div>
         </StyledForm>
-        :
-        <div>
-            <h1>VOCÊ JÁ ESTÁ LOGADO, FAÇA LOG-OUT PARA FAZER LOGIN NOVAMENTE</h1>
-        </div>
-    }
-    </div>
+    </StyledBody>
 }
 
 export default LogIn
