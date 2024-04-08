@@ -1,54 +1,60 @@
-import { Container, Logo, List, StyledLink } from './navbarCSS';
+import { GlobalStyle, Container, Logo, StyledLink } from './navbarCSS';
 import Dropdown from './dropDown';
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux'
 import Cookies from 'js-cookie';
 import axios from 'axios';
 
 export default function Navbar() {
-  const [token, setToken] = useState('');
-  const [loadingToken, setLoadingToken] = useState(true);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [token, setToken] = useState('')
+  const [loadingToken, setLoadingToken] = useState(true)
+  const question = useSelector((state: any) => state.questionReducer)
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const storedToken = Cookies.get('userToken');
-    setToken(storedToken || '');
-    setLoadingToken(false);
-  }, [location]);
+    const storedToken = Cookies.get('userToken')
+    setToken(storedToken || '')
+    setLoadingToken(false)
+  }, [location])
 
   const handleLogout = () => {
-    Cookies.remove('userToken');
-    setToken('');
-    navigate('/');
-  };
+    Cookies.remove('userToken')
+    setToken('')
+    navigate('/')
+  }
 
   return (
     <Container>
-      <Logo>Daykeeper</Logo>
+      <GlobalStyle></GlobalStyle>
+      <div className='logoContainer'>
+        <Logo>DayKeeper</Logo>
+      </div>
 
-      <List>
-        <li>
-          <StyledLink to='/'>Home</StyledLink>
-        </li>
-        <li>
-          <StyledLink to='/about'>About Us</StyledLink>
-        </li>
-        <li>
-          <StyledLink to='/search'>Search</StyledLink>
-        </li>
+      {
+        loadingToken ? null : token.length ? <div className='dayInfo'>
+          <h1>{question.date}</h1>
+          <h2> . {question.question}</h2>
+        </div> : <NotLogged></NotLogged>
+      }
+
+      <div className='userDiv'>
         {loadingToken ? null : token.length ? (
-          <Logged
-            token={token}
-            handleLogout={handleLogout}
-            handleConfig={() => navigate('/profile')}
-            handlePost={() => navigate('/publish')}
-            handleFollowRequest={()=>navigate('/follow_requests')}
-          />
+          <div className='user'>
+            <button onClick={()=>navigate('/publish')}>+ CREATE</button>
+            <Logged
+              token={token}
+              handleLogout={handleLogout}
+              handleConfig={() => navigate('/profile')}
+              handlePost={() => navigate('/publish')}
+              handleFollowRequest={()=>navigate('/follow_requests')}
+            />
+          </div>
         ) : (
           <NotLogged />
         )}
-      </List>
+      </div>
     </Container>
   );
 }
@@ -94,13 +100,13 @@ function Logged({ token, handleLogout, handleConfig, handlePost, handleFollowReq
     }
   ];
   return (
-    <li>
+    <div>
       <Dropdown text={userInfo.name} url={userInfo.profile_picture.url} options={
         userInfo.private ?
           [ ...options, { text: 'Follows', func: handleFollowRequest } ] :
           options
       } />
-    </li>
+    </div>
   );
 }
 

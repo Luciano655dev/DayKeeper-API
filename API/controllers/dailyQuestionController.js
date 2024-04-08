@@ -15,10 +15,10 @@ const getQuestion = async(req, res)=>{
         const questionDay = date.split('-')[0]
         const questionMonth = date.split('-')[1]
         const questionYear = date.split('-')[2]
-    
+
+        const resetTime = process.env.RESET_TIME
         let todayDate = bf.FormatDate(Date.now())
         if(todayDate.hour < resetTime) todayDate.day -= 1
-        const resetTime = process.env.RESET_TIME
 
         const newDateToday = new Date(todayDate.year, todayDate.month-1, todayDate.day)
         const newDateSearched = new Date(questionYear, questionMonth-1, questionDay)

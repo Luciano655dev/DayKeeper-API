@@ -51,7 +51,7 @@ export default function EditProfile() {
                     private: responseLoggedInUser.data.user.private
                 })
 
-                setLoading(false)
+    setLoading(false)
             } catch (error) {
                 console.error('Erro ao obter informações do usuário:', error)
                 setErrMsg('Erro ao obter informações do usuário')

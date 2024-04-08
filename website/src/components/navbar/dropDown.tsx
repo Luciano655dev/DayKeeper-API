@@ -1,30 +1,35 @@
 // Dropdown.js
 import { StyledImage } from './navbarCSS'
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 const DropdownContainer = styled.div`
   position: relative;
   display: inline-block;
-  margin-right: 10px;
 `;
 
 const DropdownMenu = styled.div`
   position: absolute;
-  top: 95%;
-  right: -2vw;
+  top: calc(6vh - 5px);
+  right: 0;
+  
   background-color: #fff;
+  border: 1px solid lightgray;
+  border-radius: 0.5em;
+
+  padding: 1em;
+
   display: ${(props: any) => (props.isOpen ? 'flex' : 'none')};
   flex-direction: column;
-  justify-content: center;
-  align-items: end; /* start or center too */
+  align-items: center;
 `;
 
 const MenuItem = styled.button`
   padding: 10px;
   font-size: 1em;
   width: 6em;
+  margin-top: 0.5em;
   &:hover {
     background-color: #f1f1f1;
   }
@@ -47,16 +52,15 @@ const StyledLink = styled(Link)`
 `
 
 const Dropdown = ({ options, text, url }: any) => {
-  const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
 
-  const openDropdown = () => setIsOpen(true)
-  const closeDropdown = () => setIsOpen(false)
+  const toggleDropdown = () => setIsOpen(!isOpen)
 
   return (
     <DropdownContainer>
-      <StyledImage onClick={()=>navigate(`/${text}`)} onMouseEnter={openDropdown} onMouseLeave={closeDropdown} src={url}></StyledImage>
-      <DropdownMenu isOpen={isOpen} onMouseEnter={openDropdown} onMouseLeave={closeDropdown}>
+      <StyledImage onClick={()=>toggleDropdown()} src={url}></StyledImage>
+
+      <DropdownMenu isOpen={isOpen}>
         <StyledLink to={`/${text}`}>{text}</StyledLink>
         {options.map((option: any, index: any) => (
           <MenuItem key={index} onClick={option.func}>{option.text}</MenuItem>

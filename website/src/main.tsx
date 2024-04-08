@@ -53,6 +53,26 @@ const isAuthenticated = async () => {
   }
 }
 
+const getTodayQuestion = async() => {
+  const userToken = Cookies.get('userToken')
+
+  try{
+    const date = new Date()
+    const todayDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getFullYear())}`
+
+    const response = await axios.get(`http://localhost:3000/question/${todayDate}`,
+    { headers: { Authorization: `Bearer ${userToken}` } })
+
+    return {
+      date: todayDate,
+      question: response.data.question
+    }
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
+
 // Private Route Component
 const PrivateRoute = ({ element }: any) => {
   const dispatch = useDispatch()
@@ -61,14 +81,24 @@ const PrivateRoute = ({ element }: any) => {
 
   React.useEffect(() => {
     isAuthenticated().then((authenticated: any) => {
-      setAuthenticated(authenticated.isAuth)
-      dispatch({ type: 'user', payload: {
-        name: authenticated.response.data.user.name,
-        id: authenticated.response.data.user._id,
-        pfp: authenticated.response.data.user.profile_picture,
-        private: authenticated.response.data.user.private
-      } })
-      setLoading(false)
+
+      getTodayQuestion().then((question: any) => {
+        setAuthenticated(authenticated.isAuth)
+
+        // dispatch user data
+        dispatch({ type: 'user', payload: {
+          name: authenticated.response.data.user.name,
+          id: authenticated.response.data.user._id,
+          pfp: authenticated.response.data.user.profile_picture,
+          private: authenticated.response.data.user.private
+        } })
+
+        // dispatch question data
+        dispatch({ type: 'question', payload: {...question} })
+
+        setLoading(false)
+      })
+      
     })
   }, [])
 

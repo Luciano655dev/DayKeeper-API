@@ -1,8 +1,8 @@
 import { useSelector } from "react-redux"
 
 function Home(){
-    const user = useSelector((state: any) => state.userReducer)
-    console.log(user)
+    const question = useSelector((state: any) => state.questionReducer)
+    console.log(question)
     return <div>
         <h1>HOME UHUUUUU</h1>
     </div>
