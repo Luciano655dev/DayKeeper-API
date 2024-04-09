@@ -57,6 +57,7 @@ export default function EditPost({ togglePage }: any){
             navigate('/')
         }catch(err: any){
             setErrMsg(err.response.data.msg)
+            navigate('/')
         }
     }
 

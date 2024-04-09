@@ -4,54 +4,72 @@ import { Link } from 'react-router-dom'
 export const StyledBody = styled.div`
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 90vh;
+    height: 100%;
 `
 
 export const StyledContainer = styled.div`
     display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
     overflow-y: scroll;
     overflow-x: hidden;
     width: 50vw;
-    height: 70vh;
 `
 
 export const StyledItem = styled.div`
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    flex: auto;
-    border-bottom: 1px solid black;
-    margin: 1em;
-    width: 100%;
 
-    label{
-        margin: 0;
-        margin-top: 10px;
-        margin-left: 10px;
-        font-size: 1em;
+    border-bottom: 1px solid black;
+    border-top-right-radius: 1em;
+    border-top-left-radius: 1em;
+    margin: 1em;
+    padding: 1em;
+
+    max-height: 40vh;
+
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+        background-color: #888;
     }
-    h1{
-        margin: 0;
-        margin-left: 10px;
-        font-size: 3em;
+
+    .upperContainer {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+
+        h1{
+            margin: 0;
+            margin-top: 5px;
+            margin-left: 10px;
+            font-size: 2em;
+        }
     }
+
     img{
-        max-width: 100px;
-        max-height: 100px;
+        width: 3em;
+        height: 3em;
         border-radius: 100%;
     }
-`
 
-export const StyledSearchBox = styled.div`
-    position: absolute;
-    top: 4vw;
+    .filesContainer {
+        display: flex;
+        flex-direction: row;
+        overflow-x: scroll;
+
+        div {
+            object {
+                margin: 1em;
+                max-width: 50%;
+                max-height: 100%;
+                object-fit: fill;
+            }
+        }
+    }
 `
 
 export const StyledLink = styled(Link)`
@@ -82,7 +100,6 @@ export const StyledButton = styled.button`
 `
 
 export const StyledInput = styled.input`
-    top: 5vw;
     width: 50vw;
     padding: 10px;
     border: 1px solid #ccc;

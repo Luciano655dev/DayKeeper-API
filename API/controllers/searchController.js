@@ -71,8 +71,23 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                 title: 1,
                 data: 1,
                 user: 1,
+                files: 1,
                 created_at: 1,
-                reactions: { $size: '$reactions' },
+                reactions: {
+                    $map: {
+                        input: [0, 1, 2, 3, 4],
+                        as: "reactionValue",
+                        in: {
+                            $size: {
+                                $filter: {
+                                    input: "$reactions",
+                                    as: "reaction",
+                                    cond: { $eq: ["$$reaction.reaction", "$$reactionValue"] }
+                                }
+                            }
+                        }
+                    }
+                },
                 comments: { $size: '$comments' },
                 user_info: { $arrayElemAt: ['$user_info', 0] }
             }
@@ -168,7 +183,7 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
 
 const search = async (req, res) => {
     const page = Number(req.query.page) || 1
-    const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 1
+    const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 3
 
     const searchQuery = req.query.q || ''
     const order = req.query.order || 'relevant'
