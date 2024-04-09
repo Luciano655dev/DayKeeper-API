@@ -2,10 +2,10 @@ import styled from "styled-components"
 import { Link } from 'react-router-dom'
 
 export const StyledBody = styled.div`
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
 `
 
 export const StyledContainer = styled.div`

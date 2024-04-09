@@ -12,7 +12,7 @@ const postValidation = async(req, res, next)=>{
             // deleta as imagens mandadas anteriormente
             for(let i in req.files)
                 deleteFile(req.files[i].key)
-            
+
             return res.status(400).json({ msg: "O texto está muito longo" })
         }
 
@@ -22,7 +22,7 @@ const postValidation = async(req, res, next)=>{
         const title = `${titleDate.day}-${titleDate.month}-${titleDate.year}`
 
         if(lastPost[0]){
-            if(lastPost.title == title){
+            if(lastPost[0].title == title){
                 // deleta as imagens mandadas anteriormente
                 for(let i in req.files)
                     deleteFile(req.files[i].key)

@@ -1,5 +1,4 @@
 import {
-  StyledBody,
   StyledContainer,
   StyledImage,
   StyledUsername,
@@ -39,6 +38,8 @@ export default function UserInfo() {
     const loggedUser = await axios.get(`http://localhost:3000/${user.name}`, { headers: { Authorization: `Bearer ${token}` } })
     const responseUserInfo: any = await axios.get(`http://localhost:3000/${userNameFromParams}`, { headers: { Authorization: `Bearer ${token}` } })
     const following = await axios.get(`http://localhost:3000/${userNameFromParams}/following`, { headers: { Authorization: `Bearer ${token}` } })
+
+    console.log(responseUserInfo)
 
     setIsFollowing(responseUserInfo.data.user.followers.find( (userid: any) => userid == user.id))
     setIsBlocked(loggedUser.data.user.blocked_users.find( (userid: any) => userid == responseUserInfo.data.user._id))
@@ -123,7 +124,7 @@ export default function UserInfo() {
   if(error) return <Page404></Page404>
 
   return (
-    <StyledBody>
+    <div>
       { msg ? <Alert style={{ backgroundColor: 'green' }} msg={msg}></Alert> : <></> }
       <StyledContainer>
         <StyledImage src={userInfo.profile_picture.url}></StyledImage>
@@ -204,6 +205,6 @@ export default function UserInfo() {
           <div></div>
         }
       </StyledContainer>
-    </StyledBody>
+    </div>
   )
 }

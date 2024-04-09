@@ -1,7 +1,6 @@
 import styled from "styled-components";
 
 export const StyledBody = styled.div`
-  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
   display: flex;

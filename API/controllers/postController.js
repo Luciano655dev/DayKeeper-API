@@ -247,10 +247,11 @@ const commentPost = async(req, res)=>{
       try {
         const apiKey = process.env.GIPHY_API_KEY
         gif = await axios.get(`https://api.giphy.com/v1/gifs/${gif}?api_key=${apiKey}`)
+
         gif = {
           name: gif.data.data.title,
           id: gif.data.data.id,
-          url: gif.data.data.files.original.url
+          url: gif.data.data.images.original.url
         }
       }catch(err){
         gif = {

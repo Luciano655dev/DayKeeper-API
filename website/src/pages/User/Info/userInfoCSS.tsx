@@ -1,24 +1,11 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-export const StyledBody = styled.div`
-    z-index: -100;
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100vw;
-    height: 80vh;
-`
-
 export const StyledContainer = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 20%;
-    height: 70%;
-    border-radius: 1em;
 `
 
 export const StyledImage = styled.img`

@@ -196,7 +196,6 @@ const reseteProfilePicture = async(req, res)=>{
     await updatedUser.save()
 
     return res.status(200).json({ msg: `foto de perfil do usuario(a) ${user.name} resetada com sucesso` })
-
   } catch (error){
     return res.status(500).json({ msg: `${error}` })
   }

@@ -20,8 +20,6 @@ export const Container = styled.nav`
     padding-right: 1em;
     padding-left: 1em;
 
-    border-bottom: 1px solid lightgray;
-
     background-color: #EBECF0;
 
     .logoContainer {
@@ -35,8 +33,13 @@ export const Container = styled.nav`
         max-width: 30em;
 
         h2 {
+            margin: 0;
             white-space: nowrap;
             overflow-x: hidden;
+        }
+
+        h1 {
+            margin: 0;
         }
     }
 
@@ -99,4 +102,55 @@ export const StyledImage = styled.img`
     height: 50px;
     border-radius: 50%;
     cursor: pointer;
+`
+
+export const Sidebar = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    width: 12%;
+    height: 100%;
+`
+
+export const SidebarArea = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+
+    h1 {
+        margin: 0;
+        margin-top: 1em;
+    }
+
+    button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 0;
+        font-weight: 1000;
+        width: 70%;
+
+        padding: 0.7em;
+        cursor: pointer;
+
+        margin: 0.3em;
+
+        border-radius: 0.5em;
+        border: 1px solid gray;
+
+        transition: 0.2s;
+
+        &:hover {
+            border-radius: 1em;
+        }
+
+        img {
+            width: 2em;
+            height: 2em;
+            margin-right: 0.5em;
+            border-radius: 10em;
+        }
+    }
 `
