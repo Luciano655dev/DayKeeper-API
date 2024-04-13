@@ -61,6 +61,8 @@ export const Container = styled.nav`
             align-items: center;
 
             button {
+                display: flex;
+                align-items: center;
                 border: 0;
                 font-weight: 1000;
 
@@ -73,6 +75,11 @@ export const Container = styled.nav`
                 border: 1px solid gray;
 
                 transition: 0.2s;
+
+                svg {
+                    font-size: 20px;
+                    margin-right: 5px;
+                }
 
                 &:hover {
                     border-radius: 1em;
@@ -118,48 +125,60 @@ export const Sidebar = styled.div`
     flex-direction: column;
     align-items: center;
     position: fixed;
-    width: 12%;
+
+    width: 271px;
     height: 100%;
+    padding-top: 16px;
+    padding-right: 16px;
+    padding-left: 16px;
+
+    border-right: 1px solid gray;
 `
 
 export const SidebarArea = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
 
-    h1 {
-        margin: 0;
-        margin-top: 1em;
+    border-bottom: 1px solid gray;
+    margin-bottom: 1em;
+`
+
+export const StyledSidebarLink = styled(Link)`
+    display: flex;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 16px;
+    padding-right: 16px;
+
+    align-items: center;
+
+    width: 230px;
+    height: 32px;
+
+    border-radius: 8px;
+    background: none;
+
+    column-gap: 8px;
+
+    text-decoration: none;
+    color: black;
+
+    &:hover {
+        background-color: lightgray;
+    }
+    &:active {
+        background-color: gray;
     }
 
-    button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 0;
-        font-weight: 1000;
-        width: 70%;
+    svg {
+        font-size: 20px;
+    }
 
-        padding: 0.7em;
-        cursor: pointer;
-
-        margin: 0.3em;
-
-        border-radius: 0.5em;
-        border: 1px solid gray;
-
-        transition: 0.2s;
-
-        &:hover {
-            border-radius: 1em;
-        }
-
-        img {
-            width: 2em;
-            height: 2em;
-            margin-right: 0.5em;
-            border-radius: 10em;
-        }
+    img {
+        width: 2em;
+        height: 2em;
+        margin-right: 0.5em;
+        border-radius: 10em;
     }
 `

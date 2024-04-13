@@ -31,11 +31,11 @@ import ResetPassword from './pages/Auth/ResetPassword/ResetPassword.tsx'
 
 // User
 import UserInfo from './pages/User/Info/userInfo.tsx'
-import UserPosts from './pages/User/Posts/UserPosts.tsx'
+import UserPosts from './pages/User/Posts/userPosts.tsx'
 import EditProfile from './pages/User/Edit/editProfile.tsx'
 import Followers from './pages/User/Followers/followers.tsx'
 import Following from './pages/User/Following/following.tsx'
-import FollowRequests from './pages/User/FollowRequests/FollowRequests.tsx'
+import FollowRequests from './pages/User/FollowRequests/followRequests.tsx'
 
 // Posts
 import Post from './pages/Post/Render/Render.tsx'
