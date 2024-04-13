@@ -3,7 +3,6 @@ import {
     StyledContainer,
     StyledItem,
     StyledInput,
-    StyledLink,
     StyledSelectContainer,
     StyledButton
 } from './searchCSS'
@@ -161,14 +160,44 @@ export default function Search(){
                         <p>{post.data}</p>
 
                         <div className="filesContainer">
-                            <div>
-                                {
-                                    post.files ? post.files.map((file: any)=>
-                                            <object data={file.url} key={file._id}>
+                            {
+                                post.files ? post.files.map((file: any)=>
+                                        file.mimetype.split('/')[0] == 'image' ?
+                                            <img src={file.url} key={file._id}></img>
+                                        :
+                                            <video key={file._id} controls>
+                                                <source src={file.url} type={file.mimetype}></source>
                                                 <p>Seu browser não suporta esse arquivo</p>
-                                            </object>
-                                    ) : <></>
-                                }
+                                            </video>
+                                ) : <></>
+                            }
+                        </div>
+
+                        <div className='bottomContainer'>
+                            <div className='reactionsContainer'>
+                                <div>
+                                    { post.reactions[0] }
+                                    😍
+                                </div>
+                                <div>
+                                    { post.reactions[1] }
+                                    😄
+                                </div>
+                                <div>
+                                    { post.reactions[2] }
+                                    😂
+                                </div>
+                                <div>
+                                    { post.reactions[3] }
+                                    😢
+                                </div>
+                                <div>
+                                    { post.reactions[4] }
+                                    😠
+                                </div>
+                            </div>
+                            <div>
+                                { post.comments }
                             </div>
                         </div>
                     </StyledItem>

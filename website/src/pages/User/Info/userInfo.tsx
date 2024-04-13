@@ -129,7 +129,7 @@ export default function UserInfo() {
       <StyledContainer>
         <StyledImage src={userInfo.profile_picture.url}></StyledImage>
         <StyledUsername>{userInfo.name}</StyledUsername>
-        <StyledEmail>{userInfo.email}</StyledEmail>
+        <StyledEmail>{userInfo.bio}</StyledEmail>
 
 
         { !userInfo.private || isFollowing || sameUser ?

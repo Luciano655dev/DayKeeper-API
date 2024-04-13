@@ -19,8 +19,6 @@ export const StyledItem = styled.div`
     position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
 
     border-bottom: 1px solid black;
     border-top-right-radius: 1em;
@@ -42,6 +40,12 @@ export const StyledItem = styled.div`
         flex-direction: row;
         width: 100%;
 
+        img{
+            width: 3em;
+            height: 3em;
+            border-radius: 100%;
+        }
+
         h1{
             margin: 0;
             margin-top: 5px;
@@ -50,23 +54,47 @@ export const StyledItem = styled.div`
         }
     }
 
-    img{
-        width: 3em;
-        height: 3em;
-        border-radius: 100%;
-    }
-
     .filesContainer {
         display: flex;
         flex-direction: row;
-        overflow-x: scroll;
+        flex-wrap: nowrap;
+        overflow-y: hidden;
 
-        div {
-            object {
-                margin: 1em;
-                max-width: 50%;
-                max-height: 100%;
-                object-fit: fill;
+        img {
+            margin: 1em;
+            max-width: 60%;
+            height: 90%;
+            object-fit: fill;
+        }
+
+        video {
+            margin: 1em;
+            max-width: 60%;
+            height: 90%;
+            object-fit: fill;
+        }
+
+        &::-webkit-scrollbar {
+            height: 5px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: gray;
+            border-radius: 5px;
+        }
+    }
+
+    .bottomContainer{
+        display: flex;
+        justify-content: space-between;
+
+        width: 100%;
+        margin-top: 1em;
+
+        .reactionsContainer {
+            display: flex;
+
+            div {
+                margin-left: 0.5em;
             }
         }
     }

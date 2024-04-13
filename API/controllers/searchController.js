@@ -39,10 +39,11 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                 $and: [
                     { 'user': { $nin: mainUser.blocked_users } },
                     { 'user_info.banned': { $ne: "true" } },
+                    { 'banned': { $ne: "true" } },
                     {
                         $or: [
                             { title: { $regex: new RegExp(searchQuery, 'i') } },
-                            { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } }
+                            { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } },
                         ]
                     },
                     {

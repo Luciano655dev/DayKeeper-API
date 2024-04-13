@@ -8,7 +8,7 @@ export const StyledMain = styled.div`
 
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     z-index: -1;
 
     overflow-y: scroll;

@@ -21,7 +21,14 @@ const getPostByName = async(req, res)=>{
 // submitPost
 const createPost = async(req, res)=>{
   const { data } = req.body
-  const files = req.files ? req.files.map( file => { return { name: file.originalname, key: file.key, url: file.location } }) : []
+  const files = req.files ? req.files.map( file => {
+                      return {
+                        name: file.originalname,
+                        key: file.key,
+                        mimetype: file.mimetype,
+                        url: file.location
+                      }
+                    }) : []
   const loggedUserId = req.id
 
   const titleDate = bf.FormatDate(Date.now())
@@ -85,7 +92,7 @@ const updatePost = async(req, res)=>{
     }
     
     const newPostfiles = files.filter((el, index)=>keep_files.includes(index))
-    const newFiles = req.files.map( file => { return { name: file.originalname, key: file.key, url: file.location } })
+    const newFiles = req.files.map( file => { return { name: file.originalname, key: file.key, mimetype: file.mimetype, url: file.location } })
     files = [...newPostfiles, ...newFiles]
   
     // Postar
@@ -135,7 +142,7 @@ const deletePost = async(req, res)=>{
       return res.status(404).json({ msg: "Post não encontrado" })
 
     for(let i in deletedPost.files)
-      deleteFile(deletedPost.files[i].key) .files
+      deleteFile(deletedPost.files[i].key)
 
     return res.status(200).json({ msg: 'Post deletado com sucesso', post: deletedPost })
     // typeof 'user' == ObjectId

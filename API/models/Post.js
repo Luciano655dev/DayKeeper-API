@@ -20,6 +20,7 @@ const postSchema = mongoose.Schema({
         {
             name: String,
             key: String,
+            mimetype: String,
             url: String
         }
     ],
