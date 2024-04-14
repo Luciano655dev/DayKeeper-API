@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom';
 
 function Register(){
-    const [form, SetForm] = useState({ name: '', email: '', password: '' })
+    const [form, setForm] = useState({ name: '', email: '', password: '' })
     const [checkboxValue, setCheckboxValue] = useState(false)
     const [errMsg, setErrMsg] = useState('')
     const navigate = useNavigate()
@@ -37,20 +37,20 @@ function Register(){
                 
                 <div className='inputClass'>
                     <label>Username</label>
-                    <StyledInput type="text" name="name" placeholder="username" onChange={(e)=>SetForm({...form, name: e.target.value})}></StyledInput>
+                    <StyledInput type="text" name="name" placeholder="username" onChange={(e)=>setForm({...form, name: e.target.value})}></StyledInput>
                 </div>
                 <div className='inputClass'>
                     <label>Email</label>
-                    <StyledInput type="text" name="email" placeholder="email" onChange={(e)=>SetForm({...form, email: e.target.value})}></StyledInput>
+                    <StyledInput type="text" name="email" placeholder="email" onChange={(e)=>setForm({...form, email: e.target.value})}></StyledInput>
                 </div>
                 <div className="inputClass">
                     <label>Password</label>
-                    <StyledInput type="text" name="password" placeholder="password" onChange={(e)=>SetForm({...form, password: e.target.value})}></StyledInput>
+                    <StyledInput type="text" name="password" placeholder="password" onChange={(e)=>setForm({...form, password: e.target.value})}></StyledInput>
                 </div>
 
                 <StyledCheckboxContainer>
                     <input type="checkbox" id="checkbox" onChange={(e: any)=>setCheckboxValue(e.target.value)}></input>
-                    <label for="checkbox">Eu li e concordo com os <a href="/termos_e_condicoes">Termos e Condições</a>.</label>
+                    <label htmlFor="checkbox">Eu li e concordo com os <a href="/termos_e_condicoes">Termos e Condições</a>.</label>
                 </StyledCheckboxContainer>
 
                 <StyledButton onClick={handleForm}>Submit</StyledButton>
