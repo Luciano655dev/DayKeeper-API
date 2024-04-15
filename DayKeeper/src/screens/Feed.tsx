@@ -1,28 +1,50 @@
-import { StyleSheet, Text, View, Button } from 'react-native'
+import { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, Pressable } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
-import { useDispatch, useSelector } from 'react-redux'
+import axios from 'axios'
+import { useNavigation } from '@react-navigation/native';
 
 export default function Feed() {
-  const user = useSelector((state: any) => state.userReducer)
-  const dispatch = useDispatch()
+  const navigation: any = useNavigation()
+  const [postsData, setPostsData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [errMsg, setErrMsg] = useState('')
 
-  const resetToken = async()=>{
-    await SecureStore.setItemAsync('userToken', '')
-    dispatch({ type: 'user', payload: {
-      name: '',
-      id: '',
-      pfp: ''
-    } })
-  }
+  useEffect(()=>{
+    const fetchData = async()=>{
+      setLoading(true)
+      try{
+        const token = await SecureStore.getItemAsync('userToken')
+        const response = await axios.get(`http://192.168.100.80:3000/search`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setPostsData(response.data.data)
+      }catch(error: any){
+        setErrMsg(error.response.data.msg || error.msg)
+      }
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [])
+
+  if(loading) return <View style={styles.container}>
+    <Text style={styles.title}>Loading...</Text>
+  </View>
+  if(errMsg) return <View style={styles.container}>
+    <Text style={styles.title}>{errMsg}</Text>
+  </View>
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{user.name}</Text>
-
-      <Button
-        title='Log Out here'
-        onPress={()=>resetToken()}
-      />
+      {
+        postsData.map( (data: any) => <View key={data._id}>
+          <Pressable onPress={()=>navigation.navigate('UserInfo', { username: data.user_info.name })}>
+            <Text style={styles.title}>{data.user_info.name}</Text>
+          </Pressable>
+          <Text style={styles.text}>{data.data}</Text>
+        </View>)
+      }
     </View>
   );
 }
@@ -37,5 +59,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold'
+  },
+  text: {
+    fontSize: 10
   }
 });

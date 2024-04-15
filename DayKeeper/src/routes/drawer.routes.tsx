@@ -6,14 +6,17 @@ import TabRoutes from "./tab.routes"
 import StackRoutes from "./stack.routes"
 import { Feather } from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
+import { Image } from 'react-native'
 import AuthRoutes from "./auth.routes"
+
+import UserInfo from '../screens/User/Info'
 
 const Drawer = createDrawerNavigator()
 
 export default function DrawerRoutes(){
-    const [logged, setLogged] = useState(false)
-    const user = useSelector((state: any) => state.userReducer)
     const dispatch = useDispatch()
+    const user = useSelector((state: any) => state.userReducer)
+    const [logged, setLogged] = useState(false)
 
     useEffect(()=>{
         async function fetchData(){
@@ -45,31 +48,36 @@ export default function DrawerRoutes(){
 
     return (
         <Drawer.Navigator screenOptions={{ title: '' }}>
+            <Drawer.Screen
+                name="UserInfo"
+                component={UserInfo}
+                initialParams={{ username: user.name }}
+                options={{
+                    drawerIcon: ({ size }) => (
+                        <Image
+                            source={{ uri: user.pfp.url }}
+                            style={{
+                                width: size,
+                                height: size,
+                                borderRadius: 50,
+                            }}
+                        />
+                    ),
+                    drawerLabel: user.name
+                }}
+            />
+            
             <Drawer.Screen 
                 name="Home"
                 component={TabRoutes}
                 options={{
                     drawerIcon: ({ color, size }) =>
                         <Feather
-                            name="plus"
+                            name="home"
                             color={color}
                             size={size}
                         />,
                     drawerLabel: 'Início'
-                }}
-            />
-
-            <Drawer.Screen
-                name="Profile"
-                component={StackRoutes}
-                options={{
-                    drawerIcon: ({ color, size }) =>
-                        <Feather
-                            name="user"
-                            color={color}
-                            size={size}
-                        />,
-                    drawerLabel: 'Meu Perfil'
                 }}
             />
         </Drawer.Navigator>

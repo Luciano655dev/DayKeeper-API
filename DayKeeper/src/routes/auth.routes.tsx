@@ -11,7 +11,7 @@ const Stack = createNativeStackNavigator()
 
 function AuthTabs() {
     return (
-      <Tab.Navigator screenOptions={{ title: '' }}>
+      <Tab.Navigator screenOptions={{ headerShown: false }}>
         <Tab.Screen
           name="Login"
           component={Login}
@@ -37,20 +37,20 @@ function AuthTabs() {
 }
 
 export default function AuthRoutes() {
-    return (
-        <Stack.Navigator>
-            <Stack.Screen
-                name="AuthTabs"
-                component={AuthTabs}
-                options={{ headerShown: false }}
-            />
-            <Stack.Screen
-                name="ForgetPassword"
-                component={ForgetPassword}
-                options={{ title: '' }}
-            />
-        </Stack.Navigator>
-    );
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="AuthTabs"
+        component={AuthTabs}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ForgetPassword"
+        component={ForgetPassword}
+        options={{ title: '' }}
+      />
+    </Stack.Navigator>
+  );
 }
 
 function createStackNavigator() {
