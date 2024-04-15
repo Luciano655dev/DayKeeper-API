@@ -4,19 +4,23 @@ import {
   View,
   TextInput,
   Button,
-  Alert
+  Pressable
 } from 'react-native'
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import * as SecureStore from 'expo-secure-store'
 import axios from 'axios'
+import { useNavigation } from '@react-navigation/native'
 
 export default function Login() {
-  const [form, setForm] = useState({ name: '', password: '' })
-  const [errMsg, setErrMsg] = useState('')
   const dispatch = useDispatch()
+  const navigation: any = useNavigation()
+  const [form, setForm] = useState({ name: '', password: '' })
+  const [loading, setLoading] = useState(false)
+  const [errMsg, setErrMsg] = useState('')
 
   const handleForm = async ()=>{
+    setLoading(true)
     try{
       const response = await axios.post('http://192.168.100.80:3000/auth/login', form)
 
@@ -29,6 +33,7 @@ export default function Login() {
     }catch(err: any){
       setErrMsg(err.response.data.msg)
     }
+    setLoading(false)
   }
 
   return (
@@ -51,9 +56,14 @@ export default function Login() {
         <Button
           title='Send'
           onPress={()=>handleForm()}
+          disabled={loading}
         />
 
         { errMsg ? <Text style={styles.label}>{errMsg}</Text> : <View /> }
+
+        <Pressable style={styles.pressableLink} onPress={() => navigation.navigate('ForgetPassword')}>
+          <Text style={styles.link}>Esqueceu a senha?</Text>
+        </Pressable>
       </View>
     </View>
   )
@@ -72,5 +82,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 10
+  },
+  link: {
+    fontSize: 10,
+    color: 'blue'
+  },
+  pressableLink: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 5
   }
 });
