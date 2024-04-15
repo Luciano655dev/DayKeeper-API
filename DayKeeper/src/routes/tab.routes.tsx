@@ -2,9 +2,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { Feather } from '@expo/vector-icons'
 
-import DrawerRoutes from "./drawer.routes"
 import Feed from "../screens/Feed"
-import UserInfo from '../screens/User/Info'
+import UserInfo from '../screens/User/UserInfo'
+import PostInfo from '../screens/Post/PostInfo'
 import New from "../screens/New"
 
 const Tab = createBottomTabNavigator()
@@ -15,6 +15,7 @@ function FeedStackScreen(){
         <FeedStack.Navigator screenOptions={{ headerShown: false }}>
           <FeedStack.Screen name="Feed" component={Feed} />
           <FeedStack.Screen name="UserInfo" component={UserInfo} />
+          <FeedStack.Screen name="PostInfo" component={PostInfo} />
         </FeedStack.Navigator>
     )
 }

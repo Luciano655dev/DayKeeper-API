@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Image } from 'react-native'
 import AuthRoutes from "./auth.routes"
 
-import UserInfo from '../screens/User/Info'
+import UserInfo from '../screens/User/UserInfo'
 
 const Drawer = createDrawerNavigator()
 
@@ -49,9 +49,8 @@ export default function DrawerRoutes(){
     return (
         <Drawer.Navigator screenOptions={{ title: '' }}>
             <Drawer.Screen
-                name="UserInfo"
-                component={UserInfo}
-                initialParams={{ username: user.name }}
+                name="Profile"
+                component={StackRoutes}
                 options={{
                     drawerIcon: ({ size }) => (
                         <Image

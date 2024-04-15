@@ -1,8 +1,9 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import Profile from "../screens/User/Info"
+import Profile from "../screens/User/UserInfo"
 import { useSelector } from "react-redux"
 
-import TabRoutes from "./tab.routes"
+import UserInfo from '../screens/User/UserInfo'
+import PostInfo from '../screens/Post/PostInfo'
 const Stack = createNativeStackNavigator()
 
 export default function StackRoutes(){
@@ -10,11 +11,8 @@ export default function StackRoutes(){
 
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen
-                name="UserInfo"
-                initialParams={{ username: user.name }}
-                component={Profile}
-            />
+          <Stack.Screen name="UserInfo"  initialParams={{ username: user.name }} component={UserInfo} />
+          <Stack.Screen name="PostInfo" component={PostInfo} />
         </Stack.Navigator>
     )
 }

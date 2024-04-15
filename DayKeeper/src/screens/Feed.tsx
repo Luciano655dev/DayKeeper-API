@@ -39,7 +39,7 @@ export default function Feed() {
     <View style={styles.container}>
       {
         postsData.map( (data: any) => <View key={data._id}>
-          <Pressable onPress={()=>navigation.navigate('UserInfo', { username: data.user_info.name })}>
+          <Pressable onPress={()=>navigation.navigate('PostInfo', { username: data.user_info.name, posttitle: data.title })}>
             <Text style={styles.title}>{data.user_info.name}</Text>
           </Pressable>
           <Text style={styles.text}>{data.data}</Text>
