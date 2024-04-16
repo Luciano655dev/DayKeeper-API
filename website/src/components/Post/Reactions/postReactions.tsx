@@ -7,11 +7,11 @@ export default function PostReactions({ postInfo, selectedReaction, handleReacti
     const [loading, setLoading] = useState(false)
 
     const handleInput = async(num: Number)=>{
-        setLoading(true)
+      setLoading(true)
 
-        await handleReaction(num)
+      await handleReaction(num)
 
-        setLoading(false)
+      setLoading(false)
     }
 
     return <StyledReactions>

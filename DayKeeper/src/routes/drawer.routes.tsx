@@ -9,8 +9,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Image } from 'react-native'
 import AuthRoutes from "./auth.routes"
 
-import UserInfo from '../screens/User/UserInfo'
-
 const Drawer = createDrawerNavigator()
 
 export default function DrawerRoutes(){

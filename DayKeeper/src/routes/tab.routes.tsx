@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator()
 const FeedStack = createNativeStackNavigator()
 function FeedStackScreen(){
     return (
-        <FeedStack.Navigator screenOptions={{ headerShown: false }}>
+        <FeedStack.Navigator>
           <FeedStack.Screen name="Feed" component={Feed} />
           <FeedStack.Screen name="UserInfo" component={UserInfo} />
           <FeedStack.Screen name="PostInfo" component={PostInfo} />
@@ -22,7 +22,7 @@ function FeedStackScreen(){
 
 export default function TabRoutes(){
     return (
-        <Tab.Navigator screenOptions={{ title: '' }}>
+        <Tab.Navigator screenOptions={{ headerShown: false }}>
             <Tab.Screen
                 name="Main"
                 component={FeedStackScreen}

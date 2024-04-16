@@ -13,57 +13,61 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
 
     const skipCount = (pageNumber - 1) * pageSize
 
-
     const pipeline = [
         {
             $lookup: {
                 from: 'users',
-                let: { userId: { $toObjectId: '$user' } },
-                pipeline: [
-                    {
-                        $match: {
-                            $expr: { $eq: ['$_id', '$$userId'] }
-                        }
-                    },
-                    {
-                      $project: {
-                        password: 0
-                      }
-                    }
-                ],
+                localField: 'user',
+                foreignField: '_id',
                 as: 'user_info'
             }
         },
         {
-            $match: {
-                $and: [
-                    { 'user': { $nin: mainUser.blocked_users } },
-                    { 'user_info.banned': { $ne: "true" } },
-                    { 'banned': { $ne: "true" } },
-                    {
-                        $or: [
-                            { title: { $regex: new RegExp(searchQuery, 'i') } },
-                            { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } },
-                        ]
-                    },
-                    {
-                        $or: [
-                            { 'user_info.private': false },
-                            { 
-                                $and: [
-                                    { 'user_info.private': true },
-                                    { 'user_info.followers': mainUser._id }
-                                ]
-                            }
-                        ]
-                    }
-                ]
+            $unwind: '$reactions'
+        },
+        {
+            $lookup: {
+                from: 'users',
+                localField: 'reactions.user',
+                foreignField: '_id',
+                as: 'reactions.user'
+            }
+        },
+        {
+            $unwind: '$reactions.user'
+        },
+        {
+            $group: {
+                _id: '$_id',
+                title: { $first: '$title' },
+                data: { $first: '$data' },
+                user: { $first: '$user' },
+                files: { $first: '$files' },
+                created_at: { $first: '$created_at' },
+                reactions: { $push: '$reactions' },
+                comments: { $first: '$comments' },
+                user_info: { $first: '$user_info' }
             }
         },
         {
             $addFields: {
-                relevance: { $sum: ['$reactions', '$comments'] },
+                relevance: { $sum: ['$reactions.reaction', '$comments'] },
                 isToday: { $eq: ['$title', todayDate] }
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                data: 1,
+                user: 1,
+                files: 1,
+                created_at: 1,
+                reactions: 1,
+                comments: 1,
+                user_info: {
+                    $arrayElemAt: ['$user_info', 0]
+                }
             }
         },
         {
@@ -76,24 +80,21 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                 created_at: 1,
                 reactions: {
                     $map: {
-                        input: [0, 1, 2, 3, 4],
-                        as: "reactionValue",
+                        input: '$reactions',
+                        as: 'reaction',
                         in: {
-                            $size: {
-                                $filter: {
-                                    input: "$reactions",
-                                    as: "reaction",
-                                    cond: { $eq: ["$$reaction.reaction", "$$reactionValue"] }
-                                }
-                            }
+                            user: '$$reaction.user.name',
+                            reaction: '$$reaction.reaction'
                         }
                     }
                 },
                 comments: { $size: '$comments' },
-                user_info: { $arrayElemAt: ['$user_info', 0] }
+                user_info: 1,
+                relevance: 1,
+                isToday: 1
             }
         }
-    ]
+    ];
 
     if(filterOptions.following == 'following')
         pipeline.push({ $match: { 'user': { $in: mainUser.following } } })
