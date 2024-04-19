@@ -19,8 +19,6 @@ export default function Tweet(props: any){
     const [updatedReactions, setUpdatedReactions] = useState(reactions)
 
     const navigator: any = useNavigation()
-    const [likeCounter, setLikeCounter] = useState(0)
-    const [commentText, setCommentText] = useState('')
     const [loading, setLoading] = useState(false)
 
     const userHasReacted = (index: number)=>{
@@ -29,16 +27,32 @@ export default function Tweet(props: any){
         ).length == 0
     }
 
-    const handleReactionInput = async(index: Number)=>{
-        setLoading(true)
-        try{
-            const newReactions = await handleReaction(index, username, title)
+    const handleReactionInput = async (index: number) => {
+        try {
+            let newReactions = [...updatedReactions]
+            const previousReactionIndex = newReactions.findIndex(reaction => reaction.user === loggedUsername)
+    
+            if (previousReactionIndex !== -1)
+                if (newReactions[previousReactionIndex].reaction === index)
+                    newReactions.splice(previousReactionIndex, 1)
+                else
+                    newReactions[previousReactionIndex].reaction = index
+            else
+                newReactions.push({ user: loggedUsername, reaction: index })
+    
             setUpdatedReactions(newReactions)
-        }catch(error: any){
-            console.log(error.response.data.msg || error.message)
+
+            try{
+                await handleReaction(index, username, title)
+            }catch(error){
+                console.log(error)
+                setUpdatedReactions(reactions)
+            }
+        } catch (error: any) {
+            console.log(error.response?.data.msg || error.message)
         }
-        setLoading(false)
     }
+    
 
     return (
         <View style={styles.container}>

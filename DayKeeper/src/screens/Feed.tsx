@@ -34,18 +34,9 @@ export default function Feed() {
   const handleReaction = async (reaction: number, username: String, posttitle: String) => {
     try {
       const token = await SecureStore.getItemAsync('userToken') 
-      const response: any = await axios.post(`http://192.168.100.80:3000/${username}/${posttitle}/react`, {
+      await axios.post(`http://192.168.100.80:3000/${username}/${posttitle}/react`, {
         reaction
       }, { headers: { Authorization: `Bearer ${token}` } })
-
-      const newReactions = response.data.post.reactions.map((r: any) => {
-        if(r.user.name) return { ...r, user: r.user.name }
-        return r
-      })
-
-      console.log(newReactions)
-
-      return newReactions
     } catch (error: any) {
       console.log(error.response.data.msg || error.message)
     }

@@ -10,7 +10,7 @@ export default function Routes(){
     return (
         <Provider store={store}>
             <NavigationContainer>
-                <DrawerRoutes />
+                <TabRoutes />
             </NavigationContainer>
         </Provider>
     )

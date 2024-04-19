@@ -17,11 +17,23 @@ export default function Profile({ route }: any) {
     const fetchData = async()=>{
       setLoading(true)
       try{
+        if(username == user.name){
+          setUserData({
+            username: user.name,
+            pfp: user.pfp.url
+          })
+
+          return setLoading(false)
+        }
+        
         const token = await SecureStore.getItemAsync('userToken')
         const response = await axios.get(`http://192.168.100.80:3000/${username}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
-        setUserData(response.data.user)
+        setUserData({
+          username: response.data.user.name,
+          pfp: response.data.user.profile_picture.url
+        })
       }catch(error: any){
         setErrMsg(error.response.data.msg || error.message)
       }
@@ -55,14 +67,14 @@ export default function Profile({ route }: any) {
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: userData.profile_picture.url }}
+        source={{ uri: userData.pfp }}
         style={{
           width: 50,
           height: 50,
           borderRadius: 50,
         }}
       />
-      <Text style={styles.title}>{userData.name}</Text>
+      <Text style={styles.title}>{userData.username}</Text>
 
       {
         user.name == username ?
