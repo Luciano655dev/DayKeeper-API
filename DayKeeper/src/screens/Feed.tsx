@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
 import axios from 'axios'
-import { useNavigation } from '@react-navigation/native'
-import { Feather } from '@expo/vector-icons'
 import Tweet from '../components/Tweet'
 import { useSelector } from 'react-redux';
 

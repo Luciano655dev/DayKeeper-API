@@ -29,7 +29,7 @@ export default function PostGifs({ handleSelectGif }: any){
     
             if(gifSearch != '')
               reqStr = `http://api.giphy.com/v1/gifs/search?q=${gifSearch}&api_key=${api_key}`
-    
+
             const response = await axios.get(reqStr)
       
             setGifs(response.data.data.map((gifObj: any) => {

@@ -101,7 +101,12 @@ export default function Tweet(props: any){
                     </View>
 
                     <View style={styles.footerIcons}>
-                        <TouchableOpacity onPress={handleComment} style={styles.button}>
+                        <TouchableOpacity onPress={()=>navigator.navigate('CreateComment', {
+                            username,
+                            pfp,
+                            title,
+                            text
+                        })} style={styles.button}>
                             <Feather name="message-circle" size={20} color="#999" />
                             <Text style={styles.textButton}>{comments}</Text>
                         </TouchableOpacity>

@@ -10,17 +10,24 @@ import AuthRoutes from "./auth.routes"
 import Feed from "../screens/Feed"
 import UserInfo from '../screens/User/UserInfo'
 import PostInfo from '../screens/Post/PostInfo'
+import CreateComment from '../screens/Post/CreateComment'
 import New from "../screens/New"
 
 const Tab = createBottomTabNavigator()
-
 const FeedStack = createNativeStackNavigator()
+
 function FeedStackScreen(){
     return (
         <FeedStack.Navigator>
-          <FeedStack.Screen name="Feed" component={Feed} />
-          <FeedStack.Screen name="UserInfo" component={UserInfo} />
-          <FeedStack.Screen name="PostInfo" component={PostInfo} />
+            <FeedStack.Group>
+                <FeedStack.Screen name="Feed" component={Feed} />
+                <FeedStack.Screen name="UserInfo" component={UserInfo} />
+                <FeedStack.Screen name="PostInfo" component={PostInfo} />
+            </FeedStack.Group>
+
+            <FeedStack.Group screenOptions={{ presentation: 'modal' }}>
+                <FeedStack.Screen name="CreateComment" component={CreateComment} />
+            </FeedStack.Group>
         </FeedStack.Navigator>
     )
 }
