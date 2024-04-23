@@ -61,7 +61,7 @@ export default function TabRoutes(){
         }
 
         fetchData()
-    }, [user.name])
+    }, [user])
 
     if(!logged) return <AuthRoutes></AuthRoutes>
     

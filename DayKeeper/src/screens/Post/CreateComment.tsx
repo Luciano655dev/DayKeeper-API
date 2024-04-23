@@ -46,8 +46,6 @@ export default function CreateComment({ navigation, route }: any){
           { headers: { Authorization: `Bearer ${token}` } }
         )
 
-        console.log(postResponse.data.post.comments.map((com: any) => com.user.name))
-
         setAlreadyCommented(postResponse.data.post.comments.some((el: any) => el.user.name == user.name))
       }catch(error: any){
         setError(error.response.data.message || error.message)
