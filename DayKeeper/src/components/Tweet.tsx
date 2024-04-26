@@ -11,9 +11,8 @@ export default function Tweet(props: any){
         text,
         comments,
         reactions,
-        loggedUsername,
+        loggedUser,
         handleReaction,
-        handleComment
     } = props
 
     const [updatedReactions, setUpdatedReactions] = useState(reactions)
@@ -23,14 +22,14 @@ export default function Tweet(props: any){
 
     const userHasReacted = (index: number)=>{
         return updatedReactions.filter((r: any)=>
-            r.user == loggedUsername && r.reaction == index
+            r.user == loggedUser.id && r.reaction == index
         ).length == 0
     }
 
     const handleReactionInput = async (index: number) => {
         try {
             let newReactions = [...updatedReactions]
-            const previousReactionIndex = newReactions.findIndex(reaction => reaction.user === loggedUsername)
+            const previousReactionIndex = newReactions.findIndex(reaction => reaction.user === loggedUser.id)
     
             if (previousReactionIndex !== -1)
                 if (newReactions[previousReactionIndex].reaction === index)
@@ -38,7 +37,7 @@ export default function Tweet(props: any){
                 else
                     newReactions[previousReactionIndex].reaction = index
             else
-                newReactions.push({ user: loggedUsername, reaction: index })
+                newReactions.push({ user: loggedUser.id, reaction: index })
     
             setUpdatedReactions(newReactions)
 

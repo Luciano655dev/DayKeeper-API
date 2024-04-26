@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, FlatList, Button, ActivityIndicator } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
 import axios from 'axios'
 import Tweet from '../components/Tweet'
@@ -7,27 +7,43 @@ import { useSelector } from 'react-redux';
 
 export default function Feed() {
   const user = useSelector((state: any) => state.userReducer)
-  const [data, setData] = useState([])
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [data, setData]: any = useState([])
   const [loading, setLoading] = useState(true)
+  const [newPostLoading, setNewPostLoading] = useState(false)
   const [errMsg, setErrMsg] = useState('')
 
-  useEffect(()=>{
-    const fetchData = async()=>{
-      setLoading(true)
-      try{
-        const token = await SecureStore.getItemAsync('userToken')
-        const response = await axios.get(`http://192.168.100.80:3000/search`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+  const fetchData = async()=>{
+    setNewPostLoading(true)
+    try{
+      const token = await SecureStore.getItemAsync('userToken')
+      const response = await axios.get(`http://192.168.100.80:3000/search?page=${page}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setTotalPages(response.data.totalPages)
+      if(page == 1)
         setData(response.data.data)
-      }catch(error: any){
-        setErrMsg(error.response.data.msg || error.msg)
-      }
-      setLoading(false)
+      else
+        setData([...data, ...response.data.data])
+    }catch(error: any){
+      setErrMsg(error.response.data.msg || error.msg)
     }
+    setNewPostLoading(false)
+    setLoading(false)
+  }
 
+  useEffect(()=>{
     fetchData()
   }, [])
+  useEffect(()=>{
+    fetchData()
+  }, [page])
+
+  const handleAddPage = ()=>{
+    if(page < totalPages)
+      setPage(page+1)
+  }
 
   const handleReaction = async (reaction: number, username: String, posttitle: String) => {
     try {
@@ -47,24 +63,40 @@ export default function Feed() {
     <Text>{errMsg}</Text>
   </View>
 
+  function FooterList({ load }: any){
+    if(!load) return
+    return <View style={{ padding: 10 }}>
+      <ActivityIndicator size={25} color={'#121212'} ></ActivityIndicator>
+    </View>
+  }
+
   return (
     <View style={{flex: 1}}>
-      <ScrollView style={styles.container}>
-        {
-          data.map( (data: any) =>  <Tweet
-            key={data._id}
-            username={data.user_info.name}
-            pfp={data.user_info.profile_picture.url}
-            title={data.title}
-            text={data.data}
-            comments={data.comments}
-            reactions={data.reactions}
-            loggedUsername={user.name}
-
-            handleReaction={handleReaction}
-          /> )
-        }
-      </ScrollView>
+      <FlatList
+        style={styles.container}
+        data={data}
+        keyExtractor={ ({ _id }) => String(_id) }
+        onEndReachedThreshold={0.1}
+        onEndReached={handleAddPage}
+        ListFooterComponent={<FooterList load={newPostLoading} />}
+        refreshing={loading}
+        onRefresh={()=>{
+          setPage(1)
+          setLoading(true)
+          if(page == 1) fetchData()
+        }}
+        renderItem={ ({ item }) => <Tweet
+          key={item._id}
+          username={item.user_info.name}
+          pfp={item.user_info.profile_picture.url}
+          title={item.title}
+          text={item.data}
+          comments={item.comments}
+          reactions={item.reactions}
+          loggedUser={user}
+          handleReaction={handleReaction}
+        /> }
+      />
   </View>
   )
 }
@@ -85,18 +117,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
 
-  floatingButton: {
-    borderWidth:1,
-    borderColor:'#999',
-    alignItems:'center',
-    justifyContent:'center',
-    // position: 'absolute',                                          
-    width:70,
-    bottom: 10,                                                    
-    right: 10,
-    height:70,
-    backgroundColor:'#4BB0EE',
-    borderRadius:100,
+  bottomButtons: {
+    justifyContent: 'space-between',
+    flexDirection: 'row'
   }
   
 });

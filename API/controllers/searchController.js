@@ -17,41 +17,50 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
         {
             $lookup: {
                 from: 'users',
-                localField: 'user',
-                foreignField: '_id',
+                let: { userId: { $toObjectId: '$user' } },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: { $eq: ['$_id', '$$userId'] }
+                        }
+                    },
+                    {
+                      $project: {
+                        password: 0
+                      }
+                    }
+                ],
                 as: 'user_info'
             }
         },
         {
-            $unwind: '$reactions'
-        },
-        {
-            $lookup: {
-                from: 'users',
-                localField: 'reactions.user',
-                foreignField: '_id',
-                as: 'reactions.user'
-            }
-        },
-        {
-            $unwind: '$reactions.user'
-        },
-        {
-            $group: {
-                _id: '$_id',
-                title: { $first: '$title' },
-                data: { $first: '$data' },
-                user: { $first: '$user' },
-                files: { $first: '$files' },
-                created_at: { $first: '$created_at' },
-                reactions: { $push: '$reactions' },
-                comments: { $first: '$comments' },
-                user_info: { $first: '$user_info' }
+            $match: {
+                $and: [
+                    { 'user': { $nin: mainUser.blocked_users } },
+                    { 'user_info.banned': { $ne: "true" } },
+                    {
+                        $or: [
+                            { title: { $regex: new RegExp(searchQuery, 'i') } },
+                            { 'user_info.name': { $regex: new RegExp(searchQuery, 'i') } }
+                        ]
+                    },
+                    {
+                        $or: [
+                            { 'user_info.private': false },
+                            { 
+                                $and: [
+                                    { 'user_info.private': true },
+                                    { 'user_info.followers': mainUser._id }
+                                ]
+                            }
+                        ]
+                    }
+                ]
             }
         },
         {
             $addFields: {
-                relevance: { $sum: ['$reactions.reaction', '$comments'] },
+                relevance: { $sum: ['$reactions', '$comments'] },
                 isToday: { $eq: ['$title', todayDate] }
             }
         },
@@ -61,40 +70,13 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                 title: 1,
                 data: 1,
                 user: 1,
-                files: 1,
                 created_at: 1,
                 reactions: 1,
-                comments: 1,
-                user_info: {
-                    $arrayElemAt: ['$user_info', 0]
-                }
-            }
-        },
-        {
-            $project: {
-                _id: 1,
-                title: 1,
-                data: 1,
-                user: 1,
-                files: 1,
-                created_at: 1,
-                reactions: {
-                    $map: {
-                        input: '$reactions',
-                        as: 'reaction',
-                        in: {
-                            user: '$$reaction.user.name',
-                            reaction: '$$reaction.reaction'
-                        }
-                    }
-                },
                 comments: { $size: '$comments' },
-                user_info: 1,
-                relevance: 1,
-                isToday: 1
+                user_info: { $arrayElemAt: ['$user_info', 0] }
             }
         }
-    ];
+    ]
 
     if(filterOptions.following == 'following')
         pipeline.push({ $match: { 'user': { $in: mainUser.following } } })
@@ -185,7 +167,7 @@ const UsersPerformAggregation = async(mainUserId, searchQuery = '', pageNumber =
 
 const search = async (req, res) => {
     const page = Number(req.query.page) || 1
-    const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 3
+    const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 5
 
     const searchQuery = req.query.q || ''
     const order = req.query.order || 'relevant'

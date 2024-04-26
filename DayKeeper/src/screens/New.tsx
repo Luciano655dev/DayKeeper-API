@@ -1,10 +1,14 @@
 import { Button, StyleSheet, Image, View, Pressable, TextInput } from 'react-native'
 import { useState } from 'react'
+import axios from 'axios'
 import * as ImagePicker from 'expo-image-picker'
+import * as SecureStore from 'expo-secure-store'
 
-export default function New() {
+export default function New({ navigation }: any) {
   const maxImages = 5
   const [images, setImages]: any = useState([])
+  const [text, setText]: any = useState('')
+  const [loading, setLoading]: any = useState(false)
 
   const pickImage = async () => {
     let result: any = await ImagePicker.launchImageLibraryAsync({
@@ -13,16 +17,44 @@ export default function New() {
       quality: 1,
       allowsMultipleSelection: true,
       selectionLimit: maxImages - images.length
-    });
+    })
 
     if (!result.cancelled)
       setImages([...images, ...result.assets.map((val: any) => { return { uri: val.uri, type: val.type } })])
-  };
+  }
+
+  const handleForm = async () =>{
+    setLoading(true)
+    try{
+      const token = await SecureStore.getItemAsync('userToken') 
+      const user: any = await axios.get('http://192.168.100.80:3000/auth/user', { headers: { Authorization: `Bearer ${token}` } })
+
+      const formData: any = new FormData()
+      formData.append('data', text)
+      for (let i = 0; i < images.length; i++)
+        formData.append('files', {
+          uri: images[i].uri,
+          type: images[i].type,
+          name: `${images[i].fileName}`,
+        })
+
+      const post: any = await axios.post('http://192.168.100.80:3000/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      navigation.navigate(`PostInfo`, { username: user.data.user.name, posttitle: post.data.post.title})
+    }catch(error: any){
+      console.log(error)
+    }
+    setLoading(false)
+}
 
   return (
     <View style={styles.container}>
-      <TextInput placeholder='Digite seu post aqui'></TextInput>
-      <Button title="Escolher Imagem" onPress={pickImage} />
+      <TextInput onChangeText={(text)=>setText(text)} placeholder='Digite seu post aqui'></TextInput>
+      <Button title="Escolher Imagem" onPress={pickImage} disabled={loading} />
       <View style={styles.imageContainer}>
         {images.map((image: any, index: any) => (
           <Pressable onPress={()=>setImages([...images].filter((val, i: Number) => i != index))} key={index}>
@@ -36,7 +68,7 @@ export default function New() {
         ))}
       </View>
 
-      <Button title='Send'></Button>
+      <Button title='Send' onPress={handleForm}></Button>
     </View>
   );
 }
