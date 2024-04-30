@@ -9,6 +9,7 @@ export default function Tweet(props: any){
         pfp,
         title,
         text,
+        files,
         comments,
         reactions,
         loggedUser,
@@ -65,6 +66,15 @@ export default function Tweet(props: any){
                     <Text style={styles.authorAt}></Text>
                 </View>
                 <Text style={styles.content}>{text}</Text>
+                <View style={styles.imageContainer}>
+                    {
+                        files.map((file: any) =>
+                            file.mimetype.split('/')[0] == 'image' ?
+                                <Image key={file._id} source={{ uri: file.url }} style={styles.image} /> :
+                                <View key={file._id} />
+                        )
+                    }
+                </View>
                 <View style={styles.tweetFooter}>
                     <View style={styles.footerReactions}>
                         <View style={ userHasReacted(0) ? styles.footerIcons : styles.selectedFooterIcon }>
@@ -191,5 +201,17 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 100,
     },
+    imageContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 20,
+      },
+      image: {
+        width: 100,
+        height: 100,
+        margin: 5,
+        borderColor: 'black',
+        borderWidth: 1
+      },
 
 });

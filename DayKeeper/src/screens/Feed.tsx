@@ -91,6 +91,7 @@ export default function Feed() {
           pfp={item.user_info.profile_picture.url}
           title={item.title}
           text={item.data}
+          files={item.files}
           comments={item.comments}
           reactions={item.reactions}
           loggedUser={user}

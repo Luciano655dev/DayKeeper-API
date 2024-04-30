@@ -70,6 +70,7 @@ const PostsPerformAggregation = async (mainUserId, sortStage = { _id: 1 }, searc
                 title: 1,
                 data: 1,
                 user: 1,
+                files: 1,
                 created_at: 1,
                 reactions: 1,
                 comments: { $size: '$comments' },
