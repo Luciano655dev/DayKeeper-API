@@ -10,12 +10,13 @@ const {
 } = require('../controllers/authController')
 
 // Middlewares
-const userValidation = require('../middlewares/validations/userValidation')
+const userRegisterValidation = require('../middlewares/validations/auth/userRegisterValidation')
+const userLoginValidation = require('../middlewares/validations/auth/userLoginValidation')
 const checkTokenMW = require('../middlewares/checkTokenMW')
 
 // Routes
-router.post("/register", userValidation, register)
-router.post("/login", login)
+router.post("/register", userRegisterValidation, register)
+router.post("/login", userLoginValidation, login)
 router.get("/confirm_email", confirmEmail)
 router.post('/forget-password', forgetPassword)
 router.post('/reset-password', resetPassword)

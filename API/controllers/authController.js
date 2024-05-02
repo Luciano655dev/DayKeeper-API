@@ -1,5 +1,4 @@
 const User = require('../models/User')
-const BannedUser = require('../models/BannedUser')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const {
@@ -18,9 +17,6 @@ const register = async(req, res) => {
   }
 
   try {
-    const emailIsBanned = (await BannedUser.findOne({ email })) == 'null'
-    if(emailIsBanned) return res.status(400).json({ msg: "Este email foi banido" })
-
     // create password
     const salt = await bcrypt.genSalt(12)
     const passwordHash = await bcrypt.hash(password, salt)
@@ -42,21 +38,24 @@ const register = async(req, res) => {
 
     await sendVerificationEmail(username, email, img.url)
 
-    return res.status(201).json({ msg: "Ative sua conta no seu Email", info: user })
+    return res.status(201).json({ message: "Ative sua conta no seu Email", info: user })
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({ error })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
 // verifyEmail
 const confirmEmail = async(req, res) => {
   const { token } = req.query
-  if(!token) return res.status(422).json({ msg: 'O token não fo passado' })
+
+  if(!token)
+    return res.status(422).json({ msg: "The token needs to be filled in" })
 
   try{
     jwt.verify(token, process.env.EMAIL_SECRET, async(err, decoded) => {
-      if (err) return res.status(401).send('Token inválido ou expirado.')
+      if (err) return res.status(401).json({ message: "Invalid or expired Token" })
       const { email } = decoded
   
       const user = await User.findOneAndUpdate(
@@ -64,38 +63,25 @@ const confirmEmail = async(req, res) => {
         { $set: { verified_email: true } },
         { new: true }
       )
-      if(!user) return res.status(404).json({ msg: 'Usuario não encontrado' })
+      if(!user) return res.status(404).json({ message: "User not found" })
       await user.save()
 
-      res.status(200).json({ msg: `Email de ${user.name} confirmado com sucesso!` })
+      return res.status(200).json({ msg: `${user.name}'s email confirmed successfully` })
     })
   } catch (error) {
-    res.status(500).json({ msg: error })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
 // login
 const login = async(req, res)=>{
-  const { name: userInput, password } = req.body
-
-  // validations
-  if (!userInput || !password)
-    return res.status(422).json({ msg: "Todos os campos precisam ser preenchidos." })
+  const { name: userInput } = req.body
 
   try {
     // check if user exists
     const user = await User.findOne({ $or: [{ name: userInput }, { email: userInput }] })
-    if(!user) return res.status(404).json({ msg: "Usuário não encontrado" })
-
-    // check if the Email is verified
-    if(!user.verified_email){
-      await sendVerificationEmail(user.name, user.email)
-      return res.status(422).json({ msg: "Sua conta ainda não foi ativada, acabamos de te mandar um novo email de confirmação!" })
-    }
-
-    // check if password match
-    const checkPassword = await bcrypt.compare(password, user.password)
-    if (!checkPassword) return res.status(422).json({ msg: "Senha inválida" })
 
     const token = jwt.sign(
       {
@@ -105,36 +91,40 @@ const login = async(req, res)=>{
       process.env.SECRET
     )
 
-    res.status(200).json({ msg: "Autenticação realizada com sucesso!", token, user })
+    return res.status(200).json({ message: "Authentication completed successfully", token, user })
   } catch (error) {
-    res.status(500).json({ msg: error })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
-};
+}
 
 // forgetPassword
 const forgetPassword = async (req, res) => {
   const { email } = req.body
 
   try {
-    const user = await User.findOne({ email })
+    const resetToken = jwt.sign({ email }, process.env.EMAIL_SECRET, { expiresIn: '1h' })
+    const user = await User.findOneAndUpdate({ email }, {
+      $set: {
+        resetPassword: resetToken,
+        resetPasswordExpires: Date.now() + 3600000
+      }
+    }, { new: true })
 
     if (!user)
-      return res.status(404).json({ msg: 'Usuário não encontrado' })
-
-    // Gerar token de redefinição de senha
-    const resetToken = jwt.sign({ email }, process.env.EMAIL_SECRET, { expiresIn: '1h' })
-    user.resetPasswordToken = resetToken
-    user.resetPasswordExpires = Date.now() + 3600000 // Token válido por 1 hora
+      return res.status(404).json({ message: "User not found" })
 
     await user.save()
 
     // Enviar email de redefinição de senha
     await sendPasswordResetEmail(email, resetToken)
 
-    res.status(200).json({ msg: 'Um email de redefinição de senha foi enviado para o seu endereço de email registrado.' })
+    return res.status(200).json({ message: "A password reset email has been sent to your registered email address" })
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ msg: error.message })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -144,39 +134,41 @@ const resetPassword = async (req, res) => {
   const { password } = req.body
 
   if(!token || !password)
-    return res.status(422).json({ msg: "Preencha todos os campos!" })
+    return res.status(400).json({ message: "Fill in all fields" })
 
   try {
     const decoded = jwt.verify(token, process.env.EMAIL_SECRET)
-
-    const user = await User.findOne({ email: decoded.email })
-
-    if (!user)
-      return res.status(404).json({ msg: 'Usuário não encontrado' })
-
-    // Atualizar senha
     const salt = await bcrypt.genSalt(12)
     const passwordHash = await bcrypt.hash(password, salt)
-    user.password = passwordHash
+
+    const user = await User.findOneAndUpdate({ email: decoded.email }, {
+      $set: {
+        password: passwordHash
+      }
+    }, { new: true })
+
+    if (!user)
+      return res.status(404).json({ message: "User not found" })
 
     await user.save()
-
-    return res.status(200).json({ msg: 'Senha redefinida com sucesso' })
+    return res.status(200).json({ message: "Password reset successfully" })
   } catch (error) {
-    return res.status(400).json({ msg: 'Token inválido ou expirado' })
+    return res.status(400).json({ msg: "Invalid or expired token. If this error persists, contact an admin" })
   }
-};
+}
 
 // userData
 const userData = async(req, res)=>{
   try {
     // Use o ID do usuário obtido do token para encontrar o usuário no banco de dados
     const user = await User.findById(req.id).select("-password")
-    if (!user) return res.status(404).json({ msg: "Usuário não encontrado" })
+    if (!user) return res.status(404).json({ message: "User not found" })
 
-    res.status(200).json({ user })
+    return res.status(200).json({ user })
   } catch (error) {
-    res.status(500).json({ msg: error.message })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
