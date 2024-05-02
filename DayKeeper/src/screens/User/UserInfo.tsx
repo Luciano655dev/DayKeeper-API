@@ -1,12 +1,12 @@
-import { StyleSheet, Text, View, Image, Button } from 'react-native'
+import { StyleSheet, Text, View, Image, Button, FlatList } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import * as SecureStore from 'expo-secure-store'
 import axios from 'axios'
 
-export default function Profile({ route }: any) {
+export default function Profile({ route, navigation }: any) {
   const user = useSelector((state: any) => state.userReducer)
-  const username = route.params.username
+  const username = route.params.username || ''
   const [userData, setUserData]: any = useState({})
   const [loading, setLoading] = useState(true)
   const [errMsg, setErrMsg] = useState('')
@@ -65,29 +65,38 @@ export default function Profile({ route }: any) {
   </View>
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={{ uri: userData.pfp }}
-        style={{
-          width: 50,
-          height: 50,
-          borderRadius: 50,
-        }}
-      />
-      <Text style={styles.title}>{userData.username}</Text>
-
-      {
-        user.name == username ?
-        <View>
-          <Text style={styles.title}>SAME USER</Text>
-          <Button
-            title='Log Out here'
-            onPress={()=>resetToken()}
+    <View>
+      <FlatList
+        data={[1]}
+        renderItem={()=><View style={styles.container}>
+          <Image
+            source={{ uri: userData.pfp }}
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+            }}
           />
-        </View>
-        :
-         <View />
-      }
+          <Text style={styles.title}>{userData.username}</Text>
+
+          {
+            user.name == username ?
+            <View>
+              <Text style={styles.title}>SAME USER</Text>
+              <Button
+                title='Edit User'
+                onPress={()=>navigation.navigate('UserEdit', { username })}
+              />
+              <Button
+                title='Log Out here'
+                onPress={()=>resetToken()}
+              />
+            </View>
+            :
+            <View />
+          }
+        </View>}
+      />
     </View>
   );
 }
@@ -95,9 +104,8 @@ export default function Profile({ route }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: 30,
+    alignItems: 'center'
   },
   title: {
     fontSize: 22,

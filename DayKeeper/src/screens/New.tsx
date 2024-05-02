@@ -20,7 +20,7 @@ export default function New({ navigation }: any) {
     })
 
     if (!result.cancelled)
-      setImages([...images, ...result.assets.map((val: any) => { return { uri: val.uri, type: val.type } })])
+      setImages([...images, ...result.assets.map((val: any) => { return { uri: val.uri, type: val.type, fileName: val.fileName } })])
   }
 
   const handleForm = async () =>{

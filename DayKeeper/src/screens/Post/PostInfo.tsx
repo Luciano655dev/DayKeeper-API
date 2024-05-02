@@ -19,7 +19,7 @@ export default function Profile({ route, navigation }: any) {
         const response = await axios.get(`http://192.168.100.80:3000/${username}/${posttitle}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
-        console.log(response.data.post.comments)
+
         setPostData(response.data.post)
       }catch(error: any){
         setErrMsg(error.response.data.msg || error.message)
@@ -112,7 +112,7 @@ export default function Profile({ route, navigation }: any) {
               })}></Button>
         }
         {
-          postData.comments.map((com: any) => <View style={styles.comment}>
+          postData.comments.map((com: any) => <View style={styles.comment} key={com._id}>
             <View style={styles.commentTop}>
               <Image style={styles.commentPfp} source={{ uri: com.user.profile_picture.url }}/>
               <Text>{com.user.name}</Text>

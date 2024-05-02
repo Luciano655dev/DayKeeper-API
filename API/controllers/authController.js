@@ -28,8 +28,9 @@ const register = async(req, res) => {
     const user = new User({
       name: username,
       email,
-      private: false,
+      bio: '',
       profile_picture: img,
+      private: false,
       roles: [ 'user' ],
       followers: [],
       blocked_users: [],

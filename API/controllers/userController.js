@@ -143,6 +143,7 @@ const updateUser = async(req, res) => {
           name: newData.name || user.name,
           email: newData.email || user.email,
           password: newData.password || user.password,
+          bio: newData.bio || user.bio || '',
           profile_picture: (
             req.file ?
             {
@@ -151,8 +152,8 @@ const updateUser = async(req, res) => {
               url: req.file.location
             } : user.profile_picture
           ),
-          follow_requests: ( newData.private ? user.follow_requests || [] : undefined ),
-          verified_email: ( user.email == newData.email ),
+          follow_requests: ( newData?.private ? user?.follow_requests || [] : undefined ),
+          verified_email: ( typeof newData.email == 'undefined' ? user.verified_email : (user.email == newData.email) ),
         },
       },
       { new: true }

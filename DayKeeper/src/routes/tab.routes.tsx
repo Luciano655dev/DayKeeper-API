@@ -9,6 +9,7 @@ import AuthRoutes from "./auth.routes"
 
 import Feed from "../screens/Feed"
 import UserInfo from '../screens/User/UserInfo'
+import UserEdit from '../screens/User/UserEdit'
 import PostInfo from '../screens/Post/PostInfo'
 import CreateComment from '../screens/Post/CreateComment'
 import New from "../screens/New"
@@ -27,6 +28,7 @@ function FeedStackScreen(){
 
             <FeedStack.Group screenOptions={{ presentation: 'modal' }}>
                 <FeedStack.Screen name="CreateComment" component={CreateComment} />
+                <FeedStack.Screen name="UserEdit" component={UserEdit} />
             </FeedStack.Group>
         </FeedStack.Navigator>
     )
@@ -50,6 +52,8 @@ export default function TabRoutes(){
                 dispatch({ type: 'user', payload: {
                     name: userResponse.data.user.name,
                     id: userResponse.data.user._id,
+                    email: userResponse.data.user.email,
+                    bio: userResponse.data.user.bio,
                     pfp: userResponse.data.user.profile_picture
                 } })
 
