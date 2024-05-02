@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt')
 
 const userValidation = async(req, res, next)=>{
     // userInput is email or username
-    const { userInput, password } = req.body
+    const { name: userInput, password } = req.body
 
     try{
         /* Input validations */

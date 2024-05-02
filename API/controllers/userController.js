@@ -9,30 +9,27 @@ const deleteFile = require('../common/deleteFile')
 const getUserByName = async(req, res) => {
   try {
     const { name } = req.params
-    let user = await User.findOne({ name }).select("-password")
-    if (!user) user = await User.findById(name).select("-password")
 
-    /*
-      NOTA: Estou fazendo a pesquisa do user dessa forma pois, ao colocar um $or e passar uma string,
-      a pesquisa falha e essa foi a maneira mais prática que encontrei sem precisar
-      importar nada do mongoose para verificar se era ObjectId
-    */
+    /* Search by name or id */
+    let user = await User.findOne({ name })
+      .select('-password -ban_history -reports -follow_requests -blocked_users')
+    if (!user) user = await User.findById(name)
+      .select('-password -ban_history -reports -follow_requests -blocked_users')
 
-    if (!user) return res.status(404).json({ msg: "Usuário não encontrado" })
+    if (!user) return res.status(404).json({ message: "User not found" })
 
-    return res.status(200).json({ user })
+    return res.status(200).json({ user: {...user._doc, followers: user._doc.followers.length } })
   } catch (error) {
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
 const getUserPosts = async (req, res)=>{
-  let mainUser = await User.findById(req.id)
-
   const page = Number(req.query.page) || 1
   const pageSize = req.query.pageSize ? ( Number(req.query.pageSize) <= 100 ? Number(req.query.pageSize) : 100) : 1
   const skipCount = (page - 1) * pageSize
-
   const order = req.query.order || 'relevant'
   const { name } = req.params
 
@@ -41,7 +38,10 @@ const getUserPosts = async (req, res)=>{
   if (order === 'relevant')
     sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } } // relevant
   
-  const pipeline = [
+  try{
+    let mainUser = await User.findById(req.id)
+    
+    const pipeline = [
       {
         $lookup: {
           from: 'users',
@@ -54,43 +54,52 @@ const getUserPosts = async (req, res)=>{
             },
             {
               $project: {
-                password: 0
+                password: 0,
+                ban_history: 0,
+                reports: 0,
+                follow_requests: 0,
+                blocked_users: 0
               }
             }
           ],
           as: 'user_info'
         }
-    },
-    {
-      $addFields: {
-        user_info: { $arrayElemAt: ['$user_info', 0] } // Seleciona o primeiro elemento da array 'user_info'
+      },
+      {
+        $addFields: {
+          user_info: { $arrayElemAt: ['$user_info', 0] } // Seleciona o primeiro elemento da array 'user_info'
+        }
+      },
+      {
+        $match: {
+            $and: [
+                { 'user': { $nin: mainUser.blocked_users } },
+                {
+                  'user_info.name': name
+                },
+                {
+                  $or: [
+                    { 'user_info.private': false },
+                    { 
+                      $and: [
+                        { 'user_info.private': true },
+                        { 'user_info.followers': mainUser._id }
+                      ]
+                    }
+                  ]
+                }
+            ]
+        }
+      },
+      {
+        $project: {
+          reports: 0,
+          ban_history: 0
+        }
       }
-    },
-    {
-      $match: {
-          $and: [
-              { 'user': { $nin: mainUser.blocked_users } },
-              {
-                'user_info.name': name
-              },
-              {
-                $or: [
-                  { 'user_info.private': false },
-                  { 
-                    $and: [
-                      { 'user_info.private': true },
-                      { 'user_info.followers': mainUser._id }
-                    ]
-                  }
-                ]
-              }
-          ]
-      }
-    }
-  ]
+    ]
 
-  try{
-    // Aggregating the count without sorting, skipping, or limiting
+    /* Aggregating the count without sorting, skipping, or limiting */
     const totalPostsAggregationResult = await Post.aggregate([...pipeline, { $count: "total" }])
     const totalPosts = (totalPostsAggregationResult.length > 0) ? totalPostsAggregationResult[0].total : 0
     const totalPages = Math.ceil(totalPosts / pageSize)
@@ -102,6 +111,7 @@ const getUserPosts = async (req, res)=>{
     )
 
     const posts = await Post.aggregate(pipeline)
+    if(!posts) return res.status(404).json({ message: "The user hasn't made any posts" })
 
     return res.status(200).json({
       data: posts,
@@ -111,8 +121,9 @@ const getUserPosts = async (req, res)=>{
       totalPages
     })
   }catch(error){
-    console.log(error)
-    return res.status(500).json({ error })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -123,7 +134,7 @@ const updateUser = async(req, res) => {
 
   try{
     const user = await User.findById(loggedUserId)
-    if(!user) return res.status(404).json({ msg: 'usuario não encontrado' })
+    if(!user) return res.status(404).json({ message: 'usuario não encontrado' })
 
     // Check Email
     if(newData.email && (user.email != newData.email))
@@ -158,12 +169,12 @@ const updateUser = async(req, res) => {
       },
       { new: true }
     )
-    if (!updatedUser) return res.status(404).json({ msg: 'Usuario não encontrado' })
+    if (!updatedUser) return res.status(404).json({ message: 'Usuario não encontrado' })
 
     await updatedUser.save()
-    return res.status(200).json({ msg: 'Usuario atualizado com sucesso!', user: updatedUser })
+    return res.status(200).json({ message: 'Usuario atualizado com sucesso!', user: updatedUser })
   } catch (error){
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -176,7 +187,7 @@ const reseteProfilePicture = async(req, res)=>{
     const user = await User.findById(loggedUserId)
 
     if(user.profile_picture.key == 'Doggo.jpg')
-      return res.status(400).json({ msg: "Sua foto de perfil já é a padrão" })
+      return res.status(400).json({ message: "Sua foto de perfil já é a padrão" })
 
     // deleteLastPFP
     if (user.profile_picture.name != 'Doggo.jpg')
@@ -196,9 +207,9 @@ const reseteProfilePicture = async(req, res)=>{
     )
     await updatedUser.save()
 
-    return res.status(200).json({ msg: `foto de perfil do usuario(a) ${user.name} resetada com sucesso` })
+    return res.status(200).json({ message: `foto de perfil do usuario(a) ${user.name} resetada com sucesso` })
   } catch (error){
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -207,58 +218,60 @@ const deleteUser = async (req, res) => {
   const loggedUserId = req.id
 
   if(!req.id)
-    return res.status(404).json({ msg: "Você precisa fazer login antes!" })
+    return res.status(402).json({ message: "you need to be logged in to access this route" })
 
   try {
     const user = await User.findById(loggedUserId)
+    if(!user)
+      return res.status(404).json({ message: "User not found" })
 
-    // Delete Profile Picture
+    /* Delete user's Profile Picture */
     if (user.profile_picture.name != 'Doggo.jpg')
       deleteFile(user.profile_picture.key)
 
-    // Delete all reactions by the user in any post
+    /* Delete all user reactions in posts */
     const deletedPostReactions = await Post.updateMany({}, {
       $pull: {
         reactions: { user: loggedUserId }
       }
     })
     
-    // Delete all comments by the user in any post
+    /* Delete all user comments on posts */
     const deletedComments = await Post.updateMany({}, {
       $pull: {
         comments: { user: loggedUserId }
       }
     })
 
-    // Delete all reactions by the user in any comment
+    /* Delete all user reactions in comments */
     const deletedCommentReactions = await Post.updateMany({}, {
       $pull: {
         'comments.$[].reactions': { user: loggedUserId }
       }
     })
 
-    // delete all his followers
+    /* Delete your follower list */
     const deletedFollowers = await Post.updateMany({}, {
       $pull: {
         followers: { user: loggedUserId }
       }
     })
 
-    // delete all his follow requests
+    /* Delete your follow requests */
     const deletedFollowRequests = await Post.updateMany({}, {
       $pull: {
         follow_requests: { user: loggedUserId }
       }
     })
 
-    // Delete user's posts
+    /* Deletes all user posts */
     const deletedPosts = await Post.deleteMany({ user: loggedUserId })
 
-    // Delete account
+    /* Delete account */
     const deletedUser = await User.findByIdAndDelete(loggedUserId)
 
     return res.status(200).json({
-      msg: 'O usuário e suas interações foram deletadas com sucesso',
+      message: "The user and their interactions have been successfully deleted",
       user: deletedUser,
       posts: deletedPosts,
       post_reactions: deletedPostReactions,
@@ -267,8 +280,11 @@ const deleteUser = async (req, res) => {
       followers: deletedFollowers,
       follow_requests: deletedFollowRequests
     })
+
   } catch (error) {
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -280,33 +296,37 @@ const followUser = async (req, res) => {
   try {
     const user = await User.findOne({ name })
     if (!user)
-      return res.status(404).json({ msg: 'Usuário não encontrado' })
+      return res.status(404).json({ message: "User not found" })
 
-    if(user._id == loggedUserId) return res.status(400).json({ msg: 'Você não pode seguir a si mesmo' })
+    if(user._id == loggedUserId)
+      return res.status(400).json({ message: "You can't follow yourself" })
 
+    /* Stop following */
     if (user.followers.includes(loggedUserId)) {
-      // Deixar de seguir alguem
       await User.updateOne({ name }, { $pull: { followers: loggedUserId } })
-      return res.status(200).json({ msg: `Você deixou de seguir ${name}` })
+      return res.status(200).json({ message: `You unfollowed ${name}` })
     }
 
+    /* To private users */
     if(user.private){
       if(user.follow_requests.includes(loggedUserId)){
-        // Retirar solicitação
+        /* Remove follow request */
         await User.updateOne({ name }, { $pull: { follow_requests: loggedUserId } })
-        return res.status(200).json({ msg: `Você retirou sua solicitação para seguir ${name}` })
+        return res.status(200).json({ message: `You have withdrawn your request to follow  ${name}` })
       }
 
-      // Fazer solicitação
+      /* Send follow request */
       await User.updateOne({ name }, { $push: { follow_requests: loggedUserId } })
-      return res.status(200).json({ msg: `Você mandou uma solicitação para seguir ${name}` })
+      return res.status(200).json({ message: `You sent a follow request to ${name}` })
     }
 
     await User.updateOne({ name }, { $push: { followers: loggedUserId } })
 
-    return res.status(200).json({ msg: `Você começou a seguir ${name}` })
+    return res.status(200).json({ message: `You started following ${name}` })
   } catch (error) {
-    res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -315,32 +335,33 @@ const respondFollowRequest = async(req, res)=>{
   const { name } = req.params
   const response = req.query.response == 'true'
   const loggedUserId = req.id
-
-  if(typeof response != 'boolean')
-    return res.status(400).json({ msg: "Resposta não enviada pela Query '?response' " })
   
   try{
     const followUser = await User.findOne({ name })
     const mainUser = await User.findById(loggedUserId)
 
+    /* Validations */
     if(!followUser || !mainUser)
-      return res.status(404).json({ msg: "Usuário não encontrado" })
+      return res.status(404).json({ message: "User not found" })
     if(!mainUser.private)
-      return res.status(422).json({ msg: "Apenas contas privadas podem responder solicitações" })
+      return res.status(403).json({ message: "Only private accounts can respond to requests" })
     if( !mainUser.follow_requests.includes(followUser._id) )
-      return res.status(404).json({ msg: "Este usuário não te mandou solicitação" })
+      return res.status(404).json({ message: "This user did not send you any requests" })
 
+    /* Remove user's follow request */
     await User.updateOne({ name: mainUser.name }, { $pull: { follow_requests: followUser._id } })
 
-    // NOT ACCEPTED
+    /* DENIED */
     if(!response)
-      return res.status(200).json({ msg: `Solicitação de ${followUser.name} negada com sucesso` })
+      return res.status(200).json({ message: `You denied ${followUser.name}'s request` })
 
-    // ACCEPTED
+    /* ACCEPTED */
     await User.updateOne({ name: mainUser.name }, { $push: { followers: followUser._id } })
-    return res.status(200).json({ msg: `Solicitação de ${followUser.name} aceita com sucesso` })
+    return res.status(200).json({ message: `You accepted ${followUser.name}'s request` })
   }catch(error){
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -355,16 +376,18 @@ const removeFollower = async(req, res)=>{
 
     // validations
     if(!followUser || !mainUser)
-      return res.status(404).json({ msg: "Usuário não encontrado" })
+      return res.status(404).json({ message: "User not found" })
     if(!mainUser.private)
-      return res.status(422).json({ msg: "Apenas contas privadas podem retirar seguidores" })
+      return res.status(403).json({ message: "Only private accounts can remove followers" })
     if(!mainUser.followers.includes(followUser._id))
-      return res.status(400).json({ msg: "Este usuário não te segue" })
+      return res.status(404).json({ message: "This user does not follow you" })
 
     await User.updateOne({ name: mainUser.name }, { $pull: { followers: followUser._id } })
-    return res.status(200).json({ msg: `Usuário ${followUser.name} retirado da sua lista de seguidores com sucesso` })
+    return res.status(200).json({ message: `${followUser.name} was removed from his followers` })
   }catch(error){
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -373,18 +396,19 @@ const reportUser = async(req, res)=>{
   const { name } = req.params
   const reason = req.body.reason || ''
   const loggedUserId = req.id
+  const maxReasonLength = 1000
 
-  if(reason.length > 1000)
-    return res.status(400).json({ msg: "A razão só pode ter até 1000 caracteres" })
+  if(reason.length > maxReasonLength)
+    return res.status(413).json({ message: "The reason is too long" })
 
   try{
     const userReported = await User.findOne({ name })
-    if(!userReported) return res.status(404).json("Usuario não encontrado")
+    if(!userReported) return res.status(404).json({ message: "User not found"})
 
     if(userReported.reports.find( report => report.user == loggedUserId ))
-      return res.status(400).json({ msg: "Você já reportou este usuario antes" })
+      return res.status(409).json({ message: "You have already reported this user" })
 
-    // bloquear o usuario
+    /* block reported user */
     await User.findByIdAndUpdate(loggedUserId,
       {
         $addToSet: {
@@ -393,7 +417,7 @@ const reportUser = async(req, res)=>{
       }
     )
 
-    // denuncia-lo
+    /* send report */
     await User.updateOne({ name },
       {
         $addToSet: {
@@ -406,13 +430,14 @@ const reportUser = async(req, res)=>{
     )
 
     return res.status(200).json({
-      msg: "Usuario reportado e bloqueado com sucesso",
-      reason,
-      user: userReported
+      message: `${name} successfully reported and blocked`,
+      reason
     })
 
   }catch(error){
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -422,12 +447,16 @@ const getFollowing = async(req, res)=>{
 
   try{
     const user = await User.findOne({ name })
-    if(!user) return res.status(404).json({ msg: 'Usuário não encontrado' })
+    if(!user) return res.status(404).json({ message: "User not found" })
 
     const usersFollowing = await User.find({ followers: user._id })
-    return res.status(200).json({ usersFollowing })
+      .select('-password -ban_history -reports -follow_requests -blocked_users')
+
+    return res.status(200).json({ users: usersFollowing })
   } catch (error) {
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -438,17 +467,17 @@ const getFollowers = async(req, res)=>{
   try{
     let user = await User.findOne({ name })
       .populate('followers')
-      .select('-password')
 
     if(!user) user = await User.findOne({ _id: name })
       .populate('followers')
-      .select('-password')
 
-    if(!user) return res.status(404).json({ msg: 'Usuário não encontrado' })
+    if(!user) return res.status(404).json({ message: "User not found" })
 
-    return res.status(200).json({ user })
+    return res.status(200).json({ users: user.followers })
   } catch (error) {
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -461,23 +490,25 @@ const blockUser = async(req, res)=>{
     const blockedUser = await User.findOne({ name })
     const mainUser = await User.findById(loggedUserId)
 
-    // VALIDATIONS
+    /* Validations */
     if(!mainUser || !blockedUser)
-      return res.status(404).json({ msg: "Usuário não encontrado" })
+      return res.status(404).json({ message: "User not found" })
     if(blockUser.name == mainUser.name)
-      return res.status(400).json({ msg: "você (obviamente) não pode se bloquear" })
+      return res.status(400).json({ message: "You can not block yourself" })
 
-    // Desbloquear
+    /* Unblock */
     if(mainUser.blocked_users.includes(blockedUser._id)){
-      const user = await User.updateOne({ name: mainUser.name }, { $pull: { blocked_users: blockedUser._id } })
-      return res.status(200).json({ msg: `User ${blockedUser.name} foi desbloqueado(a) com sucesso`, user })
+      await User.updateOne({ name: mainUser.name }, { $pull: { blocked_users: blockedUser._id } })
+      return res.status(200).json({ message: `${blockedUser.name} successfully unblocked` })
     }
 
-    // Bloquear
-    const user = await User.updateOne({ name: mainUser.name }, { $push: { blocked_users: blockedUser._id } })
-    return res.status(200).json({ msg: `User ${blockedUser.name} foi bloqueado(a) com sucesso`, user })
+    /* Block */
+    await User.updateOne({ name: mainUser.name }, { $push: { blocked_users: blockedUser._id } })
+    return res.status(200).json({ message: `${blockedUser.name} successfully blocked` })
   }catch (error) {
-    return res.status(500).json({ msg: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
