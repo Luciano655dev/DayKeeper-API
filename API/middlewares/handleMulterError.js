@@ -7,7 +7,7 @@ const handleMulterError = (err, req, res, next)=>{
             deleteImage(req.files[i].key)
 
         console.log('erro no upload dos arquivos')
-        return res.status(400).json({ error: 'Erro no upload de arquivos', message: err.message })
+        return res.status(400).json({ error: "Error uploading files", message: err.message })
     }
 
     return next()

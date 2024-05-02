@@ -9,9 +9,11 @@ async function checkBannedUserMW(req, res, next){
         if(user.roles.includes('admin'))
             return next()
 
-        return res.status(401).json({ msg: "Apenas admininstradores podem acessar essa rota" })
+        return res.status(402).json({ message: "Only administrators can access this route" })
     }catch(error){
-        return res.status(500).json({ error })
+        return handleBadRequest(500,
+            `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        )
     }
 }
 

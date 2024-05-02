@@ -13,10 +13,12 @@ async function checkBlockedUserMW(req, res, next){
             !blockedUser.blocked_users.includes(mainUser._id)
         ) return next()
 
-        return res.status(401).json({ msg: 'Este usuário te bloqueou ou você o bloqueou' })
+        return res.status(402).json({ message: "This user blocked you or you blocked him" })
 
     }catch(error){
-        return res.status(500).json({ error })
+        return handleBadRequest(500,
+            `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        )
     }
 }
 

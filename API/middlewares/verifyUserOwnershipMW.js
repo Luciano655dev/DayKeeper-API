@@ -6,16 +6,18 @@ async function verifyUserOwnershipMW(req, res, next) {
     const loggedUserId = req.id
     const post = await Post.findOne({ user: loggedUserId, title: posttitle })
 
-    if(!post) return res.status(404).json({ msg: "Post não encontrado" })
+    if(!post) return res.status(404).json({ message: "Post not found" })
 
     // Verifica se o usuário logado é o proprietário da postagem
     if (post.user == loggedUserId) 
       return next()
     else
-      return res.status(401).json({ msg: "Acesso não autorizado. Você só pode modificar suas próprias postagens." })
+      return res.status(401).json({ message: "You can only modify your own posts" })
 
   } catch (error) {
-    res.status(500).json({ msg: error.message })
+    return handleBadRequest(500,
+      `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    )
   }
 }
 

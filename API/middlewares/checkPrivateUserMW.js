@@ -13,10 +13,12 @@ async function checkPrivateUserMW(req, res, next){
             user._id == loggedUserId
         ) return next()
 
-        return res.status(401).json({ msg: 'Você não pode acessar essa página!' })
+        return res.status(401).json({ message: "You can not access a private user's route" })
 
     }catch(error){
-        return res.status(500).json({ error })
+        return handleBadRequest(500,
+            `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        )
     }
 }
 
