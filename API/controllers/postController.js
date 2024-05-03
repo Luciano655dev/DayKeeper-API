@@ -10,11 +10,13 @@ const getPostByName = async(req, res)=>{
   try {
     const { posttitle, name: username } = req.params
     const post = await getPost(posttitle, username)
-    if (!post) return res.status(404).json({ msg: "Post não encontrado" })
+    if (!post) return res.status(404).json({ message: "Post not found" })
 
     return res.status(200).json({ post })
   } catch (error) {
-    return res.status(500).json({ msg: error })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -36,7 +38,7 @@ const createPost = async(req, res)=>{
   const title = `${titleDate.hour < resetTime ? titleDate.day - 1 : titleDate.day}-${titleDate.month}-${titleDate.year}`
 
   try{
-    // create the post
+    /* Create post */
     const post = new Post({
       title,
       data,
@@ -49,15 +51,15 @@ const createPost = async(req, res)=>{
 
     await post.save()
 
-    return res.status(201).json({ msg: "Post postado com sucesso!", post })
-    // typeof 'user' == ObjectId
+    return res.status(201).json({ message: "Post deleted successfully", post }) // typeof 'user' == ObjectId
   } catch (error){
-
-    // Deleta as imagens mandadas caso tenha algum erro
+    /* Delete previous files */
     for(let i in req.files)
       deleteFile(req.files[i].key)
 
-    return res.status(500).json({ error, msg: "Erro no servidor, as imagens mandadas não foram postadas" })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -69,20 +71,20 @@ const updatePost = async(req, res)=>{
 
   try{
     const post = await getPostByUserId(posttitle, loggedUserId)
-    if(!post) return cb('Post não encontrado', false)
+    if(!post) return res.status(404).json({ message: "Post not found" })
 
-    // verifica se não ultrapassou o limite
+    /* Verify File Limit */
     const keep_files = req.body.keep_files.split('').map(Number) || []
     const maxFiles = ((post.files.length - 1) - (post.files.length - keep_files.length)) + req.files.length
     if(maxFiles > 5){
-      // deleta os arquivos enviados antes
+      /* Delete previous files */
       for(let i in req.files)
         deleteFile(req.files[i].key)
 
-      return res.status(400).json({ msg: "você ultrapassou o limite máximo de arquivos" })
+      return res.status(413).json({ message: "You can only send up to 5 (five) files" })
     }
 
-    // deleta os arquivos removidos do Post original
+    /* Delete files from original post */
     let files = post.files
 
     for(let i=0; i<post.files.length; i++){
@@ -95,7 +97,7 @@ const updatePost = async(req, res)=>{
     const newFiles = req.files.map( file => { return { name: file.originalname, key: file.key, mimetype: file.mimetype, url: file.location } })
     files = [...newPostfiles, ...newFiles]
   
-    // Postar
+    /* Create Post */
     const updatedPost = await Post.findOneAndUpdate(
       { title: posttitle, user: loggedUserId },
       {
@@ -114,15 +116,16 @@ const updatePost = async(req, res)=>{
       { new: true }
     )
 
-    if(!updatePost) return res.status(404).json({ msg: "Post não encontrado" })
-    if(JSON.stringify(post) == JSON.stringify(updatedPost)) return res.status(204).json({ msg: "O post não sofreu alteração" })
+    if(!updatePost) return res.status(404).json({ message: "Post not found" })
+    if(JSON.stringify(post) == JSON.stringify(updatedPost)) return res.status(204).json({ message: "The haven't changed" })
 
     await updatedPost.save()
 
-    return res.status(200).json({ msg: 'Post atualizado com sucesso!', post: updatedPost })
-    // typeof 'user' == ObjectId
+    return res.status(200).json({ message: "Post updated successfully", post: updatedPost }) // typeof 'user' == ObjectId
   } catch (error){
-    return res.status(500).json({ msg: error.message })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -139,15 +142,16 @@ const deletePost = async(req, res)=>{
     })
 
     if(!deletedPost)
-      return res.status(404).json({ msg: "Post não encontrado" })
+      return res.status(404).json({ msg: "Post not found" })
 
     for(let i in deletedPost.files)
       deleteFile(deletedPost.files[i].key)
 
-    return res.status(200).json({ msg: 'Post deletado com sucesso', post: deletedPost })
-    // typeof 'user' == ObjectId
+    return res.status(200).json({ message: "Post deleted successfully", post: deletedPost }) // typeof 'user' == ObjectId
   }catch(error){
-    return res.status(500).json({ error: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -156,9 +160,10 @@ const reportPost = async(req, res)=>{
   const { name: username, posttitle } = req.params
   const reason = req.body.reason || ''
   const loggedUserId = req.id
+  const maxReasonLength = 1000
 
-  if(reason.length > 1000)
-    return res.status(400).json({ msg: "A razão só pode ter até 1000 caracteres" })
+  if(reason.length > maxReasonLength)
+    return res.status(413).json({ message: "The reason is too long" })
 
   try{
     const postUser = await User.findOne({ name: username })
@@ -166,10 +171,10 @@ const reportPost = async(req, res)=>{
       user: postUser._id,
       title: posttitle
     })
-    if(!reportedPost) return res.status(404).json({ msg: 'Post não encontrado' })
+    if(!reportedPost) return res.status(404).json({ message: "Post not found" })
 
     if(reportedPost.reports.find(report => report.user == loggedUserId))
-      return res.status(400).json({ msg: "Você já reportou este post antes" })
+      return res.status(409).json({ message: "You have already reported this post" })
 
     await Post.findByIdAndUpdate(reportedPost._id, {
       $addToSet: {
@@ -181,12 +186,14 @@ const reportPost = async(req, res)=>{
     })
 
     return res.status(200).json({
-      msg: "Post denunciado com sucesso",
+      message: "Post reported successfully",
       reason,
       post: reportedPost
     })
   }catch(error){
-    return res.status(500).json({ error: `${error}` })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -195,44 +202,45 @@ const reactPost = async (req, res) => {
   const loggedUserId = req.id
   const { name: username, posttitle } = req.params
 
-  // Get Reaction
   const reaction = req.body.reaction
   if (reaction < 0 || reaction >= 5)
-    return res.status(422).json({ msg: "A reação não existe ou não foi preenchida" })
+    return res.status(400).json({ message: "The reaction needs to be filled in" })
 
   try {
     const user = await User.findOne({ name: username })
     let reactedPost = await getPostByUserId(posttitle, user._id)
 
-    // Verificar se o usuário já reagiu
+    /* Verify if the user has reacted before */
     const existingReactionIndex = reactedPost.reactions.findIndex(
       (reaction) =>
         reaction.user._id == loggedUserId ||
         reaction.user == loggedUserId
     )
 
-    // caso já tenha reagido
+    /* if true */
     if (existingReactionIndex !== -1) {
       if (reactedPost.reactions[existingReactionIndex].reaction === reaction) {
-        // Se a reação for a mesma, remover a reação existente
+        /* If it's the same reaction, remove */
         reactedPost.reactions.splice(existingReactionIndex, 1)
       } else {
-        // Se a reação for diferente, apenas atualizar a reação existente
+        /* If it's a different reaction, update */
         reactedPost.reactions[existingReactionIndex].reaction = reaction
       }
     } else {
-      // Se o usuário não reagiu anteriormente, adicionar a nova reação
+      /* If false, add new reaction */
       reactedPost.reactions.push({ user: loggedUserId, reaction })
     }
 
     await reactedPost.save()
 
     return res.status(200).json({
-      msg: 'A reação foi adicionada ou retirada do Post!',
+      message: "The reaction was added or removed from the post",
       post: reactedPost
     })
   } catch (error) {
-    return res.status(500).json({ msg: error.message })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -241,14 +249,18 @@ const commentPost = async(req, res)=>{
   let { comment, gif } = req.body
   const { name: username, posttitle } = req.params
   const loggedUserId = req.id
+  const maxCommentLength = 1000
+  const errorGifUrl = 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzc0OGh3NWQxbTdqcjZqaDZudXQyMHM3b3VpdXF4czczaGl4bHZicyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8L0Pky6C83SzkzU55a/giphy.gif'
 
-  // Validations
-  if(comment.length <= 0 || comment.length > 1000)
-    return res.status(422).json({ msg: 'O comentário está muito longo' })
+  /* Validations */
+  if(!comment)
+    return res.status(400).json({ message: "The comment needs to be filled in" })
+  if(comment.length > maxCommentLength)
+    return res.status(413).json({ message: "The comment is too long" })
 
   try{
     const post = await getPost(posttitle, username)
-    if(!post) return res.status(404).json({ msg: "Post não encontrado" })
+    if(!post) return res.status(404).json({ message: "Post not found" })
 
     if(gif){
       try {
@@ -264,8 +276,10 @@ const commentPost = async(req, res)=>{
         gif = {
           name: '404',
           id: '',
-          url: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzc0OGh3NWQxbTdqcjZqaDZudXQyMHM3b3VpdXF4czczaGl4bHZicyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8L0Pky6C83SzkzU55a/giphy.gif'
+          url: errorGifUrl
         }
+
+        /* Error in Giphy API */
         console.log(err)
       }
     }
@@ -278,7 +292,7 @@ const commentPost = async(req, res)=>{
       gif
     }]
 
-    // retirar o comentário do usuário (caso tenha)
+    /* Remove user's comment if exists */
     if(post.comments.findIndex(comment => comment.user._id == loggedUserId) !== -1)
       newComments = [...post.comments].filter( comment => comment.user._id != loggedUserId)
 
@@ -289,15 +303,23 @@ const commentPost = async(req, res)=>{
         comments: newComments
       },
       { new: true }
-    ).populate('comments.user') // popula apenas os novos comentários
-    
-    if (!commentedPost) return res.status(404).json({ msg: 'Post não encontrado' })
+    ).populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        match: { banned: { $ne: true } }, // Excluir comentários feitos por usuários banidos
+        select: '-password -ban_history -reports -follow_requests -blocked_users'
+      }
+    })
+    if (!commentedPost) return res.status(404).json({ message: "Post not found" })
 
     await commentedPost.save()
 
-    return res.status(200).json({ msg: 'O post foi comentado!', comment, post: commentedPost })
+    return res.status(200).json({ message: "Post commented successfully", post: commentedPost })
   } catch (error){
-    return res.status(500).json({ msg: error.message })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -306,42 +328,43 @@ const reactComment = async (req, res) => {
   const { name: username, posttitle, usercomment } = req.params
   const loggedUserId = req.id
 
-  // reaction
   const reaction = req.body.reaction
   if (reaction < 0 || reaction > 5)
-    return res.status(422).json({ msg: "A reação não existe ou não foi preenchida" })
+    return res.status(422).json({ message: "The reaction needs to be filled in" })
 
   try {
     const userCommentId = (await User.findOne({ name: usercomment }))._id.toString()
     const post = await getPost(posttitle, username)
 
     const userCommentIndex = post.comments.findIndex((comment) => comment.user._id == userCommentId)
-    if (userCommentIndex === -1) return res.status(404).json({ msg: "O comentário não foi encontrado" })
+    if (userCommentIndex === -1) return res.status(404).json({ message: "Comment not found" })
 
-    // Verificar se o usuário já reagiu ao comentário no índice atual
+    /* Verify if the user has reacted before */
     const existingReactionIndex = post.comments[userCommentIndex].reactions.findIndex(
       (reactionObj) => reactionObj.user === loggedUserId
     )
 
-    // Caso já tenha reagido
+    /* if true */
     if (existingReactionIndex !== -1){
       if (post.comments[userCommentIndex].reactions[existingReactionIndex].reaction === reaction) {
-        // Se a reação for a mesma, remover a reação existente
+        /* If it's the same reaction, remove */
         post.comments[userCommentIndex].reactions.splice(existingReactionIndex, 1)
       } else {
-        // Se a reação for diferente, apenas atualizar a reação existente
+        /* If it's a different reaction, update */
         post.comments[userCommentIndex].reactions[existingReactionIndex].reaction = reaction
       }
     } else {
-      // Se o usuário não reagiu anteriormente, adicionar a nova reação
+      /* If false, add new reaction */
       post.comments[userCommentIndex].reactions.push({ user: loggedUserId, reaction })
     }
 
     await post.save()
 
-    return res.status(200).json({ msg: 'A reação foi adicionada ou retirada do Comentário!', post })
+    return res.status(200).json({ message: "The reaction was added or removed from the comment", post })
   } catch (error) {
-    return res.status(500).json({ msg: error.message });
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -356,27 +379,21 @@ const deleteComment = async (req, res) => {
 
     const post = await getPost(posttitle, username)
 
-    // Encontrar o índice do comentário do usuário
+    /* Find comment index */
     const userCommentIndex = post.comments.findIndex((comment) => comment.user == userComment._id)
     if (userCommentIndex === -1)
-      return res.status(404).json({ msg: "O comentário não foi encontrado" })
+      return res.status(404).json({ message: "Comment not found" })
 
-    // Verificar se o usuário é o dono da postagem ou o dono do comentário
+    /* Verify if the user is the post owner or the comment owner */
     if (
       post.user !== userLoggedId &&
       post.user !== mainUser._id
-    ){
-      return res
-        .status(403)
-        .json({
-          msg: "Você não tem permissão para deletar este comentário",
-        });
-    }
+    ) return res .status(403).json({ message: "You can not delet this comment" });
 
-    // Remover o comentário do usuário
+    /* Remove user comment */
     post.comments.splice(userCommentIndex, 1)
 
-    // Atualizar o documento no banco de dados
+    /* Update */
     const user = await User.findOne({ name: username })
     const updatedPost = await Post.findOneAndUpdate(
       { title: posttitle, user: user.id },
@@ -384,16 +401,18 @@ const deleteComment = async (req, res) => {
         comments: [...post.comments],
       },
       { new: true }
-    ).populate('user')
+    ).populate('user', '-password -ban_history -reports -follow_requests -blocked_users')
 
     if (!updatedPost)
-      return res.status(404).json({ msg: "Post não encontrado" })
+      return res.status(404).json({ message: "Post not foudn" })
 
     await updatedPost.save()
 
-    res.status(200).json({ msg: "O comentário foi removido com sucesso!", post: updatedPost })
+    return res.status(200).json({ message: "Comment removed successfully", post: updatedPost })
   } catch (error) {
-    res.status(500).json({ msg: error.message })
+    return res.status(500).json({
+      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+    })
   }
 }
 
@@ -414,16 +433,16 @@ async function getPost(posttitle, username){
   try{
     const user = await User.findOne({ name: username })
     const post = await Post.findOne({ user: user._id, title: posttitle })
-      .populate('user', '-password')
+      .populate('user', '-password -ban_history -reports -follow_requests -blocked_users')
       .populate({
         path: 'comments',
         populate: {
           path: 'user',
           match: { banned: { $ne: true } }, // Excluir comentários feitos por usuários banidos
-          select: '-password'
+          select: '-password -ban_history -reports -follow_requests -blocked_users'
         }
       })
-      .populate('reactions.user', '-password')
+      .populate('reactions.user', '-password -ban_history -reports -follow_requests -blocked_users')
   
     return post
   }catch(err){
@@ -434,16 +453,16 @@ async function getPost(posttitle, username){
 async function getPostByUserId(posttitle, userid){
   try{
     const post = await Post.findOne({ user: userid, title: posttitle })
-      .populate('user', '-password')
+      .populate('user', '-password -ban_history -reports -follow_requests -blocked_users')
       .populate({
         path: 'comments',
         populate: {
           path: 'user',
           match: { banned: { $ne: true } }, // Excluir comentários feitos por usuários banidos
-          select: '-password'
+          select: '-password -ban_history -reports -follow_requests -blocked_users'
         }
       })
-      .populate('reactions.user', '-password')
+      .populate('reactions.user', '-password -ban_history -reports -follow_requests -blocked_users')
   
     return post
   }catch(err){
