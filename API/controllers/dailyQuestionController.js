@@ -9,7 +9,7 @@ const getQuestion = async(req, res)=>{
         const dateRegexFormat = /^\d{2}-\d{2}-\d{4}/
 
         if(!dateRegexFormat.test(date))
-            return res.status(400).json({ msg: "Coloque uma data no formato correto" })
+            return res.status(400).json({ message: "Enter a valid date" })
     
         const questionDay = date.split('-')[0]
         const questionMonth = date.split('-')[1]
@@ -27,11 +27,13 @@ const getQuestion = async(req, res)=>{
         if(newDateSearched > newDateToday)
             question = dailyQuestionsJson.questions.filter( el => el.day == `${questionDay-1}-${questionMonth}` )[0]
 
-        if(!question) return res.status(404).json({ msg: "A pergunta deste dia não foi encontrada" })
+        if(!question) return res.status(404).json({ message: "Question not found" })
     
         return res.status(200).json(question)
-    }catch(err){
-        return res.status(500).json({ msg: `${err}` })
+    }catch(error){
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 

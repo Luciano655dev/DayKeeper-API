@@ -17,17 +17,18 @@ const banOrUnbanUser = async(req, res)=>{
     const { name: username } = req.params
     const message = req.body.message || ''
     const loggedUserId = req.id
+    const maxMessageLength = 1000
 
-    if(message.length > 1000)
-        return res.status(400).json({ msg: "A mensagem precisa ter menos de 1000 caracteres" })
+    if(message.length > maxMessageLength)
+        return res.status(413).json({ message: "The message is too long" })
 
     try {
         const mainUser = await User.findById(loggedUserId)
         const bannedUser = await User.findOne({ name: username })
-        if(!mainUser || !bannedUser) return res.status(404).json({ msg: "Usuario não encontrado" })
+        if(!mainUser || !bannedUser) return res.status(404).json({ message: "User not found" })
 
         if(bannedUser.roles.find('admin'))
-            return res.status(400).json({ msg: "Você não pode banir um Admininstrador" })
+            return res.status(400).json({ message: "You can not ban an admininstrator" })
 
         if(bannedUser.banned == "true"){
             await User.updateOne({ name: username },
@@ -48,7 +49,7 @@ const banOrUnbanUser = async(req, res)=>{
 
             const userUpdated = await User.findOne({ name: username }) 
             return res.status(200).json({
-                msg: `Usuário ${bannedUser.name} desbanido com sucesso`,
+                message: `${bannedUser.name} unbanned successfully`,
                 user: userUpdated
             })
         }
@@ -70,11 +71,13 @@ const banOrUnbanUser = async(req, res)=>{
 
         const userUpdated = await User.findOne({ name: username }) 
         return res.status(200).json({
-            msg: `Usuario ${bannedUser.name} banido com sucesso`,
+            msg: `${bannedUser.name} banned successfully`,
             user: userUpdated
         })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -85,8 +88,8 @@ const deleteBannedUser = async(req, res)=>{
     try{
         const bannedUser = await User.findOne({ name: username })
 
-        if(!bannedUser) return res.status(400).json({ msg: "Usuario não encontrado" })
-        if(!bannedUser.banned) return res.status(400).json({ msg: "Este usuario não foi banido" })
+        if(!bannedUser) return res.status(400).json({ message: "User not found" })
+        if(!bannedUser.banned) return res.status(403).json({ message: "This user isn't banned" })
 
         const latestBan = bannedUser.ban_history[bannedUser.ban_history.length-1]
 
@@ -94,7 +97,7 @@ const deleteBannedUser = async(req, res)=>{
         if(!adminUser) adminUser = await User.findById(loggedUserId)
 
         if(adminUser._id != loggedUserId)
-            return res.status(400).json({ msg: "Apenaso admin que baniu o usuario pode exclui-lo" })
+            return res.status(409).json({ message: "Only the admin who banned the user can delete it" })
 
         /*
         const diffInDays = Math.abs(new Date() - latestBan.ban_date) / (1000 * 3600 * 24)
@@ -115,12 +118,14 @@ const deleteBannedUser = async(req, res)=>{
         // await sendOptOutEmail(bannedUser.email, bannedUser.name, adminUser.name, bannedUser.ban_message)
         
         return res.status(200).json({
-            msg: "O usuario banido e suas ações foram deletadas com sucesso, um email foi enviado notificando o usuario",
+            message: "Banned user deleted successfully",
             ban_info: bannedUser,
             user: bannedUser
         })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -135,14 +140,16 @@ const deleteUserReport = async(req, res)=>{
         }, { new: true })
 
         if(!updatedUser)
-            return res.status(404).json({ msg: "Usuario não encontrado" })
+            return res.status(404).json({ message: "User not found" })
 
         return res.status(200).json({
-            msg: "Report excluido com sucesso",
+            message: "Report deleted successfully",
             user: updatedUser
         })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -197,7 +204,9 @@ const getReportedUsers = async(req, res)=>{
             totalPages
           })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -252,7 +261,9 @@ const getBannedUsers = async(req, res)=>{
             totalPages
         })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -261,9 +272,10 @@ const banOrUnbanPost = async(req, res)=>{
     const { name: username, posttitle } = req.params
     const message = req.body.message || ''
     const loggedUserId = req.id
+    const maxMessageLength = 1000
 
-    if(message.length > 1000)
-        return res.status(400).json({ msg: "A mensagem precisa ter menos de 1000 caracteres" })
+    if(message.length > maxMessageLength)
+        return res.status(413).json({ message: "The message is too long" })
 
     try {
         const userPost = await User.findOne({ name: username })
@@ -271,7 +283,8 @@ const banOrUnbanPost = async(req, res)=>{
             title: posttitle,
             user: userPost._id
         })
-        if(!deletedPost) return res.status(404).json({ msg: "Usuario não encontrado" })
+        if(!deletedPost)
+            return res.status(404).json({ message: "User not found" })
 
         if(deletedPost.banned == "true"){
             await Post.updateOne({
@@ -298,7 +311,7 @@ const banOrUnbanPost = async(req, res)=>{
                 user: userPost._id
             }) 
             return res.status(200).json({
-                msg: `Post do ${userPost.name} do dia ${deletedPost.title} desbanido com sucesso`,
+                message: `${userPost.name}'s post from ${deletedPost.title} unbanned successfully`,
                 post: postUpdated
             })
         }
@@ -326,11 +339,13 @@ const banOrUnbanPost = async(req, res)=>{
             user: userPost._id
         }) 
         return res.status(200).json({
-            msg: `Post do ${userPost.name} do dia ${deletedPost.title} banido com sucesso`,
+            msg: `${userPost.name}'s post from ${deletedPost.title} banned successfully`,
             post: postUpdated
         })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -338,9 +353,10 @@ const deleteBannedPost = async(req, res)=>{
     const { name: username, posttitle } = req.params
     const message = req.body.message || ''
     const loggedUserId = req.id
+    const maxMessageLength = 1000
 
-    if(message.length > 1000)
-        return res.status(400).json({ msg: "A mensagem precisa ter menos de 1000 caracteres" })
+    if(message.length > maxMessageLength)
+        return res.status(413).json({ message: "The message is too long" })
 
     try{
         const userPost = await User.findOne({ name: username })
@@ -350,13 +366,13 @@ const deleteBannedPost = async(req, res)=>{
         })
 
         if(!deletedPost)
-            return res.status(404).json({ msg: "O post não foi encontrado" })
+            return res.status(404).json({ message: "Post not found" })
 
         const latestBan = deletedPost.ban_history[deletedPost.ban_history.length-1]
         if(deletedPost.banned != "true")
-            return res.status(400).json({ msg: "Este post não foi banido" })
+            return res.status(403).json({ message: "This post isn't banned" })
         if(latestBan.banned_by != loggedUserId)
-            return res.status(400).json({ msg: "Apenas o admin que baniu o post pode deleta-lo" })
+            return res.status(400).json({ message: "Only the admin who banned the post can delete it" })
 
         //const diffInDays = Math.abs(new Date() - latestBan.ban_date) / (1000 * 3600 * 24)
         //if(diffInDays < 7)
@@ -383,13 +399,14 @@ const deleteBannedPost = async(req, res)=>{
         ) */
 
         return res.status(200).json({
-            msg: "Post deletado com sucesso!",
+            msg: "Post deleted successfully",
             post: deletedPost
         })
 
     } catch (error) {
-        console.log(error)
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -444,7 +461,9 @@ const getReportedPosts = async(req, res)=>{
             totalPages
           })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
@@ -499,7 +518,9 @@ const getBannedPosts = async(req, res)=>{
             totalPages
         })
     } catch (error) {
-        return res.status(500).json({ msg: error.message })
+        return res.status(500).json({
+            message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
+        })
     }
 }
 
