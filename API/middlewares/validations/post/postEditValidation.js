@@ -1,4 +1,5 @@
 const deleteFile = require('../../../api/utils/deleteFile')
+const { serverError, inputTooLong, fieldsNotFilledIn } = require('../../../constants')
 
 const postEditValidation = async (req, res, next) => {
   const { data } = req.body
@@ -18,16 +19,14 @@ const postEditValidation = async (req, res, next) => {
   try {
     /* Input Validations */
     if (!data)
-      return handleBadRequest(400, "The text needs to be filled in")
+      return handleBadRequest(400, fieldsNotFilledIn)
 
     if (data.length > maxDataLength)
-    return handleBadRequest(413, "The text is too long")
+    return handleBadRequest(413, inputTooLong('Text'))
 
     return next()
   }catch(error){
-    return handleBadRequest(500,
-      `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
-    )
+    return handleBadRequest(500, serverError(error.message))
   }
 }
 

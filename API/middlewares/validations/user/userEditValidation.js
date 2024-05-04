@@ -1,6 +1,7 @@
 const User = require('../../../api/models/User')
 const bcrypt = require('bcrypt')
 const deleteFile = require('../../../api/utils/deleteFile')
+const { serverError, inputTooLong, defaultPfp } = require('../../../constants')
 
 const userValidation = async(req, res, next)=>{
     const {
@@ -38,28 +39,26 @@ const userValidation = async(req, res, next)=>{
         ) return handleBadRequest(400, "Enter a valid email")
 
         if( bio && bio.length > maxBioLength )
-            return handleBadRequest(413, "The bio is too long")
+            return handleBadRequest(413, inputTooLong('Bio'))
 
         if( username && username.length > maxUsernameLength )
-            return handleBadRequest(413, "The username is too long")
+            return handleBadRequest(413, inputTooLong('Username'))
 
         if(password){
             if(password.length > maxPasswordLength)
-                return handleBadRequest(413, "The password is too long")
+                return handleBadRequest(413, inputTooLong('Password'))
 
             const checkPassword = await bcrypt.compare(lastPassword, loggedUser.password)
             if (!checkPassword) return handleBadRequest(401, "A senha antiga esta incorreta")
         }
 
         /* Delete last profiel picture if user uploads a new one */
-        if(loggedUser.profile_picture.name != 'Doggo.jpg' && req.file)
+        if(loggedUser.profile_picture.name != defaultPfp.name && req.file)
             deleteFile(loggedUser.profile_picture.key)
 
         return next()
     }catch(error){
-        return handleBadRequest(500,
-            `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
-        )
+        return handleBadRequest(500, serverError(error.message))
     }
 }
 

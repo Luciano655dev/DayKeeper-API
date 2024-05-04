@@ -1,4 +1,5 @@
 const User = require('../api/models/User')
+const { serverError } = require('../constants')
 
 async function checkBlockedUserMW(req, res, next){
     const { name } = req.params
@@ -14,11 +15,8 @@ async function checkBlockedUserMW(req, res, next){
         ) return next()
 
         return res.status(402).json({ message: "This user blocked you or you blocked him" })
-
     }catch(error){
-        return handleBadRequest(500,
-            `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
-        )
+        return res.status(500).json({ message: serverError(error.message) })
     }
 }
 

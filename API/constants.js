@@ -13,5 +13,6 @@ module.exports = {
     },
     serverError: (error) => `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`,
     notFound: (data) => `${data} not found`,
+    inputTooLong: (data) => `The ${data} is too long`,
     fieldsNotFilledIn: 'Fit in all fields'
 }

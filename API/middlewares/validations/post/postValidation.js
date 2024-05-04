@@ -1,5 +1,6 @@
 const Post = require('../../../api/models/Post')
 const deleteFile = require('../../../api/utils/deleteFile')
+const { serverError, inputTooLong, fieldsNotFilledIn } = require('../../../constants')
 
 const postValidation = async(req, res, next)=>{
     const { data } = req.body
@@ -20,10 +21,10 @@ const postValidation = async(req, res, next)=>{
 
         /* Input Validations */
         if (!data)
-            return handleBadRequest(400, "The text needs to be filled in")
+            return handleBadRequest(400, fieldsNotFilledIn)
     
         if (data.length > maxDataLength)
-        return handleBadRequest(413, "The text is too long")
+        return handleBadRequest(413, inputTooLong('Text'))
 
         /* One post per day */
         const today = new Date()
@@ -39,9 +40,7 @@ const postValidation = async(req, res, next)=>{
 
         return next()
     } catch(error){
-        return handleBadRequest(500,
-            `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
-        )
+        return handleBadRequest(500, serverError(error.message))
     }
 }
 

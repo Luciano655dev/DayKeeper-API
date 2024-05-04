@@ -1,5 +1,5 @@
-require('dotenv').config()
 const jwt = require('jsonwebtoken')
+const { secret } = require('../config')
 
 async function checkTokenMW(req, res, next) {
   const authHeader = req.headers["authorization"]
@@ -9,7 +9,7 @@ async function checkTokenMW(req, res, next) {
     return res.status(400).json({ message: "The Token needs to be filled in" })
 
   try {
-    const decoded = jwt.verify(token, process.env.SECRET)
+    const decoded = jwt.verify(token, secret)
     req.id = decoded.id
     next()
   } catch (err) {

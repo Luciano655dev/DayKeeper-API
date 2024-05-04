@@ -1,6 +1,6 @@
 const User = require('../../../api/models/User')
 const BannedUser = require('../../../api/models/BannedUser')
-const { auth } = require('../../../constants')
+const { serverError, inputTooLong, fieldsNotFilledIn, auth } = require('../../../constants')
 
 const userValidation = async(req, res, next)=>{
   const { name: username, email, password } = req.body
@@ -21,23 +21,21 @@ const userValidation = async(req, res, next)=>{
 
     // User Input validations
     if (!username || !email || !password)
-      return res.status(400).json({ message: "Fill in all fields" })
+      return res.status(400).json({ message: fieldsNotFilledIn })
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email) || email.length > maxEmailLength)
       return res.status(400).json({ message: "Enter a valid email" })
 
     if (!username || username.length > maxUsernameLength)
-      return res.status(413).json({ message: "The username is too long" })
+      return res.status(413).json({ message: inputTooLong('Username') })
 
     if (!password || password.length > maxPasswordLength)
-      return res.status(413).json({ message: "The password is too long" })
+      return res.status(413).json({ message: inputTooLong('Password') })
   
     return next()
   }catch(error){
-    return res.status(500).json({
-      message: `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
-    })
+    return res.status(500).json({ message: serverError(error.message) })
   }
 }
 

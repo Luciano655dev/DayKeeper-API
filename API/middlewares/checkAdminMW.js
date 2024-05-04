@@ -1,4 +1,5 @@
 const User = require('../api/models/User')
+const { serverError } = require('../constants')
 
 async function checkBannedUserMW(req, res, next){
     const loggedUserId = req.id
@@ -11,9 +12,7 @@ async function checkBannedUserMW(req, res, next){
 
         return res.status(402).json({ message: "Only administrators can access this route" })
     }catch(error){
-        return handleBadRequest(500,
-            `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`
-        )
+        return handleBadRequest(500, serverError(error.message))
     }
 }
 
