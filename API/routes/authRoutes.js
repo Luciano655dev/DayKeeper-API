@@ -7,7 +7,7 @@ const {
     confirmEmail,
     forgetPassword,
     resetPassword
-} = require('../controllers/authController')
+} = require('../api/controllers/authController')
 
 // Middlewares
 const userRegisterValidation = require('../middlewares/validations/auth/userRegisterValidation')

@@ -13,11 +13,11 @@ const {
     removeFollower,
     blockUser,
     reportUser
-} = require('../controllers/userController')
+} = require('../api/controllers/userController')
 
 // Middlewares
 const multer = require('multer')
-const multerConfig = require('../config/multer')
+const multerConfig = require('../api/config/multer')
 const handleMulterError = require('../middlewares/handleMulterError')
 const userEditValidation = require('../middlewares/validations/user/userEditValidation')
 const checkTokenMW = require('../middlewares/checkTokenMW')

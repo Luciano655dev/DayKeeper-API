@@ -1,5 +1,5 @@
-const User = require('../../../models/User')
-const { sendVerificationEmail } = require('../../../common/emailHandler')
+const User = require('../../../api/models/User')
+const { sendVerificationEmail } = require('../../../api/utils/emailHandler')
 const bcrypt = require('bcrypt')
 
 const userValidation = async(req, res, next)=>{
@@ -26,7 +26,7 @@ const userValidation = async(req, res, next)=>{
         const checkPassword = await bcrypt.compare(password, user.password)
         if (!checkPassword)
             return res.status(401).json({ message: "Invalid Password" })
-    
+
         return next()
     }catch(error){
         return res.status(500).json({

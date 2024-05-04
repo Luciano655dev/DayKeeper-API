@@ -3,7 +3,7 @@ const router = express.Router()
 
 const {
     search
-} = require('../controllers/searchController')
+} = require('../api/controllers/searchController')
 
 // Middlewares
 const checkTokenMW = require('../middlewares/checkTokenMW')

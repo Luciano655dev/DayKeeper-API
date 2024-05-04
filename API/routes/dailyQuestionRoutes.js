@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {
     getQuestion
-} = require('../controllers/dailyQuestionController')
+} = require('../api/controllers/dailyQuestionController')
 
 // Middlewares
 const checkTokenMW = require('../middlewares/checkTokenMW')

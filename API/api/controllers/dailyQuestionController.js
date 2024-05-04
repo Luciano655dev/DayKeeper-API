@@ -1,5 +1,5 @@
 require('dotenv').config()
-const dailyQuestionsJson = require('../dailyQuestions.json')
+const dailyQuestionsJson = require('../../dailyQuestions.json')
 const bf = require('better-format')
 
 const getQuestion = async(req, res)=>{

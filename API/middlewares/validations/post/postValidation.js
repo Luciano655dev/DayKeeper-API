@@ -1,6 +1,5 @@
-const Post = require('../../../models/Post')
-const bf = require('better-format')
-const deleteFile = require('../../../common/deleteFile')
+const Post = require('../../../api/models/Post')
+const deleteFile = require('../../../api/utils/deleteFile')
 
 const postValidation = async(req, res, next)=>{
     const { data } = req.body

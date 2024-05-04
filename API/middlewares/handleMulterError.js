@@ -1,4 +1,4 @@
-const deleteImage = require('../common/deleteFile')
+const deleteImage = require('../api/utils/deleteFile')
 const multer = require('multer')
 
 const handleMulterError = (err, req, res, next)=>{

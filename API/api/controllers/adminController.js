@@ -9,8 +9,8 @@ const {
     sendOptOutEmail,
     sendPostBanEmail,
     sendPostDeletionEmail
-} = require('../common/emailHandler')
-const deleteFile = require('../common/deleteFile')
+} = require('../utils/emailHandler')
+const deleteFile = require('../utils/deleteFile')
 
 // ========== USERS ==========
 const banOrUnbanUser = async(req, res)=>{

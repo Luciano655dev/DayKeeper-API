@@ -2,8 +2,8 @@ require('dotenv').config()
 const User = require('../models/User')
 const Post = require('../models/Post')
 const bcrypt = require('bcrypt')
-const { sendVerificationEmail } = require('../common/emailHandler')
-const deleteFile = require('../common/deleteFile')
+const { sendVerificationEmail } = require('../utils/emailHandler')
+const deleteFile = require('../utils/deleteFile')
 
 // getUserByName
 const getUserByName = async(req, res) => {

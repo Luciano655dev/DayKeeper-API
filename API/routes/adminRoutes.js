@@ -10,7 +10,7 @@ const {
     getBannedPosts,
     banOrUnbanPost,
     deleteBannedPost
-} = require('../controllers/adminController')
+} = require('../api/controllers/adminController')
 
 // Middlewares
 const checkTokenMW = require('../middlewares/checkTokenMW')

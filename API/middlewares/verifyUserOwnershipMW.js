@@ -1,4 +1,4 @@
-const Post = require('../models/Post')
+const Post = require('../api/models/Post')
 
 async function verifyUserOwnershipMW(req, res, next) {
   try {

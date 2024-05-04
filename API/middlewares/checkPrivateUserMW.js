@@ -1,4 +1,4 @@
-const User = require('../models/User')
+const User = require('../api/models/User')
 
 async function checkPrivateUserMW(req, res, next){
     const { name } = req.params

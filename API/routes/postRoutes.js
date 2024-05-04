@@ -10,11 +10,11 @@ const {
     commentPost,
     reactComment,
     deleteComment
-} = require('../controllers/postController')
+} = require('../api/controllers/postController')
 
 // Middlewares
 const multer = require('multer')
-const multerConfig = require('../config/multer')
+const multerConfig = require('../api/config/multer')
 const handleMulterError = require('../middlewares/handleMulterError') // status de erro bonitinho do multer :)
 const postValidation = require('../middlewares/validations/post/postValidation')
 const postEditValidation = require('../middlewares/validations/post/postEditValidation')

@@ -1,4 +1,4 @@
-const deleteFile = require('../../../common/deleteFile')
+const deleteFile = require('../../../api/utils/deleteFile')
 
 const postEditValidation = async (req, res, next) => {
   const { data } = req.body

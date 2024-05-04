@@ -1,11 +1,14 @@
-const User = require('../../../models/User')
-const BannedUser = require('../../../models/BannedUser')
+const User = require('../../../api/models/User')
+const BannedUser = require('../../../api/models/BannedUser')
+const { auth } = require('../../../constants')
 
 const userValidation = async(req, res, next)=>{
   const { name: username, email, password } = req.body
-  const maxEmailLength = 320
-  const maxUsernameLength = 40
-  const maxPasswordLength = 50
+  const {
+    maxEmailLength,
+    maxUsernameLength,
+    maxPasswordLength
+  } = auth
 
   try{
     const user = await User.findOne({ $or: [{ name: username }, { email }] })

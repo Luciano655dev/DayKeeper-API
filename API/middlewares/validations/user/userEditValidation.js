@@ -1,6 +1,6 @@
-const User = require('../../../models/User')
+const User = require('../../../api/models/User')
 const bcrypt = require('bcrypt')
-const deleteFile = require('../../../common/deleteFile')
+const deleteFile = require('../../../api/utils/deleteFile')
 
 const userValidation = async(req, res, next)=>{
     const {

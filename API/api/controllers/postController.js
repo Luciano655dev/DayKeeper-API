@@ -1,7 +1,7 @@
 require('dotenv').config()
 const User = require('../models/User')
 const Post = require('../models/Post')
-const deleteFile = require('../common/deleteFile')
+const deleteFile = require('../utils/deleteFile')
 const bf = require('better-format')
 const axios = require('axios')
 
