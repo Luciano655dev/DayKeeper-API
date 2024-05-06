@@ -35,7 +35,7 @@ router.delete("/:posttitle", checkTokenMW, verifyUserOwnershipMW, deletePost) //
 router.post("/:name/:posttitle/report", checkTokenMW, checkBannedUserMW, checkPrivateUserMW, reportPost) // Report a post
 router.post("/:name/:posttitle/react", checkTokenMW, checkBannedUserMW, checkPrivateUserMW, checkBlockedUserMW, reactPost) // React to a Post
 router.post("/:name/:posttitle/comment", checkTokenMW, checkBannedUserMW, checkPrivateUserMW, checkBlockedUserMW, commentPost) // Comment in a post
-router.delete("/:name/:posttitle/comment/:usercomment", checkBannedUserMW, checkPrivateUserMW, checkBlockedUserMW, checkTokenMW, deleteComment) // Delete a comment
+router.delete("/:name/:posttitle/comment/:usercomment", checkTokenMW, deleteComment) // Delete a comment
 router.post("/:name/:posttitle/reactcomment/:usercomment", checkTokenMW, checkBannedUserMW, checkPrivateUserMW, checkBlockedUserMW, reactComment) // React to a comment in a Post
 
 module.exports = router

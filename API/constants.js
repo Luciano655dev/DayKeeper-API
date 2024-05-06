@@ -1,4 +1,7 @@
 module.exports = {
+    post: {
+        maxCommentLength: 500,
+    },
     user: {
         maxReportReasonLength: 1000
     },
@@ -14,6 +17,11 @@ module.exports = {
         key: 'Doggo.jpg',
         url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg",
         mimetype: 'image/jpeg'
+    },
+    errorGif: {
+        name: '404',
+        id: '',
+        url: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzc0OGh3NWQxbTdqcjZqaDZudXQyMHM3b3VpdXF4czczaGl4bHZicyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8L0Pky6C83SzkzU55a/giphy.gif'
     },
     serverError: (error) => `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`,
     notFound: (data) => `${data} not found`,

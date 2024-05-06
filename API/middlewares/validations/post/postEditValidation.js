@@ -1,5 +1,5 @@
 const deleteFile = require('../../../api/utils/deleteFile')
-const { serverError, inputTooLong, fieldsNotFilledIn } = require('../../../constants')
+const { serverError, inputTooLong } = require('../../../constants')
 
 const postEditValidation = async (req, res, next) => {
   const { data } = req.body
@@ -7,7 +7,7 @@ const postEditValidation = async (req, res, next) => {
 
   function handleBadRequest(errorCode, message){
     /* Delete previous files */
-    if (files) {
+    if (req.files) {
       for(let i in req.files){
         deleteFile(req.files[i].key)
       }
@@ -17,11 +17,7 @@ const postEditValidation = async (req, res, next) => {
   }
 
   try {
-    /* Input Validations */
-    if (!data)
-      return handleBadRequest(400, fieldsNotFilledIn)
-
-    if (data.length > maxDataLength)
+    if (data && data.length > maxDataLength)
     return handleBadRequest(413, inputTooLong('Text'))
 
     return next()

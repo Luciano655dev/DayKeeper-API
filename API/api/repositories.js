@@ -1,6 +1,7 @@
 module.exports = {
   // the information that the user cannot obtain
-  hideUserData: '-password -ban_history -reports -follow_requests -blocked_users -verified_email -roles',
+  hideUserData: '-password -ban_history -reports -follow_requests -blocked_users -verified_email -roles -banned',
+  hidePostData: '-reports -ban_history',
   userPostsPipeline: (mainUser, name) => [
       {
         $lookup: {

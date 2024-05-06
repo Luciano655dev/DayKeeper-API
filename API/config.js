@@ -2,6 +2,10 @@ require('dotenv').config()
 
 module.exports = {
     secret: process.env.SECRET,
+    resetTime: process.env.RESET_TIME,
+    giphy: {
+        apiKey: process.env.GIPHY_API_KEY
+    },
     mongodb: {
         dbUser: process.env.DB_USER,
         dbPass: process.env.DB_PASS,
