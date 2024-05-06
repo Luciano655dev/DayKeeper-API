@@ -25,8 +25,10 @@ const userValidation = async(req, res, next)=>{
         const loggedUser = await User.findById(req.id)
         if(await User.findOne({ email }) && email != loggedUser.email)
             return handleBadRequest(409, "Email is already being used")
-        if((await User.findOne({ name: username }) || await User.findById(req.id)) && username != loggedUser.name)
-            return handleBadRequest(409, "Username is already being used")
+        if(
+            await User.findOne({ name: username }) &&
+            username != loggedUser.name
+        ) return handleBadRequest(409, "Username is already being used")
 
         /* Input validations */
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -53,7 +55,7 @@ const userValidation = async(req, res, next)=>{
         }
 
         /* Delete last profiel picture if user uploads a new one */
-        if(loggedUser.profile_picture.name != defaultPfp.name && req.file)
+        if(req.file && loggedUser.profile_picture.name != defaultPfp.name)
             deleteFile(loggedUser.profile_picture.key)
 
         return next()

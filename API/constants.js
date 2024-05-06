@@ -1,4 +1,7 @@
 module.exports = {
+    user: {
+        maxReportReasonLength: 1000
+    },
     auth: {
         resetTokenExpiresTime: '1h',
         resetPasswordExpiresTime: 3600000,
@@ -9,7 +12,8 @@ module.exports = {
     defaultPfp: {
         name: 'Doggo.jpg',
         key: 'Doggo.jpg',
-        url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg"
+        url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg",
+        mimetype: 'image/jpeg'
     },
     serverError: (error) => `Server error. If possible, contact an administrator and provide the necessary information... Error: "${error.message}"`,
     notFound: (data) => `${data} not found`,

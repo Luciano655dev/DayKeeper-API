@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {
-    getUserByName,
+    getUser,
     getUserPosts,
     updateUser,
     reseteProfilePicture,
@@ -25,7 +25,7 @@ const checkBannedUserMW = require('../middlewares/checkBannedUserMW')
 const checkPrivateUserMW = require('../middlewares/checkPrivateUserMW')
 
 // Routes
-router.get("/:name", checkTokenMW, checkBannedUserMW, getUserByName)
+router.get("/:name", checkTokenMW, checkBannedUserMW, getUser)
 router.put("/update_user", checkTokenMW, multer(multerConfig("image")).single('file'), handleMulterError, userEditValidation, updateUser)
 router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
 router.delete("/delete_user", checkTokenMW, deleteUser)

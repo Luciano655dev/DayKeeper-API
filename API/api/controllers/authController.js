@@ -1,11 +1,3 @@
-const User = require('../models/User')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const {
-  sendVerificationEmail,
-  sendPasswordResetEmail
-} = require('../utils/emailHandler')
-
 const { serverError } = require('../../constants')
 
 const register = require('../services/auth/register')
