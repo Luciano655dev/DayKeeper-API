@@ -1,38 +1,51 @@
 const Post = require('../models/Post')
 const User = require('../models/User')
 
-const getDataWithPages = async({ type, pipeline, order, page = 1, maxPageSize = 3 })=>{
+const getDataWithPages = async ({ type, pipeline, order, following, page = 1, maxPageSize = 3 }) => {
   const skipCount = (page - 1) * maxPageSize
-  let newPipeline = pipeline
+  let newPipeline = [...pipeline]
 
-  let sortPipeline = { $sort: { created_at: -1 } } // recent
-  if (order === 'relevant')
-    sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } } // relevant
-  
-  try{
-    let totalPages = 0
-    if(type == 'Post'){
-      const totalPostsAggregationResult = await Post.aggregate([...newPipeline, { $count: "total" }])
-      const totalPosts = (totalPostsAggregationResult.length > 0) ? totalPostsAggregationResult[0].total : 0
-      totalPages = Math.ceil(totalPosts / maxPageSize)
-    } else {
-      const totalUsersAggregationResult = await User.aggregate([...newPipeline, { $count: "total" }])
-      const totalUsers = (totalUsersAggregationResult.length > 0) ? totalUsersAggregationResult[0].total : 0
-      totalPages = Math.ceil(totalUsers / maxPageSize)
+  let matchCriteria = {}
+  if (following === 'following') {
+    matchCriteria = type === 'Post' ? { 'user': { $in: mainUser.following } } : { '_id': { $in: mainUser.following } };
+  } else if (following === 'friends') {
+    matchCriteria = type === 'Post' ? {
+      $and: [
+        { 'user': { $in: mainUser.following } }, // O mainUser está seguindo ele
+        { 'user_info.followers': mainUser._id } // O outro usuário está te seguindo
+      ]
+    } : {
+      $and: [
+        { '_id': { $in: mainUser.following } }, // O mainUser está seguindo ele
+        { 'followers': mainUser._id } // O outro usuário está te seguindo
+      ]
     }
+  }
 
-    newPipeline.push(
-      sortPipeline,
-      { $skip: skipCount },
-      { $limit: maxPageSize }
-    )
+  newPipeline.push({ $match: matchCriteria })
 
-    let data
-    if(type == 'Post'){
-      data = await Post.aggregate(newPipeline)
-    } else {
-      data = await User.aggregate(newPipeline)
-    }
+  const sortPipeline = order === 'relevant' ? { $sort: { isTodayDate: -1, relevance: -1 } } : { $sort: { created_at: -1 } }
+
+  try {
+    const aggregationPipeline = [
+      { $facet: {
+          data: [
+            ...newPipeline,
+            sortPipeline,
+            { $skip: skipCount },
+            { $limit: maxPageSize }
+          ],
+          totalCount: [
+            ...newPipeline,
+            { $count: "total" }
+          ]
+        }
+      },
+      { $unwind: "$totalCount" }
+    ]
+
+    const [{ data, totalCount }] = await (type === 'Post' ? Post.aggregate(aggregationPipeline) : User.aggregate(aggregationPipeline))
+    const totalPages = Math.ceil(totalCount ? totalCount.total : 0 / maxPageSize)
 
     return {
       data,
@@ -41,7 +54,7 @@ const getDataWithPages = async({ type, pipeline, order, page = 1, maxPageSize = 
       maxPageSize,
       totalPages
     }
-  }catch(error){
+  } catch (error) {
     throw new Error(error.message)
   }
 }
