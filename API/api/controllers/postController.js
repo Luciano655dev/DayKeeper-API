@@ -19,7 +19,7 @@ const deleteComment = require('../services/post/deleteComment')
 // getPostByName
 const getPostController = async(req, res)=>{
   try {
-    const { code, message, post } = await getPost({ ...req.params })
+    const { code, message, post } = await getPost({ ...req.params, queryParams: req.query.populate })
 
     return res.status(code).json({ message, post })
   } catch (error) {

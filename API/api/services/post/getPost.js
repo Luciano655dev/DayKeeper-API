@@ -2,14 +2,20 @@ const findPost = require('./get/findPost')
 const { notFound } = require('../../../constants')
 
 const getPost = async(props)=>{
-    const { posttitle, name: username } = props
+    const {
+        posttitle,
+        name: username,
+        queryParams
+    } = props
+
+    let populateFields = queryParams ? queryParams.split(',') : []
 
     try {
         const post = await findPost(
             username,
             posttitle,
             'username',
-            [ 'user', 'reactions.user' /*, 'comments.user' */ ]
+            [ 'user', ...populateFields ]
         )
 
         if (!post)

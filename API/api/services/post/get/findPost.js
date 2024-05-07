@@ -23,16 +23,6 @@ async function findPost(userInput, posttitle, type = 'username', fieldsToPopulat
 
     post = await Post.findOne(query)
       .select(hidePostData)
-      .populate('user', hideUserData)
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'user',
-          match: { banned: { $ne: true } },
-          select: hideUserData
-        }
-      })
-      .populate('reactions.user', hideUserData)
       .populate(populateOptions)
 
     return post

@@ -16,7 +16,6 @@ const getUserPosts = async({ page, maxPageSize, order, name, id })=>{
 
         return response
     }catch(error){
-        console.log(error)
         throw new Error(`${error}`)
     }
 }
