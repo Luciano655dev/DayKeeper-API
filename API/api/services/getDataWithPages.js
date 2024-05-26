@@ -24,7 +24,22 @@ const getDataWithPages = async ({ type, pipeline, order, following, page = 1, ma
 
   newPipeline.push({ $match: matchCriteria })
 
-  const sortPipeline = order === 'relevant' ? { $sort: { isTodayDate: -1, relevance: -1 } } : { $sort: { created_at: -1 } }
+  let sortPipeline
+
+  switch(order){
+    case 'relevant':
+      sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } }
+      break
+    case 'most_reports': 
+      sortPipeline = { $sort: { numReports: -1 } }
+    case 'recent_ban':
+      sortPipeline = { $sort: { "latestBan.ban_date": 1 } }
+      break
+    case 'recent':
+      sortPipeline = { $sort: { created_at: -1 } }
+    default: // default is 'recent'
+      sortPipeline = { $sort: { created_at: -1 } }
+  }
 
   try {
     const aggregationPipeline = [

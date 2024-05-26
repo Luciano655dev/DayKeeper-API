@@ -11,36 +11,36 @@ const deletePosts = require('./delete/deletePosts')
 const deleteUserFromDatabase = require('./delete/deleteUser')
 
 const deleteUser = async(props)=>{
-    const { loggedUserId } = props
-  
-    try {
-      const user = await User.findById(loggedUserId)
-      if(!user)
-        return { code: 404, message: notFound("User") }
+  const { userId } = props
 
-      await deleteProfilePicture(user)
-      const deletedPostReactions = await deletePostReactions(loggedUserId)
-      const deletedComments = await deleteUserComments(loggedUserId)
-      const deletedCommentReactions = await deleteCommentReactions(loggedUserId)
-      const deletedFollowers = await deleteFollowers(loggedUserId)
-      const deletedFollowRequests = await deleteFollowRequests(loggedUserId)
-      const deletedPosts = await deletePosts(loggedUserId)
-      const deletedUser = await deleteUserFromDatabase(loggedUserId)
-  
-      return {
-        code: 204,
-        message: "The user and their interactions have been successfully deleted",
-        user: deletedUser,
-        posts: deletedPosts,
-        post_reactions: deletedPostReactions,
-        comments: deletedComments,
-        comment_reactions: deletedCommentReactions,
-        followers: deletedFollowers,
-        follow_requests: deletedFollowRequests
-      }
-    } catch (error) {
-      throw new Error(error.message)
+  try {
+    const user = await User.findById(userId)
+    if(!user)
+      return { code: 404, message: notFound("User") }
+
+    await deleteProfilePicture(user)
+    const deletedPostReactions = await deletePostReactions(userId)
+    const deletedComments = await deleteUserComments(userId)
+    const deletedCommentReactions = await deleteCommentReactions(userId)
+    const deletedFollowers = await deleteFollowers(userId)
+    const deletedFollowRequests = await deleteFollowRequests(userId)
+    const deletedPosts = await deletePosts(userId)
+    const deletedUser = await deleteUserFromDatabase(userId)
+
+    return {
+      code: 204,
+      message: "The user and their interactions have been successfully deleted",
+      user: deletedUser,
+      posts: deletedPosts,
+      post_reactions: deletedPostReactions,
+      comments: deletedComments,
+      comment_reactions: deletedCommentReactions,
+      followers: deletedFollowers,
+      follow_requests: deletedFollowRequests
     }
+  } catch (error) {
+    throw new Error(error.message)
+  }
 }
 
 module.exports = deleteUser

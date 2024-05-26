@@ -3,7 +3,12 @@ module.exports = {
         maxCommentLength: 500,
     },
     user: {
-        maxReportReasonLength: 1000
+        maxReportReasonLength: 1000,s
+    },
+    admin: {
+        maxReportMessageLength: 1000,
+        daysToDeleteBannedUser: 30,
+        daysToDeleteBannedPost: 7
     },
     auth: {
         resetTokenExpiresTime: '1h',

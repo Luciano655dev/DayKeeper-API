@@ -98,7 +98,7 @@ const sendUnbanEmail = async(email, bannedUsername, adminUsername, message) => {
   })
 }
 
-const sendOptOutEmail = async(email, bannedUsername, adminUsername, message) => {
+const sendDeleteUserEmail = async(email, bannedUsername, adminUsername, message) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
@@ -170,7 +170,7 @@ module.exports = {
   sendPasswordResetEmail,
   sendBanEmail,
   sendUnbanEmail,
-  sendOptOutEmail,
+  sendDeleteUserEmail,
   sendPostBanEmail,
   sendPostDeletionEmail
 }

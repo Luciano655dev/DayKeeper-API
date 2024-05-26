@@ -176,5 +176,48 @@ module.exports = {
         user_info: 1
       }
     }
+  ],
+  reportedElementPipeline: [
+    {
+      $match: {
+        $and: [
+          { 
+            'banned': "false"
+          },
+          {
+            reports: {
+              $exists: true,
+              $not: { $size: 0 }
+            }
+          }
+        ]
+      },
+    },
+    {
+      $addFields: {
+        numReports: { $size: "$reports" }
+      },
+    }
+  ],
+  bannedElementPipeline: (loggedUserId) => [
+    {
+      $addFields: {
+        latestBan: {
+          $arrayElemAt: ["$ban_history", -1]
+        }
+      }
+    },
+    {
+      $match: {
+        $and: [
+          {
+            'banned': "true"
+          },
+          {
+            "latestBan.banned_by": loggedUserId
+          }
+        ]
+      }
+    }
   ]
 }
