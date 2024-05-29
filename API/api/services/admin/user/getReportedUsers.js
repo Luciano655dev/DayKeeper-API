@@ -1,5 +1,6 @@
 const getDataWithPages = require('../../getDataWithPages')
 const { reportedElementPipeline } = require('../../../repositories')
+const { success: { fetched } } = require(`../../../../constants`)
 
 const getReportedUsers = async(props)=>{
     const { page, maxPageSize } = props
@@ -13,7 +14,7 @@ const getReportedUsers = async(props)=>{
             maxPageSize
         })
 
-        return { code: 200, response }
+        return fetched(`reported users`, { response })
     } catch (error) {
         throw new Error(error.message)
     }

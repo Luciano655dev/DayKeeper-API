@@ -1,5 +1,10 @@
 const findPost = require('./get/findPost')
 
+const {
+    errors: { invalidValue },
+    success: { custom }
+} = require('../../../constants')
+
 const reactPost = async (props) => {
     const {
         name: username,
@@ -9,7 +14,7 @@ const reactPost = async (props) => {
     } = props
 
     if (!reaction || reaction < 0 || reaction >= 5)
-      return { code: 400, message: "Ender a valid reaction" }
+      return invalidValue(`reaction`)
   
     try {
         let reactedPost = await findPost(
@@ -42,11 +47,7 @@ const reactPost = async (props) => {
 
         await reactedPost.save()
     
-        return {
-            code: 200,
-            message: "The reaction was added or removed from the post",
-            post: reactedPost
-        }
+        return custom("The reaction was added or removed from the post", { post: reactedPost })
     } catch (error) {
       throw new Error(error.message)
     }

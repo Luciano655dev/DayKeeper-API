@@ -1,5 +1,10 @@
 const User = require('../../models/User')
-const { notFound, defaultPfp } = require('../../../constants')
+
+const {
+  defaultPfp,
+  errors: { notFound, custom: customErr },
+  success: { reseted }
+} = require('../../../constants')
 
 const reseteProfilePicture = async(props)=>{
     const { loggedUserId } = props
@@ -7,10 +12,10 @@ const reseteProfilePicture = async(props)=>{
     try{
       // delete last PFP
       const user = await User.findById(loggedUserId)
-      if(!user) return { code: 404, message: notFound("User") }
+      if(!user) return notFound("User")
   
       if(user.profile_picture.key == defaultPfp.key)
-        return { code: 400, message: "Sour profile photo is already the default" }
+        return customErr("Sour profile photo is already the default")
   
       // deleteLastPFP
       if (user.profile_picture.name != defaultPfp.name)
@@ -25,7 +30,7 @@ const reseteProfilePicture = async(props)=>{
       )
       await updatedUser.save()
   
-      return { code: 200, message: `${user.name}'s profile picture reseted successfully` }
+      return reseted(`${user.name}'s profile picture reseted successfully`)
     } catch (error){
       throw new Error(error.message)
     }

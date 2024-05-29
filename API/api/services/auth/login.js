@@ -1,6 +1,9 @@
 const User = require('../../models/User')
 const jwt = require('jsonwebtoken')
 const { secret } = require('../../../config')
+const {
+  success: { custom }
+} = require('../../../constants')
 
 const login = async(props)=>{
   const { name: userInput } = props
@@ -16,7 +19,7 @@ const login = async(props)=>{
       secret
     )
 
-    return { token, user }
+    return custom("Authentication completed successfully", { token, user })
   }catch(error){
     throw new Error(error.message)
   }

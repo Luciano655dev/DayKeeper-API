@@ -1,6 +1,10 @@
 const User = require('../../../models/User')
 const { sendUnbanEmail, sendBanEmail } = require('../../../utils/emailHandler')
-const { maxReportMessageLength, notFound, inputTooLong } = require('../../../../constants')
+const {
+    admin: { maxReportMessageLength },
+    errors: { notFound, inputTooLong, unauthorized },
+    success: { custom }
+} = require('../../../../constants')
 
 const banOrUnbanUser = async(props)=>{
     const {
@@ -10,16 +14,16 @@ const banOrUnbanUser = async(props)=>{
     } = props
 
     if(message.length > maxReportMessageLength)
-        return { code: 413, message: inputTooLong("Message") }
+        return inputTooLong("Message")
 
     try {
         const mainUser = await User.findById(loggedUserId)
         const bannedUser = await User.findOne({ name: username })
         if(!mainUser || !bannedUser) 
-            return { code: 404, message: notFound('User') }
+            return notFound('User')
 
         if(bannedUser.roles.find('admin'))
-            return { code: 400, message: "You can not ban an admin" }
+            return unauthorized(`ban user`, `you can not ban an admin`)
 
         if(bannedUser.banned == "true"){
             await User.updateOne({ name: username },
@@ -38,12 +42,7 @@ const banOrUnbanUser = async(props)=>{
 
             await sendUnbanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
 
-            const userUpdated = await User.findOne({ name: username }) 
-            return {
-                code: 200,
-                message: `${bannedUser.name} unbanned successfully`,
-                user: userUpdated
-            }
+            return custom( `${bannedUser.name} unbanned successfully`)
         }
 
         await User.updateOne({ name: username }, {
@@ -61,12 +60,7 @@ const banOrUnbanUser = async(props)=>{
 
         await sendBanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
 
-        const userUpdated = await User.findOne({ name: username }) 
-        return {
-            code: 200,
-            message: `${bannedUser.name} banned successfully`,
-            user: userUpdated
-        }
+        return custom(`${bannedUser.name} banned successfully`)
     } catch (error) {
         throw new Error(error.message)
     }

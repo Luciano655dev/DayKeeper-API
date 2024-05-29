@@ -1,9 +1,13 @@
-const getDataWithPages = require('../getDataWithPages')
-const { searchPostPipeline, searchUserPipeline } = require('../../repositories')
-const formatDate = require('../../utils/formatDate')
-const { notFound } = require('../../../constants')
-const { resetTime } = require('../../../config')
 const User = require('../../models/User')
+const getDataWithPages = require('../getDataWithPages')
+const formatDate = require('../../utils/formatDate')
+const { searchPostPipeline, searchUserPipeline } = require('../../repositories')
+const { resetTime } = require('../../../config')
+
+const {
+    errors: { notFound },
+    success: { fetched }
+} = require('../../../constants')
 
 const search = async (props) => {
     const page = Number(props.page) || 1
@@ -20,7 +24,7 @@ const search = async (props) => {
         const mainUser = await User.findById(loggedUserId)
         mainUser.following = await User.distinct('_id', { followers: loggedUserId })
         if(!mainUser || !mainUser.following)
-            return { code: 404, message: notFound('User') }
+            return notFound('User')
 
         let todayDate = formatDate(Date.now())
         todayDate = `${todayDate.hour < resetTime ? todayDate.day - 1 : todayDate.day}-${todayDate.month}-${todayDate.year}`
@@ -36,7 +40,7 @@ const search = async (props) => {
             maxPageSize
         })
 
-        return { code: 200, response}
+        return fetched(`data`, { response })
     } catch (error) {
         throw new Error(error.message)
     }

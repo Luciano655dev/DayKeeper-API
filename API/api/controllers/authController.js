@@ -10,9 +10,9 @@ const getUserData = require('../services/auth/getUserData')
 // register
 const registerController = async(req, res) => {
   try {
-    const user = await register(req.body)
+    const { code, message, user } = await register(req.body)
 
-    return res.status(201).json({ message: "Ative sua conta no seu Email", user })
+    return res.status(code).json({ message, user })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.message) })
   }
@@ -21,9 +21,9 @@ const registerController = async(req, res) => {
 // login
 const loginController = async(req, res)=>{
   try {
-    const { token, user } = await login(req.body)
+    const { code, message, token, user } = await login(req.body)
 
-    return res.status(200).json({ message: "Authentication completed successfully", token, user })
+    return res.status(code).json({ message, token, user })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.message) })
   }

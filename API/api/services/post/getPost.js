@@ -1,5 +1,8 @@
 const findPost = require('./get/findPost')
-const { notFound } = require('../../../constants')
+const {
+    errors: { notFound },
+    success: { fetched }
+} = require('../../../constants')
 
 const getPost = async(props)=>{
     const {
@@ -19,9 +22,9 @@ const getPost = async(props)=>{
         )
 
         if (!post)
-            return { code: 404, message: notFound('Post') }
+            return notFound('Post')
   
-        return { code: 200, post }
+        return fetched(`post`, { post })
     } catch (error) {
         throw new Error(error.message)
     }

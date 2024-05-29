@@ -1,5 +1,8 @@
 const User = require('../../models/User')
-const { notFound } = require('../../../constants')
+const {
+  errors: { notFound },
+  success: { fetched }
+} = require('../../../constants')
 
 const getUserData = async(props)=>{
   const { id } = props
@@ -7,9 +10,9 @@ const getUserData = async(props)=>{
   try {
     const user = await User.findById(id).select("-password")
     if (!user)
-      return { code: 404, message: notFound('User'), user: undefined }
+      return notFound('User')
 
-    return { code: 200, message: undefined, user }
+    return fetched(`user`, user)
   } catch (error) {
     throw new Error(error.message)
   }

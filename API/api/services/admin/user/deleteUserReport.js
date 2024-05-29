@@ -1,5 +1,8 @@
 const User = require('../../../models/User')
-const { notFound } = require('../../../../constants')
+const {
+    errors: { notFound },
+    success: { deleted }
+} = require('../../../../constants')
 
 const deleteUserReport = async(props)=>{
     const { name: username, reportId } = props
@@ -12,13 +15,9 @@ const deleteUserReport = async(props)=>{
         }, { new: true })
 
         if(!updatedUser)
-            return { code: 404, message: notFound('User') }
+            return notFound('User')
 
-        return {
-            code: 200,
-            message: "Report deleted successfully",
-            user: updatedUser
-        }
+        return deleted(`Report`)
     } catch (error) {
         throw new Error(error.message)
     }

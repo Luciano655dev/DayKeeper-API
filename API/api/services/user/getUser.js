@@ -1,7 +1,10 @@
 const User = require('../../models/User')
 const mongoose = require('mongoose')
 const { hideUserData } = require('../../repositories')
-const { notFound } = require('../../../constants')
+const {
+    errors: { notFound },
+    success: { fetched }
+} = require('../../../constants')
 
 const getUser = async(props) => {
     const { name: userInput } = props
@@ -12,9 +15,10 @@ const getUser = async(props) => {
         if (!user && mongoose.isValidObjectId(userInput))
             user = await User.findById(String(userInput)).select(hideUserData)
 
-        if (!user) return { code: 404, message: notFound('User'), user: null }
+        if (!user)
+            return notFound('User')
 
-        return { code: 200, user: { ...user._doc, followers: user._doc.followers.length } }
+        return fetched(`user`, { user: { ...user._doc, followers: user._doc.followers.length } })
     } catch (error) {
         throw new Error(error.message)
     }

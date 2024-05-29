@@ -1,6 +1,9 @@
 const User = require('../../models/User')
 const findPost = require('./get/findPost')
-const { notFound } = require('../../../constants')
+const {
+    errors: { notFound, invalidValue },
+    success: { custom }
+} = require('../../../constants')
 
 const reactComment = async (props) => {
     const {
@@ -12,7 +15,7 @@ const reactComment = async (props) => {
     } = props
 
     if (!reaction || reaction < 0 || reaction > 5)
-      return { code: 422, message: "Enter a valid reaction" }
+      return invalidValue(`reaction`)
   
     try {
         const userCommentId = (await User.findOne({ name: usercomment }))._id.toString()
@@ -24,11 +27,11 @@ const reactComment = async (props) => {
         )
 
         if(!post || !userCommentId)
-            return { code: 404, message: notFound('Post or User') }
+            return notFound('Post or User')
     
         const userCommentIndex = post.comments.findIndex((comment) => comment.user._id == userCommentId)
         if (userCommentIndex === -1)
-            return { code: 404, message: notFound('Comment') }
+            return notFound('Comment')
     
         /* Verify if the user has reacted before */
         const existingReactionIndex = post.comments[userCommentIndex].reactions.findIndex(
@@ -38,11 +41,11 @@ const reactComment = async (props) => {
         /* if true */
         if (existingReactionIndex !== -1){
             if (post.comments[userCommentIndex].reactions[existingReactionIndex].reaction === reaction) {
-            /* If it's the same reaction, remove */
-            post.comments[userCommentIndex].reactions.splice(existingReactionIndex, 1)
+                /* If it's the same reaction, remove */
+                post.comments[userCommentIndex].reactions.splice(existingReactionIndex, 1)
             } else {
-            /* If it's a different reaction, update */
-            post.comments[userCommentIndex].reactions[existingReactionIndex].reaction = reaction
+                /* If it's a different reaction, update */
+                post.comments[userCommentIndex].reactions[existingReactionIndex].reaction = reaction
             }
         } else {
             /* If false, add new reaction */
@@ -51,7 +54,7 @@ const reactComment = async (props) => {
     
         await post.save()
     
-        return { code: 200, message: "The reaction was added or removed from the comment", post }
+        return custom("The reaction was added or removed from the comment", { post })
     } catch (error) {
       throw new Error(error.message)
     }

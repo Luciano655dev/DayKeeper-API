@@ -1,13 +1,16 @@
 const User = require('../../models/User')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const { fieldsNotFilledIn, notFound } = require('../../../constants')
+const {
+  errors: { fieldsNotFilledIn, notFound },
+  success: { reseted }
+} = require('../../../constants')
 
 const resetPassword = async (props) => {
   const { token, password } = props
 
   if(!token || !password)
-    return { code: 400, message: fieldsNotFilledIn }
+    return fieldsNotFilledIn(`all`)
 
   try {
     const decoded = jwt.verify(token, process.env.EMAIL_SECRET)
@@ -21,10 +24,11 @@ const resetPassword = async (props) => {
     }, { new: true })
 
     if (!user)
-      return { code: 404, message: notFound("User") }
+      return notFound("User")
 
     await user.save()
-    return { code: 200, message: "Password reset successfully" }
+
+    return reseted(`Password`)
   } catch (error) {
     throw new Error(error.message)
   }

@@ -1,5 +1,8 @@
 const User = require('../../models/User')
-const { notFound } = require('../../../constants')
+const {
+  errors: { notFound },
+  success: { deleted }
+} = require('../../../constants')
 
 const deleteProfilePicture = require("./delete/deleteProfilePicture")
 const deletePostReactions = require('./delete/deletePostReactions')
@@ -16,8 +19,9 @@ const deleteUser = async(props)=>{
   try {
     const user = await User.findById(userId)
     if(!user)
-      return { code: 404, message: notFound("User") }
+      return notFound("User")
 
+    
     await deleteProfilePicture(user)
     const deletedPostReactions = await deletePostReactions(userId)
     const deletedComments = await deleteUserComments(userId)
@@ -27,9 +31,7 @@ const deleteUser = async(props)=>{
     const deletedPosts = await deletePosts(userId)
     const deletedUser = await deleteUserFromDatabase(userId)
 
-    return {
-      code: 204,
-      message: "The user and their interactions have been successfully deleted",
+    return deleted("User", {
       user: deletedUser,
       posts: deletedPosts,
       post_reactions: deletedPostReactions,
@@ -37,7 +39,7 @@ const deleteUser = async(props)=>{
       comment_reactions: deletedCommentReactions,
       followers: deletedFollowers,
       follow_requests: deletedFollowRequests
-    }
+    })
   } catch (error) {
     throw new Error(error.message)
   }

@@ -3,10 +3,9 @@ const Post = require(`../../../models/Post`)
 const deleteFile = require(`../../../utils/deleteFile`)
 const { sendPostDeletionEmail } = require(`../../../utils/emailHandler`)
 const {
-    maxReportMessageLength,
-    daysToDeleteBannedPost,
-    inputTooLong,
-    notFound
+    admin: { maxReportMessageLength, daysToDeleteBannedPost },
+    errors: { inputTooLong, notFound, unauthorized },
+    success: { deleted }
 } = require(`../../../../constants`)
 
 const deleteBannedPosts = async(props)=>{
@@ -18,7 +17,7 @@ const deleteBannedPosts = async(props)=>{
     } = props
 
     if(message.length > maxReportMessageLength)
-        return { code: 413, message: inputTooLong(`Message`) }
+        return inputTooLong(`Message`)
 
     try{
         const userPost = await User.findOne({ name: username })
@@ -28,17 +27,17 @@ const deleteBannedPosts = async(props)=>{
         })
 
         if(!deletedPost)
-            return { code: 404, message: notFound(`Post`) }
+            return notFound(`Post`)
 
         const latestBan = deletedPost.ban_history[deletedPost.ban_history.length-1]
         if(deletedPost.banned != "true")
-            return { code: 403, message: "This post isn't banned" }
+            return unauthorized(`delete this post`, `this post isn't banned`)
         if(latestBan.banned_by != loggedUserId)
-            return { code: 400, message: "Only the admin who banned the post can delete it" }
+            return unauthorized(`delete this post`, "Only the admin who banned this post can delete it")
 
         const diffInDays = Math.abs(new Date() - latestBan.ban_date) / (1000 * 3600 * 24)
         if(diffInDays < daysToDeleteBannedPost)
-            return { code: 400, msg: "Você só pode excluir um post caso ele esteja 7 ou mais dias banido" }
+            return unauthorized(`delete this post`, "You can only delete a post if it has been banned for 7 or more days")
 
         // delete post
         await await Post.findOneAndDelete({
@@ -60,12 +59,7 @@ const deleteBannedPosts = async(props)=>{
             message
         )
 
-        return {
-            code: 200,
-            message: "Post deleted successfully",
-            post: deletedPost
-        }
-
+        return deleted(`Post`)
     } catch (error) {
         throw new Error(error.message)
     }

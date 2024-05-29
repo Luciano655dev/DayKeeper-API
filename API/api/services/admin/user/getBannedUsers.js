@@ -1,5 +1,6 @@
 const getDataWithPages = require(`../../getDataWithPages`)
 const { bannedElementPipeline } = require(`../../../repositories`)
+const { success: { fetched } } = require(`../../../../constants`)
 
 const getBannedUsers = async(props) => {
     const {
@@ -18,10 +19,10 @@ const getBannedUsers = async(props) => {
             maxPageSize
         })
 
-        return { code: 200, response }
+        return fetched(`banned users`, { response })
     } catch (error) {
         throw new Error(error.message)
     }
 }
 
-export default getBannedUsers
+module.exports = getBannedUsers

@@ -1,16 +1,4 @@
-const User = require('../models/User')
-const Post = require('../models/Post')
-const BannedUser = require('../models/BannedUser')
 const mongoose = require('mongoose')
-
-const {
-    sendBanEmail,
-    sendUnbanEmail,
-    sendOptOutEmail,
-    sendPostBanEmail,
-    sendPostDeletionEmail
-} = require('../utils/emailHandler')
-const deleteFile = require('../utils/deleteFile')
 
 const { serverError } = require('../../constants')
 const banOrUnbanUser = require('../services/admin/user/banOrUnbanUser')
@@ -144,11 +132,8 @@ const getReportedPostsController = async(req, res)=>{
 }
 
 const getBannedPostsController = async(req, res)=>{
-    const loggedUserId = new mongoose.Types.ObjectId(req.id)
-
     const page = Number(req.query.page) || 1
     const maxPageSize = req.query.maxPageSize ? ( Number(req.query.maxPageSize) <= 100 ? Number(req.query.maxPageSize) : 100) : 1
-    
 
     try{
         const { response, code } = await getBannedPosts({

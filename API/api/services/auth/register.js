@@ -3,6 +3,10 @@ const { defaultPfp } = require('../../../constants')
 const bcrypt = require('bcrypt')
 const { sendVerificationEmail } = require('../../utils/emailHandler')
 
+const {
+    success: { created }
+} = require('../../../constants')
+
 const register = async(props) => {
     const { name: username, email, password } = props
     const img = defaultPfp
@@ -29,7 +33,7 @@ const register = async(props) => {
     
         await sendVerificationEmail(username, email, img.url)
     
-        return user
+        return created(`Check your gmail`, user)
     } catch (error) {
         throw new Error(error.message)
     }
