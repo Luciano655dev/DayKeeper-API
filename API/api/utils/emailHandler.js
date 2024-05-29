@@ -12,13 +12,7 @@ const transporterOptions = {
   },
 }
 
-async function sendVerificationEmail(name, email, imgSrc = ''){
-  const emailToken = jwt.sign(
-    { email },
-    process.env.EMAIL_SECRET,
-    { expiresIn: 3 * 60 } // 3 minutes
-  )
-
+async function sendVerificationEmail(name, email, imgSrc = '', verificationCode) {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   transporter.sendMail({
@@ -30,7 +24,7 @@ async function sendVerificationEmail(name, email, imgSrc = ''){
       <img src="${imgSrc}"></img>
       <h1>Bem vindo(a) ao DayKeeper ${name}!</h1>
 
-      <h3><a href="http://localhost:5173/confirm_email?token=${emailToken}">Clique aqui para confirmar seu registro.</a></h3>
+      <h3>Seu código de verificação é: <strong>${verificationCode}</strong></h3>
 
       <h4>Apriveite ao máximo nossa plataforma!</h4>
       <h4>Qualquer dúvida, entre em contato:</h4>
@@ -38,13 +32,14 @@ async function sendVerificationEmail(name, email, imgSrc = ''){
       <h4><a href="https://github.com/luciano655dev">Github</a></h4>
     `,
   }, (error, info) => {
-    if (error) return res.status(500).send(error.toString())
+    if (error)
+      return error.toString()
 
-    console.log(`http://localhost:3000/auth/confirm_email?token=${emailToken}`)
+    console.log(`Verification code sent: ${verificationCode}`)
   })
 }
 
-const sendPasswordResetEmail = async (email, resetToken) => {
+const sendPasswordResetEmail = async (email, verificationCode) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
@@ -52,8 +47,13 @@ const sendPasswordResetEmail = async (email, resetToken) => {
     to: email,
     subject: 'Redefinição de Senha no DayKeeper',
     text: `Você está recebendo este email porque solicitou uma redefinição de senha para a sua conta. 
-           Por favor, clique no seguinte link ou cole-o no seu navegador para completar o processo: 
-           http://localhost:5173/reset_password?token=${resetToken}`,
+           
+          <h3>Seu código de verificação é: <strong>${verificationCode}</strong></h3>`,
+  }, (error, info) => {
+    if (error)
+      return error.toString()
+
+    console.log(`Verification code sent: ${verificationCode}`)
   })
 }
 

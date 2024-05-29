@@ -1,4 +1,4 @@
-const { serverError } = require('../../constants')
+const { errors: { serverError } } = require('../../constants')
 
 const register = require('../services/auth/register')
 const login = require('../services/auth/login')
@@ -32,7 +32,7 @@ const loginController = async(req, res)=>{
 // verifyEmail
 const confirmEmailController = async(req, res) => {
   try{
-    const { code, message } = await confirmEmail(req.query)
+    const { code, message } = await confirmEmail(req.body)
 
     return res.status(code).json({ message })
   } catch (error) {
@@ -47,6 +47,7 @@ const forgetPasswordController = async (req, res) => {
 
     return res.status(code).json({ message })
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: serverError(error.message) })
   }
 }

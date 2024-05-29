@@ -1,8 +1,7 @@
 const User = require('../../models/User')
-const jwt = require('jsonwebtoken')
 const { sendPasswordResetEmail } = require('../../utils/emailHandler')
 const {
-  auth: { resetTokenExpiresTime, resetPasswordExpiresTime },
+  auth: { resetPasswordExpiresTime },
   errors: { notFound },
   success: { custom }
 } = require('../../../constants')
@@ -10,12 +9,14 @@ const {
 const forgetPassword = async (props) => {
   const { email } = props
 
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+  const verificationCodeTime = Date.now() + resetPasswordExpiresTime
+
   try {
-    const resetToken = jwt.sign({ email }, process.env.EMAIL_SECRET, { expiresIn: resetTokenExpiresTime })
     const user = await User.findOneAndUpdate({ email }, {
       $set: {
-        resetPassword: resetToken,
-        resetPasswordExpires: Date.now() + resetPasswordExpiresTime
+        verification_code: verificationCode,
+        verification_time: verificationCodeTime
       }
     }, { new: true })
 
@@ -25,7 +26,7 @@ const forgetPassword = async (props) => {
     await user.save()
 
     // Enviar email de redefinição de senha
-    await sendPasswordResetEmail(email, resetToken)
+    await sendPasswordResetEmail(email, verificationCode)
 
     return custom("A password reset email has been sent to your registered email address" )
   } catch (error) {

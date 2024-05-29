@@ -21,6 +21,15 @@ const userSchema = mongoose.Schema({
     required: true
   },
 
+  verification_code: {
+    type: String,
+    required: false
+  },
+  verification_time: {
+    type: Date,
+    required: false
+  },
+
   followers: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -78,7 +87,6 @@ const userSchema = mongoose.Schema({
       required: false
     }
   }]
-
 })
 
 const User = mongoose.model('User', userSchema)

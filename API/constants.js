@@ -13,7 +13,8 @@ module.exports = {
     },
     auth: {
         resetTokenExpiresTime: '1h',
-        resetPasswordExpiresTime: 3600000,
+        resetPasswordExpiresTime: 3600000, // 1 h
+        registerCodeExpiresTime: 600000, // 10 min
         maxUsernameLength: 40,
         maxEmailLength: 320,
         maxPasswordLength: 50
@@ -84,9 +85,6 @@ module.exports = {
             }
         }
     },
-    notFound: (data) => `${data} not found`,
-    inputTooLong: (data) => `The ${data} is too long`,
-    fieldsNotFilledIn: 'Fit in all fields',
     success: {
         updated: (data, props) => {
             return {

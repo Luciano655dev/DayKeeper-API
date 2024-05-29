@@ -1,33 +1,36 @@
 const User = require('../../models/User')
-const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const {
-  errors: { fieldsNotFilledIn, notFound },
+  errors: { fieldsNotFilledIn, notFound, unauthorized, invalidValue },
   success: { reseted }
 } = require('../../../constants')
 
 const resetPassword = async (props) => {
-  const { token, password } = props
+  const { verificationCode, email, password } = props
 
-  if(!token || !password)
+  if(!verificationCode || !password)
     return fieldsNotFilledIn(`all`)
 
   try {
-    const decoded = jwt.verify(token, process.env.EMAIL_SECRET)
-    const salt = await bcrypt.genSalt(12)
-    const passwordHash = await bcrypt.hash(password, salt)
-
-    const user = await User.findOneAndUpdate({ email: decoded.email }, {
-      $set: {
-        password: passwordHash
-      }
-    }, { new: true })
+    const user = await User.findOne({ email })
 
     if (!user)
       return notFound("User")
+    if (user.verification_code !== verificationCode)
+      return invalidValue(`Verification code`)
+    if(user.verification_time < Date.now())
+      return unauthorized(`confirm email`, `time expired`)
+
+    const salt = await bcrypt.genSalt(12)
+    const passwordHash = await bcrypt.hash(password, salt)
+
+    user.password = passwordHash
+    user.verification_code = undefined
+    user.verification_time = undefined
 
     await user.save()
 
+    console.log(`reseted successfully :)`)
     return reseted(`Password`)
   } catch (error) {
     throw new Error(error.message)

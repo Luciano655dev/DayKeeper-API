@@ -1,34 +1,33 @@
 const User = require('../../models/User')
-const jwt = require('jsonwebtoken')
-const { mail } = require("../../../config")
 const {
-    errors: { notFound, unauthorized, fieldNotFilledIn },
+    errors: { notFound, unauthorized, fieldNotFilledIn, invalidValue },
     success: { custom }
 } = require("../../../constants")
 
 const confirmEmail = async(props)=>{
-    const { token } = props
+    const { email, verificationCode } = props
 
-    if(!token)
+    if(!verificationCode || !email)
         return fieldNotFilledIn('token')
 
     try{
-        return jwt.verify(token, mail.secret, async(err, decoded) => {
-            if (err)
-                return unauthorized(`Invalid or expired token`)
-            const { email } = decoded
-        
-            const user = await User.findOneAndUpdate(
-              { email },
-              { $set: { verified_email: true } },
-              { new: true }
-            )
-            if(!user)
-                return notFound('User')
-            await user.save()
-      
-            return custom(`${user.name}'s email confirmed successfully` )
-        })
+        const user = await User.findOne({ email })
+
+        if (!user)
+            return notFound(`user`)
+    
+        if (user.verification_code !== verificationCode)
+            return invalidValue(`Verification code`)
+
+        if(user.verification_time < Date.now())
+            return unauthorized(`confirm email`, `time expired`)
+
+        user.verified_email = true
+        user.verification_code = undefined
+        user.verification_time = undefined
+        await user.save()
+
+        return custom(`${user.name}'s email confirmed successfully`)
     }catch(error){
         throw new Error(error.mesage)
     }
