@@ -1,5 +1,5 @@
 const User = require('../api/models/User')
-const { serverError } = require('../constants')
+const { errors: { serverError } } = require('../constants')
 
 async function checkBannedUserMW(req, res, next){
     const { name } = req.params

@@ -11,7 +11,8 @@ const {
 
 const search = async (props) => {
     const page = Number(props.page) || 1
-    const maxPageSize = props.maxPageSize ? ( Number(props.maxPageSize) <= 100 ? Number(props.maxPageSize) : 100) : 2
+    const maxPageSize = props.maxPageSize ? ( Number(props.maxPageSize) <= 100 ? Number(props.maxPageSize): 100)
+    : 3
 
     const searchQuery = props.q || ''
     const order = props.order || 'relevant'
@@ -38,7 +39,7 @@ const search = async (props) => {
             following,
             page,
             maxPageSize
-        })
+        }, mainUser)
 
         return fetched(`data`, { response })
     } catch (error) {

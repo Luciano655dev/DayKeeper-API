@@ -1,5 +1,5 @@
 const search = require('../services/seach/search')
-const { serverError } = require('../../constants')
+const { errors: { serverError } } = require('../../constants')
 
 const searchController = async (req, res) => {
     try {

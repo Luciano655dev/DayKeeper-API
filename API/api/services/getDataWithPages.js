@@ -1,13 +1,13 @@
 const Post = require('../models/Post')
 const User = require('../models/User')
 
-const getDataWithPages = async ({ type, pipeline, order, following, page = 1, maxPageSize = 3 }) => {
+const getDataWithPages = async ({ type, pipeline, order, following, page = 1, maxPageSize = 3 }, mainUser) => {
   const skipCount = (page - 1) * maxPageSize
   let newPipeline = [...pipeline]
 
   let matchCriteria = {}
   if (following === 'following') {
-    matchCriteria = type === 'Post' ? { 'user': { $in: mainUser.following } } : { '_id': { $in: mainUser.following } };
+    matchCriteria = type === 'Post' ? { 'user': { $in: mainUser.following } } : { '_id': { $in: mainUser.following } }
   } else if (following === 'friends') {
     matchCriteria = type === 'Post' ? {
       $and: [
@@ -22,23 +22,24 @@ const getDataWithPages = async ({ type, pipeline, order, following, page = 1, ma
     }
   }
 
-  newPipeline.push({ $match: matchCriteria })
+  newPipeline.push({ $match: matchCriteria });
 
-  let sortPipeline
+  let sortPipeline;
 
-  switch(order){
+  switch (order) {
     case 'relevant':
-      sortPipeline = { $sort: { isTodayDate: -1, relevance: -1 } }
+      sortPipeline = { $sort: { isTodayDate: -1, relevance: -1, _id: 1 } }
       break
-    case 'most_reports': 
-      sortPipeline = { $sort: { numReports: -1 } }
+    case 'most_reports':
+      sortPipeline = { $sort: { numReports: -1 , _id: 1} }
+      break
     case 'recent_ban':
-      sortPipeline = { $sort: { "latestBan.ban_date": 1 } }
+      sortPipeline = { $sort: { "latestBan.ban_date": 1, _id: 1 } }
       break
     case 'recent':
-      sortPipeline = { $sort: { created_at: -1 } }
     default: // default is 'recent'
-      sortPipeline = { $sort: { created_at: -1 } }
+      sortPipeline = { $sort: { created_at: -1, _id: 1} }
+      break
   }
 
   try {
@@ -57,10 +58,14 @@ const getDataWithPages = async ({ type, pipeline, order, following, page = 1, ma
         }
       },
       { $unwind: "$totalCount" }
-    ]
+    ];
 
-    const [{ data, totalCount }] = await (type === 'Post' ? Post.aggregate(aggregationPipeline) : User.aggregate(aggregationPipeline))
-    const totalPages = Math.ceil(totalCount ? totalCount.total : 0 / maxPageSize)
+    const [{ data, totalCount }] = await (
+      type === 'Post' ? Post.aggregate(aggregationPipeline) : User.aggregate(aggregationPipeline)
+    );
+
+    // Corrigido o cálculo de totalPages
+    const totalPages = Math.ceil(totalCount.total / maxPageSize);
 
     return {
       data,
@@ -68,10 +73,11 @@ const getDataWithPages = async ({ type, pipeline, order, following, page = 1, ma
       pageSize: data.length,
       maxPageSize,
       totalPages
-    }
+    };
   } catch (error) {
-    throw new Error(error.message)
+    throw new Error(error.message);
   }
-}
+};
+
 
 module.exports = getDataWithPages

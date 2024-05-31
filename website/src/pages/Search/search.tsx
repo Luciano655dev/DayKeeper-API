@@ -19,22 +19,23 @@ export default function Search(){
     const containerRef = useRef(null)
     const queryParams = new URLSearchParams(location.search)
 
-    const [page, setPage] = useState(1)
+    const [page, setPage] = useState(Number(queryParams.get('page')) || 1)
     const [totalPages, setTotalPages] = useState(1)
     const [search, setSearch] = useState('')
 
     // 0: type, 1: order, 2: following, 3: day
     const [filters, setFilters]: any = useState([
-        `&type=${queryParams.get('type') || 'posts'}`,
+        `&type=${queryParams.get('type') || 'Post'}`,
         `&order=${queryParams.get('order') || 'relevant'}`,
-        `&following=${queryParams.get('following') || 'false'}`
+        `&following=${queryParams.get('following') || 'false'}`,
+        `&page=${queryParams.get('page') || '1'}`
     ])
 
     const [loading, setLoading] = useState(true)
     const [data, setData]: any = useState(null)
     const [error, setError] = useState('')
 
-    const loadPosts = async(newPage: Number, bool: Boolean)=>{
+    const loadPosts = async(newPage: Number)=>{
         try{
             const reqStr = `&q=${search}${filters.join('')}`
             const response: any = await axios.get(`http://localhost:3000/search?page=${newPage}&${reqStr}`,
@@ -43,10 +44,6 @@ export default function Search(){
 
             setTotalPages(response.data.totalPages)
 
-            if(bool)
-                return setData([ ...response.data.data])
-
-            if(data) return setData([ ...response.data.data, ...data])
             return setData(response.data.data)
         } catch (error: any) {
             console.log(error)
@@ -57,9 +54,21 @@ export default function Search(){
     }
 
     // Infinite scroll
-    const handleLoadMore = async () => {
-        setPage((prevPage) => prevPage + 1)
-        await loadPosts(page + 1, filters[0] == '&type=users')
+    const handleChangePage = async(direction: boolean)=>{
+        setLoading(true)
+
+        try{
+            let nextPage = Math.max(page - 1, 1)
+            if(direction) // aumentar
+                nextPage = Math.min(page + 1, totalPages)
+    
+            setPage(nextPage)
+            setFilters(filters.with(3, `&page=${nextPage}`))
+        }catch(error){
+            setError(`${error}`)
+        }
+
+        setLoading(false)
     }
 
     useEffect(()=>{
@@ -71,7 +80,7 @@ export default function Search(){
 
                 navigate(`/search${reqStr}`, { replace: true })
 
-                await loadPosts(page, filters[0] == '&type=users')
+                await loadPosts(page)
             } catch (error: any) {
                 console.log(error)
                 setError(`${error}`)
@@ -102,8 +111,8 @@ export default function Search(){
 
             <StyledSelectContainer>
                 <select disabled value={queryParams.get('type') || 'posts'}>
-                    <option value='posts'>POSTS</option>
-                    <option value='users'>USERS</option>
+                    <option value='Post'>POSTS</option>
+                    <option value='User'>USERS</option>
                 </select>
 
                 <select disabled value={queryParams.get('order') || 'relevant'}>
@@ -131,8 +140,8 @@ export default function Search(){
 
             <StyledSelectContainer>
                 <select value={queryParams.get('type') || 'posts'} onChange={ (e) => handleChangeOption(0, 'type', e.target.value) }>
-                    <option value='posts'>POSTS</option>
-                    <option value='users'>USERS</option>
+                    <option value='Post'>POSTS</option>
+                    <option value='User'>USERS</option>
                 </select>
 
                 <select value={queryParams.get('order') || 'relevant'} onChange={ (e) => handleChangeOption(1, 'order', e.target.value) }>
@@ -149,7 +158,7 @@ export default function Search(){
         </div>
 
         <StyledContainer ref={containerRef}>
-            { queryParams.get('type') != 'users' ? 
+            { queryParams.get('type') != 'User' ? 
                 data.map((post: any)=>
                     <StyledItem key={post._id} onClick={()=>navigate(`/${post.user_info.name}/${post.title}`)}>
                         <div className='upperContainer'>
@@ -176,23 +185,23 @@ export default function Search(){
                         <div className='bottomContainer'>
                             <div className='reactionsContainer'>
                                 <div>
-                                    { post.reactions[0] }
+                                    { post.reactions.filter(({ reaction }: any) => reaction == 0).length }
                                     😍
                                 </div>
                                 <div>
-                                    { post.reactions[1] }
+                                    { post.reactions.filter(({ reaction }: any) => reaction == 1).length }
                                     😄
                                 </div>
                                 <div>
-                                    { post.reactions[2] }
+                                    { post.reactions.filter(({ reaction }: any) => reaction == 2).length }
                                     😂
                                 </div>
                                 <div>
-                                    { post.reactions[3] }
+                                    { post.reactions.filter(({ reaction }: any) => reaction == 3).length }
                                     😢
                                 </div>
                                 <div>
-                                    { post.reactions[4] }
+                                    { post.reactions.filter(({ reaction }: any) => reaction == 4).length }
                                     😠
                                 </div>
                             </div>
@@ -207,7 +216,7 @@ export default function Search(){
 
                 data.map((user: any)=>
                     <StyledItem key={user._id} onClick={()=>navigate(`/${user.name}`)}>
-                        <img src={user.profile_picture.url}></img>
+                        <img src={user.profile_picture.url} style={{ maxWidth: `10em`, maxHeight: `10em` }}></img>
                         <h1>{user.name}</h1>
                     </StyledItem>
                 )
@@ -215,7 +224,13 @@ export default function Search(){
 
             {
                 page < totalPages ? 
-                    <StyledButton onClick={()=>handleLoadMore()}>Load More</StyledButton>
+                    <StyledButton onClick={()=>handleChangePage(true)}>{`>`}</StyledButton>
+                    :
+                    <></>
+            }
+            {
+                page > 1 ? 
+                    <StyledButton onClick={()=>handleChangePage(false)}>{`<`}</StyledButton>
                     :
                     <></>
             }
