@@ -15,7 +15,7 @@ const blockUser = require('../services/user/blockUser')
 // getUserByName
 const getUserController = async(req, res) => {
   try {
-    const { code, message, user } = await getUser(req.params)
+    const { code, message, user } = await getUser({ ...req.params, loggedUserId: req.id})
 
     return res.status(code).json({ message, user })
   } catch (error) {

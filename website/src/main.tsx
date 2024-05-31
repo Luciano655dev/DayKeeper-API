@@ -81,7 +81,6 @@ const PrivateRoute = ({ element }: any) => {
 
   React.useEffect(() => {
     isAuthenticated().then((authenticated: any) => {
-
       getTodayQuestion().then((question: any) => {
         setAuthenticated(authenticated.isAuth)
 

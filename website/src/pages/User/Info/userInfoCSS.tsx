@@ -1,6 +1,13 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
+export const buttonStyle = {
+    margin: '1em',
+    padding: '1em',
+    width: '10vw',
+    fontSize: '1em'
+}
+
 export const StyledContainer = styled.div`
     display: flex;
     flex-direction: column;

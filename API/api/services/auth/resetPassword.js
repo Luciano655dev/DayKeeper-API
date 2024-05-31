@@ -30,7 +30,6 @@ const resetPassword = async (props) => {
 
     await user.save()
 
-    console.log(`reseted successfully :)`)
     return reseted(`Password`)
   } catch (error) {
     throw new Error(error.message)

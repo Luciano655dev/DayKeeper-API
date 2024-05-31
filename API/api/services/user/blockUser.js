@@ -24,7 +24,10 @@ const blockUser = async(props)=>{
     }
 
     /* Block */
-    await User.updateOne({ name: mainUser.name }, { $push: { blocked_users: blockedUser._id } })
+    await User.updateOne({ _id: loggedUserId }, {$push: { blocked_users: blockedUser._id }})
+    blockedUser.followers = blockedUser.followers.filter((id) => id != loggedUserId)
+    await blockedUser.save()
+    
     return custom(`${blockedUser.name} successfully blocked`)
   }catch (error) {
     throw new Error(error.message)

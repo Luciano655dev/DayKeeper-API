@@ -7,7 +7,7 @@ const {
 } = require('../../../constants')
 
 const getUser = async(props) => {
-    const { name: userInput } = props
+    const { name: userInput, loggedUserId } = props
 
     try {
         /* Search by name or id */
@@ -18,7 +18,23 @@ const getUser = async(props) => {
         if (!user)
             return notFound('User')
 
-        return fetched(`user`, { user: { ...user._doc, followers: user._doc.followers.length } })
+        const loggedUser = await User.findById(loggedUserId).select("-password")
+
+        let status = `error`
+        if(user._doc.followers.includes(loggedUserId.toString()))
+            status = `following`
+        else if(loggedUser.blocked_users.includes(user._id.toString()))
+            status = `blocked`
+        else if(user._doc._id == loggedUserId.toString())
+            status = `logged`
+        else
+            status = `default`
+
+        return fetched(`user`, { user: {
+            ...user._doc,
+            followers: user._doc.followers.length,
+            status
+        } })
     } catch (error) {
         throw new Error(error.message)
     }

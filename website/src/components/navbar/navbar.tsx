@@ -131,8 +131,8 @@ function Logged({ token, handleLogout, location }: any) {
   const navigate = useNavigate()
   const [userInfo, setUserInfo]: any = useState({ name: '', profile_picture: { url: '' } })
   const [userFollowing, setUserFollowing]: any = useState({ usersFollowing: [] })
-  const [loadingUser, setLoadingUser] = useState(true);
-  const [error, setError]: any = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true)
+  const [error, setError]: any = useState(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,13 +141,14 @@ function Logged({ token, handleLogout, location }: any) {
         const userResponse = await axios.get('http://localhost:3000/auth/user', {
           headers: { Authorization: `Bearer ${token}` },
         })
+
         setUserInfo(userResponse.data.user)
 
         // fetch user friends Data
         const followingResponse: any = await axios.get(`http://localhost:3000/${userResponse.data.user.name}/following`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        setUserFollowing(followingResponse.data.usersFollowing)
+        setUserFollowing(followingResponse.data.users)
       } catch (error) {
         setError('Error fetching user information');
       } finally {

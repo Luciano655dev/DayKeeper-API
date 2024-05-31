@@ -7,14 +7,15 @@ import {
   StyledEditProfileButton,
   StyledFollowLink,
   StyledPostsLink,
-  StyledReportButton
+  StyledReportButton,
+  buttonStyle
 } from './userInfoCSS'
-import { StyledButton } from '../Edit/editProfileCSS';
-import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { StyledButton } from '../Edit/editProfileCSS'
+import { useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import Cookies from 'js-cookie';
-import axios from 'axios';
+import Cookies from 'js-cookie'
+import axios from 'axios'
 import { Alert } from '../../Post/Render/Info/postInfoCSS'
 import Page404 from '../../404/Page404'
 
@@ -24,186 +25,98 @@ export default function UserInfo() {
   const { name: userNameFromParams } = useParams()
   const sameUser = userNameFromParams === user.name
 
-  const [isFollowing, setIsFollowing] = useState(false)
-  const [isBlocked, setIsBlocked] = useState(false)
-  const [activeBlockButton, setActiveBlockButton] = useState(true)
-  const [activeFollowButton, setActiveFollowButton] = useState(true)
-  const [userInfo, setUserInfo]: any = useState({})
-  
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [msg, setMsg] = useState('')
+  const [state, setState]: any = useState({
+    isFollowing: false,
+    isBlocked: false,
+    activeBlockButton: true,
+    activeFollowButton: true,
+    userInfo: {},
+    loading: true,
+    error: '',
+    msg: '',
+  })
 
-  const updateUserInfo = async()=>{
-    const loggedUser = await axios.get(`http://localhost:3000/${user.name}`, { headers: { Authorization: `Bearer ${token}` } })
-    const responseUserInfo: any = await axios.get(`http://localhost:3000/${userNameFromParams}`, { headers: { Authorization: `Bearer ${token}` } })
-    const following = await axios.get(`http://localhost:3000/${userNameFromParams}/following`, { headers: { Authorization: `Bearer ${token}` } })
+  const updateUserInfo = async () => {
+    try {
+      const [responseUserInfo, following] = await Promise.all([
+        axios.get(`http://localhost:3000/${userNameFromParams}`,
+          { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`http://localhost:3000/${userNameFromParams}/following`,
+          { headers: { Authorization: `Bearer ${token}` } })
+      ])
 
-    console.log(responseUserInfo)
-
-    setIsFollowing(responseUserInfo.data.user.followers.find( (userid: any) => userid == user.id))
-    setIsBlocked(loggedUser.data.user.blocked_users.find( (userid: any) => userid == responseUserInfo.data.user._id))
-
-    setActiveBlockButton(!(responseUserInfo.data.user._id == user.id)) // Não pode ser o mesmo usuário
-
-    setActiveFollowButton(
-      !(responseUserInfo.data.user._id == user.id) && // Não pode ser o mesmo usuário
-      !responseUserInfo.data.user.follow_requests.find( (userid: any) => userid == user.id) && // não pode ter pedido para seguir
-      !responseUserInfo.data.user.blocked_users.find( (userid: any) => userid == user.id) // não pode estar bloqueado
-    )
-    setUserInfo({...responseUserInfo.data.user, following: following.data.usersFollowing})
+      const userStatus = responseUserInfo.data.user.status
+      setState((prevState: any) => ({
+        ...prevState,
+        isFollowing: userStatus === 'following',
+        isBlocked: userStatus === 'blocked',
+        activeBlockButton: userStatus === 'following' || userStatus === 'default',
+        activeFollowButton: userStatus === 'following' || userStatus === 'default',
+        userInfo: { ...responseUserInfo.data.user, following: following.data.users },
+        loading: false
+      }))
+    } catch (error: any) {
+      setState((prevState: any) => ({
+        ...prevState,
+        error: error.toString(),
+        loading: false
+      }))
+    }
   }
 
   useEffect(() => {
-    const getUserInfo = async () => {
-      try {
-        await updateUserInfo()
-
-        setLoading(false)
-      } catch (error) {
-        setError(true)
-        setLoading(false)
-      }
-    }
-
-    getUserInfo()
+    updateUserInfo()
   }, [userNameFromParams])
 
-  const handleFollow = async()=>{
-    setLoading(true)
-
-    try{
-      const response: any = await axios.post(`http://localhost:3000/${userNameFromParams}/follow`, {},
-      { headers: { Authorization: `Bearer ${token}` } })
-
+  const handleAction = async (url: any) => {
+    setState((prevState: any) => ({ ...prevState, loading: true }))
+    try {
+      const response = await axios.post(`http://localhost:3000/${userNameFromParams}/${url}`, {}, { headers: { Authorization: `Bearer ${token}` } })
       await updateUserInfo()
-
-      setMsg(response.data.msg)
-    }catch(error: any){
-      setMsg(error.response.data.msg)
+      setState((prevState: any) => ({ ...prevState, msg: response.data.message, loading: false }))
+    } catch (error: any) {
+      setState((prevState: any) => ({ ...prevState, msg: error.response.data.message, loading: false }))
     }
-
-    setLoading(false)
   }
 
-  const handleBlock = async()=>{
-    setLoading(true)
-
-    try{
-      const response: any = await axios.post(`http://localhost:3000/${userNameFromParams}/block`, {},
-      { headers: { Authorization: `Bearer ${token}` } })
-
-      await updateUserInfo()
-
-      setMsg(response.data.msg)
-    }catch(error: any){
-      setMsg(error.response.data.msg)
-    }
-
-    setLoading(false)
-  }
-
-  const handleReport = async()=>{
-    setLoading(true)
-
-    try{
-      const response: any = await axios.post(`http://localhost:3000/${userNameFromParams}/report`, {},
-      { headers: { Authorization: `Bearer ${token}` } })
-
-      await updateUserInfo()
-
-      setMsg(response.data.msg)
-    }catch(error: any){
-      setMsg(error.response.data.msg)
-    }
-
-    setLoading(false)
-  }
-
-  if (loading) return <div>loading...</div>
-  if(error) return <Page404></Page404>
+  if (state.loading) return <div>loading...</div>
+  if (state.error) return <Page404 />
 
   return (
     <div>
-      { msg ? <Alert style={{ backgroundColor: 'green' }} msg={msg}></Alert> : <></> }
+      {state.msg && <Alert style={{ backgroundColor: 'green' }} msg={state.msg} />}
       <StyledContainer>
-        <StyledImage src={userInfo.profile_picture.url}></StyledImage>
-        <StyledUsername>{userInfo.name}</StyledUsername>
-        <StyledEmail>{userInfo.bio}</StyledEmail>
+        <StyledImage src={state.userInfo.profile_picture.url} />
+        <StyledUsername>{state.userInfo.name}</StyledUsername>
+        <StyledEmail>{state.userInfo.bio}</StyledEmail>
 
+        <StyledSubContainer>
+          <StyledPostsLink to={`/${state.userInfo.name}/posts`}>POSTS</StyledPostsLink>
+          <div>
+            <StyledFollowLink to={`/${state.userInfo.name}/followers`}>{state.userInfo.followers}</StyledFollowLink>
+            <StyledFollowLink to={`/${state.userInfo.name}/following`}>{state.userInfo.following.length}</StyledFollowLink>
+          </div>
+        </StyledSubContainer>
 
-        { !userInfo.private || isFollowing || sameUser ?
-            <StyledSubContainer>
-              <StyledPostsLink to={`/${userInfo.name}/posts`}>POSTS</StyledPostsLink>
-              <div>
-                <StyledFollowLink to={`/${userInfo.name}/followers`}>{userInfo.followers.length}</StyledFollowLink>
-                <StyledFollowLink to={`/${userInfo.name}/following`}>{userInfo.following.length}</StyledFollowLink>
-              </div>
-            </StyledSubContainer>
-          :
-            <StyledSubContainer>
-            <h2>POSTS</h2>
-              <div>
-                <h1>{userInfo.followers.length}</h1>
-                <h1>{userInfo.following.length}</h1>
-              </div>
-            </StyledSubContainer>
-        }
+        <StyledButton
+          disabled={!state.activeFollowButton}
+          style={{ ...buttonStyle, backgroundColor: state.isFollowing ? 'red' : undefined }}
+          onClick={() => handleAction('follow')}
+        >
+          {state.isFollowing ? 'Unfollow' : 'Follow'}
+        </StyledButton>
 
-        { !isFollowing ?
-            <StyledButton
-              disabled={!activeFollowButton}
-              style={{
-                margin: '1em',
-                padding: '1em',
-                width: '10vw',
-                fontSize: '1em'
-              }}
-              onClick={handleFollow}
-            >Follow</StyledButton>
-          :
-            <StyledButton
-              style={{
-                margin: '1em',
-                padding: '1em',
-                width: '10vw',
-                fontSize: '1em',
-                backgroundColor: 'red'
-              }}
-              onClick={handleFollow}
-            >Unfollow</StyledButton>
-        }
+        <StyledButton
+          disabled={!state.activeBlockButton}
+          style={{ ...buttonStyle, backgroundColor: state.isBlocked ? undefined : 'red' }}
+          onClick={() => handleAction('block')}
+        >
+          {state.isBlocked ? 'Unblock' : 'Block'}
+        </StyledButton>
 
-        { !isBlocked ?
-            <StyledButton
-              disabled={!activeBlockButton}
-              style={{
-                margin: '1em',
-                padding: '1em',
-                width: '10vw',
-                fontSize: '1em',
-                backgroundColor: 'red'
-              }}
-              onClick={handleBlock}
-            >Block</StyledButton>
-          :
-            <StyledButton
-              style={{
-                margin: '1em',
-                padding: '1em',
-                width: '10vw',
-                fontSize: '1em',
-              }}
-              onClick={handleBlock}
-            >Unblock</StyledButton>
-        }
+        <StyledReportButton onClick={() => handleAction('report')}>REPORT USER</StyledReportButton>
 
-        <StyledReportButton onClick={handleReport}>REPORT USER</StyledReportButton>
-
-        {sameUser ?
-          <StyledEditProfileButton to={"/profile"}>EDITAR PERFIL</StyledEditProfileButton> :
-          <div></div>
-        }
+        {sameUser && <StyledEditProfileButton to="/profile">EDITAR PERFIL</StyledEditProfileButton>}
       </StyledContainer>
     </div>
   )
