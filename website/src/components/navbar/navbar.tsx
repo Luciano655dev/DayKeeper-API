@@ -15,10 +15,10 @@ import { FaBook } from "react-icons/fa"
 import { FaPhoneAlt } from "react-icons/fa"
 import { FaPlusSquare } from "react-icons/fa"
 
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import axios from 'axios';
+import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import Cookies from 'js-cookie'
+import axios from 'axios'
 
 export default function Navbar() {
   const [token, setToken] = useState('')
@@ -30,14 +30,12 @@ export default function Navbar() {
   useEffect(() => {
     const fetchData = async()=>{
       const storedToken = Cookies.get('userToken')
-      const date = new Date()
-      const todayDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getFullYear())}`
+      const todayDate = `30-05-2024`
 
       try {
         // fetch question data
         const questionResponse = await axios.get(`http://localhost:3000/question/${todayDate}`,
         { headers: { Authorization: `Bearer ${storedToken}` } })
-
 
         setQuestionInfo(questionResponse.data)
         setToken(storedToken || '')

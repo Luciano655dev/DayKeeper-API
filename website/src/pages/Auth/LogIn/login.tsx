@@ -20,7 +20,7 @@ function LogIn(){
     const handleForm = async ()=>{
         try{
             const response = await axios.post('http://localhost:3000/auth/login', form)
-            Cookies.set('userToken', response.data.token, { expires: 7 })
+            Cookies.set('userToken', response.data.token, { expires: 20 })
             
             dispatch({ type: 'user', payload: {
                 name: response.data.user.name,
