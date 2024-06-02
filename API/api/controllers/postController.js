@@ -1,11 +1,4 @@
-require('dotenv').config()
-const User = require('../models/User')
-const Post = require('../models/Post')
-const deleteFile = require('../utils/deleteFile')
-const bf = require('better-format')
-const axios = require('axios')
-
-const { serverError } = require("../../constants")
+const { errors: { serverError } } = require("../../constants")
 const getPost = require('../services/post/getPost')
 const createPost = require('../services/post/createPost')
 const updatePost = require('../services/post/updatePost')

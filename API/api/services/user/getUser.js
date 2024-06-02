@@ -11,7 +11,7 @@ const getUser = async(props) => {
 
     try {
         /* Search by name or id */
-        let user = await User.findOne({ name:   userInput }).select(hideUserData)
+        let user = await User.findOne({ name: userInput }).select(hideUserData)
         if (!user && mongoose.isValidObjectId(userInput))
             user = await User.findById(String(userInput)).select(hideUserData)
 

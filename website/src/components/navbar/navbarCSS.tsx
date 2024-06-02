@@ -30,25 +30,26 @@ export const Container = styled.nav`
     .dayInfo {
         display: flex;
         flex-direction: row;
-        max-width: 40em;
+        max-width: 30em;
+        flex-wrap: nowrap;
         overflow-x: scroll;
 
         &::-webkit-scrollbar {
-            width: 10px;
+            max-height: 2px;
         }
         &::-webkit-scrollbar-thumb {
             background-color: #888;
-            border-radius: 5px;
+            border-radius: 1px;
         }
 
         h2 {
             margin: 0;
             white-space: nowrap;
-            overflow-x: hidden;
         }
 
         h1 {
             margin: 0;
+            white-space: nowrap;
         }
     }
 

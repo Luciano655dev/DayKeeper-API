@@ -38,14 +38,14 @@ export default function PostInfo({ togglePage }: any) {
       try {
         if (!postTitleFromParams) return
 
-        const responsePostInfo = await axios.get(`http://localhost:3000/${username}/${postTitleFromParams}`,
+        const responsePostInfo = await axios.get(`http://localhost:3000/${username}/${postTitleFromParams}?populate=comments.user`,
           { headers: { Authorization: `Bearer ${token}` }
         })
         setPostInfo(responsePostInfo.data.post)
 
         // update selected reaction
         responsePostInfo.data.post.reactions.filter((reac: any)=>
-          reac.user._id == user.id ? setSelectedReaction(reac.reaction) : reac
+          reac.user == user.id ? setSelectedReaction(reac.reaction) : reac
         )
 
         // set Same user
@@ -53,25 +53,25 @@ export default function PostInfo({ togglePage }: any) {
 
         setLoading(false)
       }catch (error: any) {
-        return setError(error.response.data.msg)
+        return setError(error.response.data.message)
       }
     };
 
     getPostInfo()
-  }, [postTitleFromParams])
+  }, [])
 
   // ========== REACTION FUNCTION ==========
-  const handleReaction = async (reaction: number) => {
-    try {
-      const response: any = await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/react`, {
-        reaction
+  const handleReaction = async (index: number, updatedPostInfo: any, newReactionIndex: any) => {
+    try{
+      await axios.post(`http://localhost:3000/${username}/${postTitleFromParams}/react`, {
+        reaction: index
       }, { headers: { Authorization: `Bearer ${token}` } })
 
-      setPostInfo({...postInfo, reactions: response.data.post.reactions})
-      setSelectedReaction(selectedReaction === reaction ? 10 : reaction)
-      setMsg(response.data.msg)
-    } catch (error: any) {
-      setError(error.response.data.msg)
+      setPostInfo(updatedPostInfo)
+      setSelectedReaction(newReactionIndex)
+    }catch(error){
+      console.log(error)
+      setPostInfo(postInfo)
     }
   }
 
@@ -101,7 +101,7 @@ export default function PostInfo({ togglePage }: any) {
 
       setMsg(response.data.msg)
     } catch (error: any) {
-      setError(error.response.data.msg)
+      setError(error.response.data.message)
     }
   }
 
@@ -133,11 +133,12 @@ export default function PostInfo({ togglePage }: any) {
           postInfo={postInfo}
           selectedReaction={selectedReaction}
           handleReaction={handleReaction}
+          loggedUserId={user._id}
         ></PostReactions>
 
         { sameUser ? <div>
           <br></br><br></br>
-          <StyledButton onClick={togglePage}>Edite seu post aqui</StyledButton>
+            <StyledButton onClick={togglePage}>Edite seu post aqui</StyledButton>
           <br></br><br></br>
         </div> : <></> }
 

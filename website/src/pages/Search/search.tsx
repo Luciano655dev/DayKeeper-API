@@ -121,7 +121,7 @@ const Search = () => {
                         <option value='recent'>RECENT</option>
                     </select>
                     <select value={queryParams.get('following') || 'false'} onChange={(e) => handleChangeOption(2, 'following', e.target.value)}>
-                        <option value='false'>NO</option>
+                        <option value='false'>ANY FOLLOW</option>
                         <option value='following'>FOLLOWING</option>
                         <option value='friends'>FRIENDS</option>
                     </select>
@@ -156,7 +156,7 @@ const Search = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <div>{post.comments}</div>
+                                <div>{post.comments}💬</div>
                             </div>
                         </StyledItem>
                     ))

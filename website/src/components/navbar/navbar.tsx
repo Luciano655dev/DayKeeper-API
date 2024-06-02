@@ -30,14 +30,15 @@ export default function Navbar() {
   useEffect(() => {
     const fetchData = async()=>{
       const storedToken = Cookies.get('userToken')
-      const todayDate = `30-05-2024`
+      const date = new Date()
+      const todayDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getFullYear())}`
 
       try {
         // fetch question data
         const questionResponse = await axios.get(`http://localhost:3000/question/${todayDate}`,
         { headers: { Authorization: `Bearer ${storedToken}` } })
 
-        setQuestionInfo(questionResponse.data)
+        setQuestionInfo(questionResponse.data.question)
         setToken(storedToken || '')
       }catch(error){
         console.log(error)
@@ -67,7 +68,7 @@ export default function Navbar() {
         {
           loading ? null : token.length ? <div className='dayInfo'>
             <h1>{questionInfo.day}</h1>
-            <h2> . {questionInfo.question}</h2>
+            <h2> . {questionInfo.data}</h2>
           </div> : <></>
         }
 
