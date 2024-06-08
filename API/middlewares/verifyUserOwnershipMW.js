@@ -7,7 +7,8 @@ async function verifyUserOwnershipMW(req, res, next) {
     const loggedUserId = req.id
     const post = await Post.findOne({ user: loggedUserId, title: posttitle })
 
-    if(!post) return res.status(404).json({ message: notFound('Post') })
+    if(!post)
+      return notFound('Post')
 
     /* Verify if the logged user is the post owner */
     if (post.user == loggedUserId) 
