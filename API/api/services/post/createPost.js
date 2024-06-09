@@ -1,5 +1,6 @@
 const Post = require('../../models/Post')
 const formatDate = require("../../utils/formatDate")
+const getTodayDate = require(`../../utils/getTodayDate`)
 const deleteFile = require('../../utils/deleteFile')
 const { resetTime } = require('../../../config')
 
@@ -9,13 +10,7 @@ const {
 
 const createPost = async(props)=>{
   const { data, loggedUserId, files } = props
-
-  const titleDate = formatDate(Date.now())
-  const title = `${titleDate.hour < resetTime ? titleDate.day - 1 : titleDate.day}-${titleDate.month}-${titleDate.year}`
-  /*
-    caso o usuario esteja postando antes do `resetTime`,
-    o título será do dia anterios
-  */
+  const title = getTodayDate()
 
   try{
     /* Create post */

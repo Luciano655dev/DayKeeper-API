@@ -41,24 +41,26 @@ const fileSizeLimit = 4 * 1024 * 1024 * 1024 // 4 GB
 const MulterConfig = (mediaType) => {
   let allowedMimes = []
 
-  if (mediaType === "image") {
-    allowedMimes = [
-      "image/jpeg",
-      "image/pjpeg",
-      "image/png",
-      // "image/gif"
-    ]
-  } if (mediaType === "both") {
-    allowedMimes = [
-      "image/jpeg",
-      "image/pjpeg",
-      "image/png",
-      "image/gif",
-      "video/mp4",
-      "video/quicktime",
-      "video/x-msvideo",
-      "video/x-ms-wmv",
-    ]
+  switch(mediaType){
+    case "image":
+      allowedMimes = [
+        "image/jpeg",
+        "image/pjpeg",
+        "image/png",
+        // "image/gif"
+      ]
+      break
+    case "both":
+      allowedMimes = [
+        "image/jpeg",
+        "image/pjpeg",
+        "image/png",
+        "image/gif",
+        "video/mp4",
+        "video/quicktime",
+        "video/x-msvideo",
+        "video/x-ms-wmv",
+      ]
   }
 
   return {

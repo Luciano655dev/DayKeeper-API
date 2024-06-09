@@ -1,10 +1,22 @@
+const Storie = require(`../../models/Storie`)
+const deleteFile = require(`../../utils/deleteFile`)
+
 const {
-  success: { custom }
+  errors: { notFound },
+  success: { deleted }
 } = require('../../../constants')
 
 const deleteStorie = async(props)=>{
+  const { storieId } = props
+
   try{
-    return custom("DELETE STORIE HERE")
+    const deletedStorie = await Storie.findByIdAndDelete(storieId)
+    if(!deletedStorie)
+      return notFound(`Storie`)
+
+    deleteFile(deletedStorie.file.key)
+
+    return deleted(`Storie`, { storie: deletedStorie })
   }catch(error){
     throw new Error(error.message)
   }

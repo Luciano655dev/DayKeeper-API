@@ -1,4 +1,4 @@
-const { errors: { serverError } } = require('../../constants')
+const { errors: { serverError, fieldNotFilledIn } } = require('../../constants')
 
 //  SERVICES
 const createStorie = require(`../services/stories/createStorie`)
@@ -10,10 +10,23 @@ const getUserStories = require(`../services/stories/getUserStories`)
 const getStorieReactions = require(`../services/stories/getStorieReactions`)
 
 const createStorieController = async (req, res) => {
-    try {
-        const { code, message } = await createStorie()
+    if(!req.file) return res.status(400).json({ message: `The file need to be filled in` })
 
-        return res.status(code).json({ message })
+    const file = {
+        name: req.file.originalname,
+        key: req.file.key,
+        mimetype: req.file.mimetype,
+        url: req.file.location
+    }
+
+    try {
+        const { code, message, storie } = await createStorie({
+            file,
+            text: req.body.text,
+            loggedUserId: req.id
+        })
+
+        return res.status(code).json({ message, storie })
     } catch (error) {
         return serverError(`${error}`)
     }
@@ -21,7 +34,7 @@ const createStorieController = async (req, res) => {
 
 const deleteStorieController = async (req, res) => {
     try {
-        const { code, message } = await deleteStorie()
+        const { code, message } = await deleteStorie({ ...req.params })
 
         return res.status(code).json({ message })
     } catch (error) {

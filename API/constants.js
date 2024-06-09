@@ -1,5 +1,8 @@
 module.exports = {
     maxPageSize: 100,
+    stories: {
+        maxStoriesPerDay: 5
+    },
     post: {
         maxCommentLength: 500,
     },
@@ -68,6 +71,13 @@ module.exports = {
             return {
                 code: 400,
                 message: `Enter a valid ${value}`,
+                ...props
+            }
+        },
+        maxQuantityToday: (value, props) => {
+            return {
+                code: 429,
+                message: `you reached the maximum amount of ${value} today`,
                 ...props
             }
         },
