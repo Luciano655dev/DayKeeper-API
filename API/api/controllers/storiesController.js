@@ -65,10 +65,15 @@ const reportStorieController = async (req, res) => {
 // ========== GET ==========
 const getStorieController = async (req, res) => {
     try {
-        const { code, message } = await getStorie()
+        const { code, message, stories } = await getStorie({
+            ...req.params,
+            populate: req.query.populate,
+            loggedUserId: req.id
+        })
 
-        return res.status(code).json({ message })
+        return res.status(code).json({ message, stories })
     } catch (error) {
+        console.log(error)
         return serverError(`${error}`)
     }
 }

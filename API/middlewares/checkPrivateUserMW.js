@@ -7,6 +7,7 @@ async function checkPrivateUserMW(req, res, next){
 
     try{
         const user = await User.findOne({ name })
+        if(!user) return res.status(404).json({ message: `User not found` })
 
         if(
             !user.private ||

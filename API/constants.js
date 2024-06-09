@@ -120,7 +120,7 @@ module.exports = {
         fetched: (data, props) => {
             return {
                 code: 200,
-                data: `${data} fetched successfully`,
+                message: `${data} fetched successfully`,
                 ...props
             }
         },

@@ -15,7 +15,7 @@ async function checkBannedUserMW(req, res, next){
 
         next()
     }catch(error){
-        return res.status(500).json({ message: serverError(error.message) })
+        return res.status(500).json({ message: serverError(error.message).message })
     }
 }
 
