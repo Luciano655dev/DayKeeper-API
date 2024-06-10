@@ -12,6 +12,7 @@ const deleteFollowers = require("./delete/deleteFollowers")
 const deleteFollowRequests = require('./delete/deleteFollowRequests')
 const deletePosts = require('./delete/deletePosts')
 const deleteUserFromDatabase = require('./delete/deleteUser')
+const deleteStories = require('./delete/deleteStories')
 
 const deleteUser = async(props)=>{
   const { userId } = props
@@ -30,6 +31,7 @@ const deleteUser = async(props)=>{
     const deletedFollowRequests = await deleteFollowRequests(userId)
     const deletedPosts = await deletePosts(userId)
     const deletedUser = await deleteUserFromDatabase(userId)
+    const deletedStories = await deleteStories(userId)
 
     return deleted("User", {
       user: deletedUser,
@@ -38,7 +40,8 @@ const deleteUser = async(props)=>{
       comments: deletedComments,
       comment_reactions: deletedCommentReactions,
       followers: deletedFollowers,
-      follow_requests: deletedFollowRequests
+      follow_requests: deletedFollowRequests,
+      stories: deletedStories
     })
   } catch (error) {
     throw new Error(error.message)
