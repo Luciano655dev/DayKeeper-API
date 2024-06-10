@@ -1,11 +1,12 @@
-const findUser = require(`../user/get/findUser`)
+const Storie = require(`../../models/Storie`)
 const findStorie = require(`./get/findStorie`)
 
 const getStorie = async(props)=>{
     const {
         name: userInput,
         storieTitle: storieInput,
-        populate
+        populate,
+        loggedUserId
     } = props
 
     let populateFields = populate ? populate.split(',') : []
@@ -15,6 +16,8 @@ const getStorie = async(props)=>{
             userInput,
             storieInput,
             fieldsToPopulate: populateFields,
+            loggedUserId,
+            view: true
         })
 
         return response

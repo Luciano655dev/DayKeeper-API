@@ -1,6 +1,7 @@
 const Storie = require(`../../../models/Storie`)
 const findUser = require(`../../user/get/findUser`)
 const mongoose = require(`mongoose`)
+const populateOptions = require(`../../../utils/populateOptions`)
 const {
     hideUserData,
     hideStorieData,
@@ -12,31 +13,39 @@ const {
     success: { fetched }
 } = require(`../../../../constants`)
 
-const findStorie = async({ userInput, storieInput, fieldsToPopulate = [], loggedUserId })=>{
+const findStorie = async({ userInput, storieInput, fieldsToPopulate = [], loggedUserId, view = true })=>{
     try{
         // find user
-        let storieUser = findUser(userInput)
+        let storieUser = await findUser(userInput)
         if(!storieUser)
             return notFound(`User`)
 
         // find storie
-        const populateOptions = fieldsToPopulate.map(field => ({
-            path: field,
-            match: { banned: { $ne: true } },
-            select: hideUserData
-        }))
-
+        const pO = populateOptions(fieldsToPopulate)
         const project = storieUser._id == loggedUserId ? hideGeneralData : {
             ...hideStorieData,
             ...hideGeneralData
         }
-        
-        let stories = await Storie.find(
-            { title: storieInput, user: storieUser._id },
-            project
-        ).populate(populateOptions)
-        if(!stories?.length && mongoose.Types.ObjectId.isValid(storieInput))
-            stories = await Storie.findById(storieInput, project).populate(populateOptions)
+        const viewPipe = view ? { $addToSet: { views: loggedUserId } } : { }
+
+        let stories
+        if(mongoose.Types.ObjectId.isValid(storieInput))
+            stories = await Storie.findOneAndUpdate(
+                { _id: storieInput },
+                viewPipe,
+                { new: true, fields: project }
+            ).populate(pO)
+        else{
+            await Storie.updateMany(
+                { title: storieInput, user: storieUser._id },
+                viewPipe
+            )
+
+            stories = await Storie.find(
+                { title: storieInput, user: storieUser._id },
+                project
+            ).populate(pO)
+        }
 
         if(!stories)
             return notFound(`Stories`)
