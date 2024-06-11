@@ -21,13 +21,12 @@ const reactPost = async (props) => {
             username,
             posttitle,
             'username',
-            [ 'user', 'reactions.user' ]
+            [ 'user' ]
         )
     
         /* Verify if the user has reacted before */
         const existingReactionIndex = reactedPost.reactions.findIndex(
             (reaction) =>
-            reaction.user._id == loggedUserId ||
             reaction.user == loggedUserId
         )
     

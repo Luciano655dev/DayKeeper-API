@@ -3,7 +3,6 @@ const findUser = require(`../../user/get/findUser`)
 const mongoose = require(`mongoose`)
 const populateOptions = require(`../../../utils/populateOptions`)
 const {
-    hideUserData,
     hideStorieData,
     hideGeneralData
 } = require(`../../../repositories/index`)
@@ -13,7 +12,7 @@ const {
     success: { fetched }
 } = require(`../../../../constants`)
 
-const findStorie = async({ userInput, storieInput, fieldsToPopulate = [], loggedUserId, view = true })=>{
+const findStorie = async({ userInput, storieInput, fieldsToPopulate = [], loggedUserId, view = false })=>{
     try{
         // find user
         let storieUser = await findUser(userInput)

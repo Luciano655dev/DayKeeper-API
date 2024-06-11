@@ -44,9 +44,13 @@ const deleteStorieController = async (req, res) => {
 
 const reactStorieController = async (req, res) => {
     try {
-        const { code, message } = await reactStorie()
+        const { code, message, storie } = await reactStorie({
+            ...req.params,
+            ...req.body,
+            loggedUserId: req.id
+        })
 
-        return res.status(code).json({ message })
+        return res.status(code).json({ message, storie })
     } catch (error) {
         return serverError(`${error}`)
     }
