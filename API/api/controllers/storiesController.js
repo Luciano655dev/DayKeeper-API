@@ -96,16 +96,6 @@ const getUserStoriesController = async (req, res) => {
     }
 }
 
-const getStorieReactionsController = async (req, res) => {
-    try {
-        const { code, message } = await getStorieReactions()
-
-        return res.status(code).json({ message })
-    } catch (error) {
-        return serverError(`${error}`)
-    }
-}
-
 module.exports = {
     createStorie: createStorieController,
     deleteStorie: deleteStorieController,
@@ -114,5 +104,4 @@ module.exports = {
 
     getStorie: getStorieController,
     getUserStories: getUserStoriesController,
-    getStorieReactions: getStorieReactionsController
 }

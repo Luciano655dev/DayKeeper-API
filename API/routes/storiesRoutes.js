@@ -4,7 +4,6 @@ const router = express.Router()
 const {
     getUserStories,
     getStorie,
-    getStorieReactions,
     createStorie,
     reactStorie,
     deleteStorie,
@@ -25,7 +24,6 @@ const handleMulterError = require('../middlewares/handleMulterError')
 // Routes
 router.get('/:name/all_stories', checkTokenMW, checkBannedUserMW, checkPrivateUserMW, getUserStories) // get user stories
 router.get('/:name/:storieTitle', checkTokenMW, checkBannedUserMW, checkPrivateUserMW, getStorie) // get today user stories
-router.get(`/:name/:storieTitle/reactions`, checkTokenMW, verifyStoriesOwnershipMW, getStorieReactions) // get stories reactions
 
 router.post('/create', checkTokenMW, multer(multerConfig("both")).single(`file`), handleMulterError, createStorie) // createStories
 router.post('/:name/:storieTitle', checkTokenMW, checkBannedUserMW, checkPrivateUserMW, reactStorie) // react to a storie
