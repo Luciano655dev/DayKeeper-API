@@ -23,7 +23,7 @@ const multerConfig = require('../api/config/multer')
 const handleMulterError = require('../middlewares/handleMulterError')
 
 // Routes
-router.get('/:name/all_stories', checkTokenMW, verifyStoriesOwnershipMW, getUserStories) // get user stories
+router.get('/:name/all_stories', checkTokenMW, checkBannedUserMW, checkPrivateUserMW, getUserStories) // get user stories
 router.get('/:name/:storieTitle', checkTokenMW, checkBannedUserMW, checkPrivateUserMW, getStorie) // get today user stories
 router.get(`/:name/:storieTitle/reactions`, checkTokenMW, verifyStoriesOwnershipMW, getStorieReactions) // get stories reactions
 

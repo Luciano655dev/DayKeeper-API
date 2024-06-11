@@ -21,7 +21,6 @@ const deleteUser = async(props)=>{
     const user = await User.findById(userId)
     if(!user)
       return notFound("User")
-
     
     await deleteProfilePicture(user)
     const deletedPostReactions = await deletePostReactions(userId)

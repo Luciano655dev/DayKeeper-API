@@ -1,10 +1,37 @@
+const User = require(`../../models/User`)
+const getDataWithPages = require(`../getDataWithPages`)
+const userStoriesPipeline = require(`../../repositories/userStoriesPipeline`)
+
 const {
-    success: { custom }
+    errors: { notFound },
+    success: { fetched }
 } = require('../../../constants')
 
 const getUserStories = async(props)=>{
+    let {
+        name,
+        order,
+        loggedUserId,
+        following,
+        page,
+        maxPageSize
+    } = props
+
     try{
-        return custom("GET USER STORIES HERE")
+        const mainUser = await User.findById(loggedUserId)
+        if(!mainUser)
+            return notFound(`User`)
+
+        const response = await getDataWithPages({
+            type: `Storie`,
+            pipeline: userStoriesPipeline(mainUser, name),
+            order: order == `recent` ? order : `relevant`,
+            following: `following`,
+            page,
+            maxPageSize
+        }, mainUser)
+
+        return fetched("User Stories", { response })
     }catch(error){
         throw new Error(error.message)
     }

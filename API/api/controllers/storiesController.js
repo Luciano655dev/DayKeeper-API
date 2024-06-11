@@ -80,9 +80,13 @@ const getStorieController = async (req, res) => {
 
 const getUserStoriesController = async (req, res) => {
     try {
-        const { code, message } = await getUserStories()
+        const { code, message, response } = await getUserStories({
+            loggedUserId: req.id,
+            ...req.params,
+            ...req.query
+        })
 
-        return res.status(code).json({ message })
+        return res.status(code).json({ message, ...response })
     } catch (error) {
         return serverError(`${error}`)
     }

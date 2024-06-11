@@ -1,4 +1,3 @@
-const Storie = require(`../../models/Storie`)
 const findStorie = require(`./get/findStorie`)
 
 const getStorie = async(props)=>{

@@ -1,34 +1,48 @@
 const Post = require('../models/Post')
 const User = require('../models/User')
+const Storie = require(`../models/Storie`)
 
-const getDataWithPages = async ({ type, pipeline, order, following, page = 1, maxPageSize = 3 }, mainUser) => {
+const getDataWithPages = async ({ type, pipeline, order, following, page, maxPageSize }, mainUser) => {
+  page = Number(page)
+  maxPageSize = Number(maxPageSize)
+
+  if(isNaN(page)) page = 1
+  if(isNaN(maxPageSize)) maxPageSize = 5
+
   const skipCount = (page - 1) * maxPageSize
   let newPipeline = [...pipeline]
 
+  // ========== FOLLOWING ==========
+  let canApplyFollowing = ( type == `Post` || type == `User` )
   let matchCriteria = {}
-  if (following === 'following') {
-    matchCriteria = type === 'Post' ? { 'user': { $in: mainUser.following } } : { '_id': { $in: mainUser.following } }
-  } else if (following === 'friends') {
-    matchCriteria = type === 'Post' ? {
-      $and: [
-        { 'user': { $in: mainUser.following } }, // O mainUser está seguindo ele
-        { 'user_info.followers': mainUser._id } // O outro usuário está te seguindo
-      ]
-    } : {
-      $and: [
-        { '_id': { $in: mainUser.following } }, // O mainUser está seguindo ele
-        { 'followers': mainUser._id } // O outro usuário está te seguindo
-      ]
-    }
+  if (following === 'following' && canApplyFollowing) {
+    matchCriteria = type === 'Post'
+      ? { 'user': { $in: mainUser.following } }
+      : { '_id': { $in: mainUser.following } };
+  } else if (following === 'friends' && canApplyFollowing) {
+    matchCriteria = type === 'Post'? 
+      {
+        $and: [
+          { 'user': { $in: mainUser.following } },
+          { 'user_info.followers': mainUser._id }
+        ]
+      }
+      :
+      {
+        $and: [
+          { '_id': { $in: mainUser.following } },
+          { 'followers': mainUser._id }
+        ]
+      }
   }
 
-  newPipeline.push({ $match: matchCriteria });
+  newPipeline.push({ $match: matchCriteria })
 
-  let sortPipeline;
-
+  // ========== SORT ===========
+  let sortPipeline
   switch (order) {
     case 'relevant':
-      sortPipeline = { $sort: { isTodayDate: -1, relevance: -1, _id: 1 } }
+      sortPipeline = { $sort: { created_at: -1, relevance: -1, _id: 1 } }
       break
     case 'most_reports':
       sortPipeline = { $sort: { numReports: -1 , _id: 1} }
@@ -43,6 +57,7 @@ const getDataWithPages = async ({ type, pipeline, order, following, page = 1, ma
   }
 
   try {
+    // ========== AGGREGATION ==========
     const aggregationPipeline = [
       { $facet: {
           data: [
@@ -58,14 +73,13 @@ const getDataWithPages = async ({ type, pipeline, order, following, page = 1, ma
         }
       },
       { $unwind: "$totalCount" }
-    ];
+    ]
 
-    const [{ data, totalCount }] = await (
-      type === 'Post' ? Post.aggregate(aggregationPipeline) : User.aggregate(aggregationPipeline)
-    );
+    const Model = type === 'Post' ? Post : (type === 'Storie' ? Storie : User)
+    const [{ data, totalCount }] = await Model.aggregate(aggregationPipeline)
 
     // Corrigido o cálculo de totalPages
-    const totalPages = Math.ceil(totalCount.total / maxPageSize);
+    const totalPages = Math.ceil(totalCount.total / maxPageSize)
 
     return {
       data,
@@ -73,11 +87,11 @@ const getDataWithPages = async ({ type, pipeline, order, following, page = 1, ma
       pageSize: data.length,
       maxPageSize,
       totalPages
-    };
+    }
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message)
   }
-};
+}
 
 
 module.exports = getDataWithPages
