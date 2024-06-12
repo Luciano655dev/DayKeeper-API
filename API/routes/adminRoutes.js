@@ -9,7 +9,8 @@ const {
     getReportedPosts,
     getBannedPosts,
     banOrUnbanPost,
-    deleteBannedPost
+    deleteBannedPost,
+    deletePostReport
 } = require('../api/controllers/adminController')
 
 // Middlewares
@@ -20,13 +21,14 @@ const checkAdminMW = require('../middlewares/checkAdminMW')
 router.get("/reportedUsers", checkTokenMW, checkAdminMW, getReportedUsers)
 router.get("/bannedUsers", checkTokenMW, checkAdminMW, getBannedUsers)
 router.post("/:name/banOrUnban", checkTokenMW, checkAdminMW, banOrUnbanUser)
-router.delete("/:name/delete", checkTokenMW, checkAdminMW, deleteBannedUser)
+router.delete("/:name/", checkTokenMW, checkAdminMW, deleteBannedUser)
 router.delete("/:name/:reportId", checkTokenMW, checkAdminMW, deleteUserReport)
 
 // Post
 router.get("/reportedPosts", checkTokenMW, checkAdminMW, getReportedPosts)
 router.get("/bannedPosts", checkTokenMW, checkAdminMW, getBannedPosts)
 router.post("/:name/:posttitle/banOrUnban", checkTokenMW, checkAdminMW, banOrUnbanPost)
-router.delete("/:name/:posttitle/delete", checkTokenMW, checkAdminMW, deleteBannedPost)
+router.delete("/:name/:posttitle/", checkTokenMW, checkAdminMW, deleteBannedPost)
+router.delete("/:name/:posttitle/:reportId", checkTokenMW, checkAdminMW, deletePostReport)
 
 module.exports = router

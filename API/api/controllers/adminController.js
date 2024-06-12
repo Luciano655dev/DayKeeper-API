@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const { serverError } = require('../../constants')
+const { errors: { serverError } } = require('../../constants')
 const banOrUnbanUser = require('../services/admin/user/banOrUnbanUser')
 const deleteBannedUser = require('../services/admin/user/deleteBannedUser')
 const deleteUserReport = require('../services/admin/user/deleteUserReport')
@@ -8,6 +8,7 @@ const getReportedUsers = require('../services/admin/user/getReportedUsers')
 const getBannedUsers = require(`../services/admin/user/getBannedUsers`)
 const banOrUnbanPost = require(`../services/admin/post/banOrUnbanPost`)
 const deleteBannedPosts = require(`../services/admin/post/deleteBannedPost`)
+const deletePostReport = require(`../services/admin/post/deletePostReport`)
 const getReportedPosts = require(`../services/admin/post/getReportedPosts`)
 const getBannedPosts = require(`../services/admin/post/getBannedPosts`)
 
@@ -115,6 +116,17 @@ const deleteBannedPostController = async(req, res)=>{
     }
 }
 
+const deletePostReportController = async(req, res)=>{
+    try{
+        const { code, message } = await deletePostReport({...req.params})
+
+        return res.status(code).json({ message })
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ message: serverError(error.toString()) })
+    }
+}
+
 const getReportedPostsController = async(req, res)=>{
     const page = Number(req.query.page) || 1
     const maxPageSize = req.query.maxPageSize ? ( Number(req.query.maxPageSize) <= 100 ? Number(req.query.maxPageSize) : 100) : 1
@@ -154,8 +166,10 @@ module.exports = {
     banOrUnbanUser: banOrUnbanUserController,
     deleteBannedUser: deleteBannedUserController,
     deleteUserReport: deleteUserReportController,
+
     getReportedPosts: getReportedPostsController,
     getBannedPosts: getBannedPostsController,
     banOrUnbanPost: banOrUnbanPostController,
     deleteBannedPost: deleteBannedPostController,
+    deletePostReport: deletePostReportController
 }
