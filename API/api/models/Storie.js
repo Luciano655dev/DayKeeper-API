@@ -33,6 +33,7 @@ const storieSchema = mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User'
             },
+            created_at: { type: Date, default: Date.now() },
             reaction: Number
         }
     ],

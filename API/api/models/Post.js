@@ -30,6 +30,7 @@ const postSchema = mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User'
             },
+            created_at: { type: Date, default: Date.now() },
             reason: String
         }
     ],

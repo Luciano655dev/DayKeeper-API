@@ -33,6 +33,7 @@ const reportPost = async(props)=>{
       $addToSet: {
         reports: {
           user: loggedUserId,
+          created_at: new Date(),
           reason
         }
       }

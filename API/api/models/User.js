@@ -58,6 +58,7 @@ const userSchema = mongoose.Schema({
         ref: 'User',
         required: true
       },
+      created_at: { type: Date, default: Date.now() },
       reason: String
     }
   ],
