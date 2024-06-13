@@ -34,6 +34,7 @@ const deleteBannedUserController = async(req, res)=>{
     try{
         const { code, message, ban_info, user } = await deleteBannedUser({
             ...req.params,
+            message: req.body.message || ``,
             loggedUserId: req.id
         })
         
@@ -92,7 +93,7 @@ const banOrUnbanPostController = async(req, res)=>{
     try {
         const { code, message, post } = await banOrUnbanPost({
             ...req.params,
-            message: req.body.message || '',
+            reason: req.body.reason || '',
             loggedUserId: req.id
         })
 

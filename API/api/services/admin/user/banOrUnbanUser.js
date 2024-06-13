@@ -1,5 +1,6 @@
 const User = require('../../../models/User')
-const { sendUnbanEmail, sendBanEmail } = require('../../../utils/emailHandler')
+const { sendBanEmail, sendUnbanEmail } = require('../../../utils/emailHandler')
+
 const {
     admin: { maxReportMessageLength },
     errors: { notFound, inputTooLong, unauthorized },
@@ -9,17 +10,17 @@ const {
 const banOrUnbanUser = async(props)=>{
     const {
         name: username,
-        message,
+        reason,
         loggedUserId
     } = props
 
-    if(message.length > maxReportMessageLength)
-        return inputTooLong("Message")
+    if(reason.length > maxReportMessageLength)
+        return inputTooLong("Reason")
 
     try {
-        const mainUser = await User.findById(loggedUserId)
+        const loggedUser = await User.findById(loggedUserId)
         const bannedUser = await User.findOne({ name: username })
-        if(!mainUser || !bannedUser) 
+        if(!loggedUser || !bannedUser) 
             return notFound('User')
 
         if(bannedUser.roles.find('admin'))
@@ -40,7 +41,12 @@ const banOrUnbanUser = async(props)=>{
                 }
             )
 
-            await sendUnbanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
+            await sendUnbanEmail({
+                username: bannedUser.name,
+                email: bannedUser.email,
+                adminUsername: loggedUser.name,
+                reason
+            })
 
             return custom( `${bannedUser.name} unbanned successfully`)
         }
@@ -58,7 +64,12 @@ const banOrUnbanUser = async(props)=>{
             }
         })
 
-        await sendBanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
+        await sendBanEmail({
+            username: bannedUser.name,
+            email: bannedUser.email,
+            adminUsername: loggedUser.name,
+            reason
+        })
 
         return custom(`${bannedUser.name} banned successfully`)
     } catch (error) {

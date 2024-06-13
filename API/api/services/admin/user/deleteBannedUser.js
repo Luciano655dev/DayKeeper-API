@@ -1,7 +1,7 @@
 const User = require('../../../models/User')
 const BannedUser = require('../../../models/BannedUser')
 const deleteUser = require('../../user/deleteUser')
-const { sendDeleteUserEmail } = require('../../../utils/emailHandler')
+const { sendUserDeletionEmail } = require('../../../utils/emailHandler')
 
 const {
     admin: { daysToDeleteBannedUser },
@@ -12,7 +12,8 @@ const {
 const deleteBannedUser = async(props)=>{
     const {
         name: username,
-        loggedUserId
+        loggedUserId,
+        message
     } = props
 
     try{
@@ -45,7 +46,14 @@ const deleteBannedUser = async(props)=>{
         })
         await newBannedUser.save()
 
-        await sendDeleteUserEmail(bannedUser.email, bannedUser.name, adminUser.name, bannedUser.ban_message)
+        // bannedUser.ban_message
+        await sendUserDeletionEmail({
+            username: bannedUser.name,
+            email: bannedUser.email,
+            adminUsername: adminUser.name,
+            reason: bannedUser.ban_message,
+            message
+        })
         
         return deleted(`Banned user`)
     } catch (error) {

@@ -1,7 +1,7 @@
 const User = require(`../../../models/User`)
 const Post = require(`../../../models/Post`)
 
-const { sendBanEmail, sendUnbanEmail } = require(`../../../utils/emailHandler`)
+const { sendPostBanEmail, sendPostUnbanEmail } = require(`../../../utils/emailHandler`)
 const {
     admin: { maxReportMessageLength },
     errors: { inputTooLong, notFound },
@@ -12,21 +12,25 @@ const banOrUnbanPost = async(props)=>{
     const {
         name: username,
         posttitle,
-        message,
+        reason,
         loggedUserId
     } = props
 
-    if(message.length > maxReportMessageLength)
-        return inputTooLong(`Message`)
+    if(reason.length > maxReportMessageLength)
+        return inputTooLong(`Reason`)
 
     try {
+        const loggedUser = await User.findById(loggedUserId)
+        if(!loggedUser) return notFound(`Admin Profile`)
+
         const userPost = await User.findOne({ name: username })
+        if(!userPost) return notFound(`User`)
+
         const deletedPost = await Post.findOne({
             title: posttitle,
             user: userPost._id
         })
-        if(!deletedPost)
-            return notFound(`User`)
+        if(!deletedPost) return notFound(`User`)
 
         if(deletedPost.banned == "true"){
             await Post.updateOne({
@@ -46,7 +50,14 @@ const banOrUnbanPost = async(props)=>{
                 }
             )
 
-            await sendUnbanEmail(userPost.email, userPost.name, mainUser.name, message)
+            await sendPostUnbanEmail({
+                username: userPost.username,
+                email: userPost.email,
+                title: deletedPost.title,
+                id: deletedPost.id,
+                adminUsername: loggedUser.name,
+                reason
+            })
 
             return custom(`${userPost.name}'s post from ${deletedPost.title} unbanned successfully`)
         }
@@ -67,7 +78,14 @@ const banOrUnbanPost = async(props)=>{
             }
         })
 
-        await sendBanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
+        await sendPostBanEmail({
+            username: userPost.username,
+            email: userPost.email,
+            title: deletedPost.title,
+            id: deletedPost.id,
+            adminUsername: loggedUser.name,
+            reason
+        })
         
         return custom(`${userPost.name}'s post from ${deletedPost.title} banned successfully`)
     } catch (error) {

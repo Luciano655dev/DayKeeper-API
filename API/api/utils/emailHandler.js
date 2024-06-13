@@ -57,17 +57,17 @@ const sendPasswordResetEmail = async (email, verificationCode) => {
   })
 }
 
-const sendBanEmail = async(email, bannedUsername, adminUsername, message) => {
+const sendBanEmail = async({ username, email, adminUsername, reason }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
     from: 'Day Keeper <daykeepeer655@gmail.com>',
     to: email,
-    subject: `Sua conta ${bannedUsername} foi banida no DayKeeper :(`,
-    text: `Você está recebendo este email pois <strong>Sua conta de nome ${bannedUsername} foi banida no DayKeeper</strong>
+    subject: `Sua conta ${username} foi banida no DayKeeper :(`,
+    text: `Você está recebendo este email pois <strong>Sua conta de nome ${username} foi banida no DayKeeper</strong>
             Sua conta foi revisada e banida do DayKeeper por ${adminUsername} pelo seguinte motivo:
 
-            ${message}
+            ${reason}
 
             Você ainda pode solicitar o desbanimento da sua conta respondendo este Gmail
             Caso isso não seja feito, sua conta e suas interações serão <strong>permanentemente excluidas</strong> em 1(um) mês
@@ -77,17 +77,17 @@ const sendBanEmail = async(email, bannedUsername, adminUsername, message) => {
   })
 }
 
-const sendUnbanEmail = async(email, bannedUsername, adminUsername, message) => {
+const sendUnbanEmail = async({ username, email, adminUsername, reason }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
     from: 'Day Keeper <daykeepeer655@gmail.com>',
     to: email,
-    subject: `Sua conta ${bannedUsername} foi DESBANIDA do DayKeeper ;)`,
-    text: `Temos boas noticias! <strong>Sua conta de nome ${bannedUsername} foi DESBANIDA no DayKeeper</strong>
+    subject: `Sua conta ${username} foi DESBANIDA do DayKeeper ;)`,
+    text: `Temos boas noticias! <strong>Sua conta de nome ${username} foi DESBANIDA no DayKeeper</strong>
             Sua conta foi revisada por ${adminUsername} e, concluimos que, pelo seguinte motivo:
 
-            ${message}
+            ${reason}
 
             Sua conta foi desbanida
             Todos os seus posts e interações voltaram ao ar!
@@ -98,17 +98,21 @@ const sendUnbanEmail = async(email, bannedUsername, adminUsername, message) => {
   })
 }
 
-const sendDeleteUserEmail = async(email, bannedUsername, adminUsername, message) => {
+const sendUserDeletionEmail = async({ username, email, adminUsername, reason, message }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
     from: 'Day Keeper <daykeepeer655@gmail.com>',
     to: email,
-    subject: `Sua conta ${bannedUsername} foi permanentemente excluida do DayKeeper`,
+    subject: `Sua conta "${username}" foi permanentemente excluida do DayKeeper`,
     text: ` Após uma analise da sua conta por nossos admininstradores, decidimos excluir sua conta
-            Sua conta de nome ${bannedUsername} já havia sido banida antes e, após analises, ela foi excluida.
+            Sua conta de nome ${username} já havia sido banida antes e, após analises, ela foi excluida.
 
             Sua conta, banida e revisada por ${adminUsername}, foi banida pelo seguinte motivo:
+
+            "${reason}"
+
+            e o ADM concluiu com a seguinte mensagem:
 
             "${message}"
 
@@ -121,19 +125,20 @@ const sendDeleteUserEmail = async(email, bannedUsername, adminUsername, message)
   })
 }
 
-const sendPostBanEmail = async(email, bannedUsername, bannedPostTitle, adminUsername, message) => {
+// ========== POST ==========
+const sendPostBanEmail = async({ username, email, title, id, adminUsername, reason }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
     from: 'Day Keeper <daykeepeer655@gmail.com>',
     to: email,
-    subject: `Seu post do dia ${bannedPostTitle} foi banido do DayKeeper`,
+    subject: `Seu post do dia ${title} foi banido do DayKeeper`,
     text: ` Após uma analise da sua conta por nossos admininstradores, decidimos banir seu post
-            do dia ${bannedPostTitle}, pertencente a sua conta de nome ${bannedUsername}, do DayKeeper.
+            do dia ${title}, de id "${id}", pertencente a sua conta de nome ${username}, do DayKeeper.
 
             Esse post, revisado por ${adminUsername}, foi banido pelo seguinte motivo:
 
-            "${message}"
+            "${reason}"
 
             Caso você acredite que esse banimento foi feito de forma equivocada, contate-nos
             em um período de até uma semana
@@ -144,27 +149,32 @@ const sendPostBanEmail = async(email, bannedUsername, bannedPostTitle, adminUser
   })
 }
 
-const sendPostUnbanEmail = async(email, bannedUsername, bannedPostTitle, adminUsername, message) => {
+const sendPostUnbanEmail = async({ username, email, title, id, adminUsername, reason }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
     from: 'Day Keeper <daykeepeer655@gmail.com>',
     to: email,
-    subject: `Sua conta ${bannedUsername} foi DESBANIDA do DayKeeper ;)`,
-    text: `Post do dia ${bannedPostTitle} desbanido por ${adminUsername}, "${message}"`,
+    subject: `Seu post do dia ${title} foi DESBANIDO do DayKeeper ;)`,
+    text: `Post do dia ${bannedPostTitle} com o id "${id}", da conta ${username}
+          foi desbanido por ${adminUsername} pela razao: "${reason}"`,
   })
 }
-const sendPostDeletionEmail = async(email, bannedUsername, bannedPostTitle, adminUsername, message) => {
+const sendPostDeletionEmail = async({ username, email, title, id, adminUsername, reason, message }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
     from: 'Day Keeper <daykeepeer655@gmail.com>',
     to: email,
-    subject: `Seu post do dia ${bannedPostTitle} foi excluido permanentemente do DayKeeper`,
+    subject: `Seu post do dia ${title} foi excluido permanentemente do DayKeeper`,
     text: ` Por falta de resposta ou por confirmação de admininstradores, decidimos excluir permanentemente
-            seu post do dia ${bannedPostTitle}, pertencente a sua conta de nome ${bannedUsername}, do DayKeeperr.
+            seu post do dia ${title} com o id "${id}", pertencente a sua conta de nome ${username}, no DayKeeperr.
 
             Esse post, que já havia sido banido por ${adminUsername}, foi permanentemente excluido pelo seguinte motivo:
+
+            "${reason}"
+
+            E o ADM concluiu com a seguinte mensagem:
 
             "${message}"
 
@@ -175,6 +185,7 @@ const sendPostDeletionEmail = async(email, bannedUsername, bannedPostTitle, admi
   })
 }
 
+// ========== STORIES ==========
 const sendStorieBanEmail = async({ username, email, title, id, adminUsername, reason }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
@@ -209,7 +220,7 @@ module.exports = {
 
   sendBanEmail,
   sendUnbanEmail,
-  sendDeleteUserEmail,
+  sendUserDeletionEmail,
 
   sendPostBanEmail,
   sendPostUnbanEmail,

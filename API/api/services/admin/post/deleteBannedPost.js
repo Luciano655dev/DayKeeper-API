@@ -20,14 +20,17 @@ const deleteBannedPosts = async(props)=>{
         return inputTooLong(`Message`)
 
     try{
+        const loggedUser = await User.findById(loggedUserId)
+        if(!loggedUser)return notFound(`User`)
+
         const userPost = await User.findOne({ name: username })
+        if(!userPost)return notFound(`User`)
+
         const deletedPost = await Post.findOne({
             title: posttitle,
             user: userPost._id
         })
-
-        if(!deletedPost)
-            return notFound(`Post`)
+        if(!deletedPost)return notFound(`Post`)
 
         const latestBan = deletedPost.ban_history[deletedPost.ban_history.length-1]
         if(deletedPost.banned != "true")
@@ -50,14 +53,18 @@ const deleteBannedPosts = async(props)=>{
 
         const adminUser = await User.findById(latestBan.banned_by)
         if(!adminUser) adminUser = await User.findById(loggedUserId)
+
+        const latest_ban = deletedPost.ban_history[deletedPost.ban_history - 1]
         
-        sendPostDeletionEmail(
-            userPost.email,
-            userPost.name,
-            deletedPost.title,
-            adminUser.name,
+        sendPostDeletionEmail({
+            title: userPost.title,
+            username: userPost.name,
+            email: userPost.email,
+            id: deletedPost._id,
+            adminUsername: loggedUser,
+            reason: latest_ban.ban_message,
             message
-        )
+        })
 
         return deleted(`Post`)
     } catch (error) {
