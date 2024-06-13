@@ -46,7 +46,7 @@ const banOrUnbanPost = async(props)=>{
                 }
             )
 
-            await sendUnbanEmail(bannedUser.email, bannedUser.name, mainUser.name, message)
+            await sendUnbanEmail(userPost.email, userPost.name, mainUser.name, message)
 
             return custom(`${userPost.name}'s post from ${deletedPost.title} unbanned successfully`)
         }

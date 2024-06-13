@@ -144,6 +144,16 @@ const sendPostBanEmail = async(email, bannedUsername, bannedPostTitle, adminUser
   })
 }
 
+const sendPostUnbanEmail = async(email, bannedUsername, bannedPostTitle, adminUsername, message) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Sua conta ${bannedUsername} foi DESBANIDA do DayKeeper ;)`,
+    text: `Post do dia ${bannedPostTitle} desbanido por ${adminUsername}, "${message}"`,
+  })
+}
 const sendPostDeletionEmail = async(email, bannedUsername, bannedPostTitle, adminUsername, message) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
@@ -165,12 +175,46 @@ const sendPostDeletionEmail = async(email, bannedUsername, bannedPostTitle, admi
   })
 }
 
+const sendStorieBanEmail = async({ username, email, title, id, adminUsername, reason }) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Seu Storie do dia ${title} foi banido do DayKeeper`,
+    text: ` ${username}, seu storie do dia ${title} com o id "${id}" foi banido pelo admin ${adminUsername} pelo motivo:
+    
+          "${reason}"
+          `,
+  })
+}
+
+const sendStorieUnbanEmail = async({ username, email, title, id, adminUsername, reason }) => {
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  await transporter.sendMail({
+    from: 'Day Keeper <daykeepeer655@gmail.com>',
+    to: email,
+    subject: `Seu Storie do dia ${title} foi DESBANIDO do DayKeeper`,
+    text: ` ${username}, seu storie do dia ${title} com o id "${id}" foi desbanido pelo admin ${adminUsername} que concluiu:
+    
+          "${reason}"
+          `,
+  })
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
+
   sendBanEmail,
   sendUnbanEmail,
   sendDeleteUserEmail,
+
   sendPostBanEmail,
-  sendPostDeletionEmail
+  sendPostUnbanEmail,
+  sendPostDeletionEmail,
+
+  sendStorieBanEmail,
+  sendStorieUnbanEmail
 }

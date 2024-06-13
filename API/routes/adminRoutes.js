@@ -6,11 +6,14 @@ const {
     banOrUnbanUser,
     deleteBannedUser,
     deleteUserReport,
+
     getReportedPosts,
     getBannedPosts,
     banOrUnbanPost,
     deleteBannedPost,
-    deletePostReport
+    deletePostReport,
+
+    banOrUnbanStorie
 } = require('../api/controllers/adminController')
 
 // Middlewares
@@ -30,5 +33,8 @@ router.get("/bannedPosts", checkTokenMW, checkAdminMW, getBannedPosts)
 router.post("/:name/:posttitle/banOrUnban", checkTokenMW, checkAdminMW, banOrUnbanPost)
 router.delete("/:name/:posttitle/", checkTokenMW, checkAdminMW, deleteBannedPost)
 router.delete("/:name/:posttitle/:reportId", checkTokenMW, checkAdminMW, deletePostReport)
+
+// Storie
+router.post("/storie/:name/:storieId/banOrUnban", checkTokenMW, checkAdminMW, banOrUnbanStorie)
 
 module.exports = router

@@ -6,11 +6,14 @@ const deleteBannedUser = require('../services/admin/user/deleteBannedUser')
 const deleteUserReport = require('../services/admin/user/deleteUserReport')
 const getReportedUsers = require('../services/admin/user/getReportedUsers')
 const getBannedUsers = require(`../services/admin/user/getBannedUsers`)
+
 const banOrUnbanPost = require(`../services/admin/post/banOrUnbanPost`)
 const deleteBannedPosts = require(`../services/admin/post/deleteBannedPost`)
 const deletePostReport = require(`../services/admin/post/deletePostReport`)
 const getReportedPosts = require(`../services/admin/post/getReportedPosts`)
 const getBannedPosts = require(`../services/admin/post/getBannedPosts`)
+
+const banOrUnbanStorie = require(`../services/admin/storie/banOrUnbanStorie`)
 
 // ========== USERS ==========
 const banOrUnbanUserController = async(req, res)=>{
@@ -160,6 +163,21 @@ const getBannedPostsController = async(req, res)=>{
     }
 }
 
+// =========== STORIES ==========
+const banOrUnbanStorieController = async(req, res)=>{
+    try {
+        const { code, message } = await banOrUnbanStorie({
+            ...req.params,
+            reason: req.body.reason || '',
+            loggedUserId: req.id
+        })
+
+        return res.status(code).json({ message })
+    } catch (error) {
+        return res.status(500).json({ message: serverError(error.toString()) })
+    }
+}
+
 module.exports = {
     getReportedUsers: getReportedUsersController,
     getBannedUsers: getBannedUsersController,
@@ -171,5 +189,6 @@ module.exports = {
     getBannedPosts: getBannedPostsController,
     banOrUnbanPost: banOrUnbanPostController,
     deleteBannedPost: deleteBannedPostController,
-    deletePostReport: deletePostReportController
+    deletePostReport: deletePostReportController,
+    banOrUnbanStorie: banOrUnbanStorieController
 }
