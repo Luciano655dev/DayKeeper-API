@@ -7,9 +7,11 @@ async function checkPrivateUserMW(req, res, next){
 
     try{
         const user = await User.findOne({ name })
+        const loggedUser = await User.findById(loggedUserId)
         if(!user) return res.status(404).json({ message: `User not found` })
 
         if(
+            loggedUser.roles.includes('admin') ||
             !user.private ||
             user.followers.includes(loggedUserId) ||
             user._id == loggedUserId
