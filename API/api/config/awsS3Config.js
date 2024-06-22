@@ -1,15 +1,21 @@
-require('dotenv').config()
+const {
+  aws: {
+    defaultRegion,
+    accessKeyId,
+    secretAccessKey
+  }
+} = require(`../../config`)
 const aws = require('aws-sdk')
 
 let awsS3Config = new aws.S3({
-    region: process.env.AWS_DEFAULT_REGION,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-    sslEnabled: false,
-    s3ForcePathStyle: true,
-    signatureVersion: 'v4',
+  region: `us-east-1`,
+  credentials: {
+    accessKeyId,
+    secretAccessKey,
+  },
+  sslEnabled: false,
+  s3ForcePathStyle: true,
+  signatureVersion: 'v4',
 })
 
 module.exports = awsS3Config

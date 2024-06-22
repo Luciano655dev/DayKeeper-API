@@ -13,7 +13,6 @@ const updateUser = async(params) => {
     email,
     password,
     bio,
-    private,
     file,
     loggedUserId
   } = params
@@ -50,7 +49,7 @@ const updateUser = async(params) => {
               url: file.location
             } : user.profile_picture
           ),
-          follow_requests: ( private ? user?.follow_requests || [] : undefined ),
+          follow_requests: [],
           verified_email: ( typeof email == 'undefined' ? user.verified_email : (user.email == email) ),
         },
       },

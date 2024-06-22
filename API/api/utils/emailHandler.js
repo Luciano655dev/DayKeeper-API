@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer')
-const jwt = require('jsonwebtoken')
 
 const transporterOptions = {
   service: "gmail",

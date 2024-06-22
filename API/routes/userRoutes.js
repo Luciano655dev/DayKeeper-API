@@ -24,9 +24,11 @@ const checkTokenMW = require('../middlewares/checkTokenMW')
 const checkBannedUserMW = require('../middlewares/checkBannedUserMW')
 const checkPrivateUserMW = require('../middlewares/checkPrivateUserMW')
 
+const detectInappropriateFileMW = require('../middlewares/detectInappropriateFileMW')
+
 // Routes
 router.get("/:name", checkTokenMW, checkBannedUserMW, getUser)
-router.put("/update_user", checkTokenMW, multer(multerConfig("image")).single('file'), handleMulterError, userEditValidation, updateUser)
+router.put("/update_user", checkTokenMW, multer(multerConfig("image")).single('file'), detectInappropriateFileMW, handleMulterError, userEditValidation, updateUser)
 router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
 router.delete("/delete_user", checkTokenMW, deleteUser)
 

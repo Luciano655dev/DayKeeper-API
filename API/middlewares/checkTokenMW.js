@@ -13,7 +13,7 @@ async function checkTokenMW(req, res, next) {
     req.id = decoded.id
     next()
   } catch (err) {
-    return res.status(402).json({ message: "Invalid Token" })
+    return res.status(409).json({ message: "Invalid Token" })
   }
 }
 

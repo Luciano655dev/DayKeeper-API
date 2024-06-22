@@ -43,4 +43,6 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
   console.clear()
   console.log(`\x1b[36mServidor rodando em http://localhost:${PORT}\x1b[0m`)
-}) 
+})
+
+module.exports = app
