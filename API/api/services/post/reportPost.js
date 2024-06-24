@@ -4,7 +4,7 @@ const {
   user: { maxReportReasonLength },
   errors: { inputTooLong, notFound, doubleAction },
   success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const reportPost = async(props)=>{
   const {

@@ -2,7 +2,7 @@ const User = require('../../../models/User')
 const {
     errors: { notFound },
     success: { deleted }
-} = require('../../../../constants')
+} = require('../../../../constants/index')
 
 const deleteUserReport = async(props)=>{
     const { name: username, reportId } = props

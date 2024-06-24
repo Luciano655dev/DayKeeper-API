@@ -2,7 +2,7 @@ const User = require('../../models/User')
 const {
   errors: { notFound },
   success: { deleted }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const deleteProfilePicture = require("./delete/deleteProfilePicture")
 const deletePostReactions = require('./delete/deletePostReactions')

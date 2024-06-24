@@ -4,7 +4,7 @@ const { hideUserData } = require('../../repositories')
 const {
     errors: { notFound },
     success: { fetched }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const getUser = async(props) => {
     const { name: userInput, loggedUserId } = props

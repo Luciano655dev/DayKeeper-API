@@ -6,7 +6,7 @@ const {
     admin: { maxReportMessageLength, daysToDeleteBannedPost },
     errors: { inputTooLong, notFound, unauthorized },
     success: { deleted }
-} = require(`../../../../constants`)
+} = require(`../../../../constants/index`)
 
 const deleteBannedPosts = async(props)=>{
     const {

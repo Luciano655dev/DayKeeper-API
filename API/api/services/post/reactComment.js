@@ -3,7 +3,7 @@ const findPost = require('./get/findPost')
 const {
     errors: { notFound, invalidValue },
     success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const reactComment = async (props) => {
     const {

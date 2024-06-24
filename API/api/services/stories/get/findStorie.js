@@ -10,7 +10,7 @@ const {
 const {
     errors: { notFound },
     success: { fetched }
-} = require(`../../../../constants`)
+} = require(`../../../../constants/index`)
 
 const findStorie = async({ userInput, storieInput, fieldsToPopulate = [], loggedUserId, view = false })=>{
     try{

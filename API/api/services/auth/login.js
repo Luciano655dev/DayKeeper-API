@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const { secret } = require('../../../config')
 const {
   success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const login = async(props)=>{
   const { name: userInput } = props

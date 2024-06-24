@@ -1,4 +1,4 @@
-const { serverError } = require('../../constants')
+const { serverError } = require('../../constants/index')
 const getUser = require('../services/user/getUser')
 const getUserPosts = require('../services/user/getUserPosts')
 const updateUser = require("../services/user/updateUser")

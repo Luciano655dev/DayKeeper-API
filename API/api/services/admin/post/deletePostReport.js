@@ -4,7 +4,7 @@ const Post = require('../../../models/Post')
 const {
     errors: { notFound },
     success: { deleted }
-} = require('../../../../constants')
+} = require('../../../../constants/index')
 
 const deleteUserReport = async(props)=>{
     const {

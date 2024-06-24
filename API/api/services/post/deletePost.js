@@ -3,7 +3,7 @@ const deleteFile = require('../../utils/deleteFile')
 const {
   errors: { notFound },
   success: { deleted }
-} = require("../../../constants")
+} = require("../../../constants/index")
 
 const deletePost = async(props)=>{
   const {

@@ -10,7 +10,7 @@ const {
   errors: { fieldsNotFilledIn, inputTooLong, notFound },
   errroGif,
   success: { created }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const commentPost = async(props)=>{
   let {

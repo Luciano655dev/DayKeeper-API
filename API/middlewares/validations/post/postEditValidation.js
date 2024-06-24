@@ -1,5 +1,5 @@
 const deleteFile = require('../../../api/utils/deleteFile')
-const { serverError, inputTooLong } = require('../../../constants')
+const { serverError, inputTooLong } = require('../../../constants/index')
 
 const postEditValidation = async (req, res, next) => {
   const { data } = req.body

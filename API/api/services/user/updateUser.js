@@ -5,7 +5,7 @@ const { sendVerificationEmail } = require('../../utils/emailHandler')
 const {
   errors: { notFound },
   success: { updated }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const updateUser = async(params) => {
   const {

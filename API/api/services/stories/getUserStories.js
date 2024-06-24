@@ -5,7 +5,7 @@ const userStoriesPipeline = require(`../../repositories/userStoriesPipeline`)
 const {
     errors: { notFound },
     success: { fetched }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const getUserStories = async(props)=>{
     let {

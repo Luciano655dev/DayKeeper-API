@@ -5,7 +5,7 @@ const formatDate = require(`../../utils/formatDate`)
 const {
     errors: { invalidValue, notFound, custom },
     success: { fetched }
-} = require(`../../../constants`)
+} = require(`../../../constants/index`)
 
 const getQuestion = async (props) => {
     const { date } = props

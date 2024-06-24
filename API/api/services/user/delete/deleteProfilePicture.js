@@ -1,5 +1,5 @@
 const deleteFile = require('../../../utils/deleteFile')
-const { defaultPfp } = require('../../../../constants')
+const { defaultPfp } = require('../../../../constants/index')
 
 const deleteProfilePicture = async(user)=>{
     try{

@@ -1,6 +1,6 @@
 const Post = require('../../../api/models/Post')
 const deleteFile = require('../../../api/utils/deleteFile')
-const { serverError, inputTooLong, fieldsNotFilledIn } = require('../../../constants')
+const { serverError, inputTooLong, fieldsNotFilledIn } = require('../../../constants/index')
 
 const postValidation = async(req, res, next)=>{
     const { data } = req.body

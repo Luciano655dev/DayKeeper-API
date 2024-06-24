@@ -4,7 +4,7 @@ const {
   auth: { resetPasswordExpiresTime },
   errors: { notFound },
   success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const forgetPassword = async (props) => {
   const { email } = props

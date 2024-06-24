@@ -2,7 +2,7 @@ const User = require('../../models/User')
 const {
     errors: { notFound, unauthorized, fieldNotFilledIn, invalidValue },
     success: { custom }
-} = require("../../../constants")
+} = require("../../../constants/index")
 
 const confirmEmail = async(props)=>{
     const { email, verificationCode } = props

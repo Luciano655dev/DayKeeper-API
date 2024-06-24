@@ -4,7 +4,7 @@ const mongoose = require(`mongoose`)
 const {
     errors: { invalidValue, notFound },
     success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const reactStorie = async (props) => {
     const {

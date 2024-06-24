@@ -2,7 +2,7 @@ const User = require("../../models/User")
 const {
   errors: { notFound, custom: customErr },
   success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const followUser = async(props)=>{
   const { name, loggedUserId } = props

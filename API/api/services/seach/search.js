@@ -7,7 +7,7 @@ const { resetTime } = require('../../../config')
 const {
     errors: { notFound },
     success: { fetched }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const search = async (props) => {
     const page = Number(props.page) || 1

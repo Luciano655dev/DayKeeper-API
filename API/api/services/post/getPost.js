@@ -2,7 +2,7 @@ const findPost = require('./get/findPost')
 const {
     errors: { notFound },
     success: { fetched }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const getPost = async(props)=>{
     const {

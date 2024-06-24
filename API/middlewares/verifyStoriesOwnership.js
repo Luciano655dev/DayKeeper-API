@@ -2,7 +2,7 @@ const User = require(`../api/models/User`)
 const Storie = require(`../api/models/Storie`)
 const { 
   errors: { serverError }
-} = require('../constants')
+} = require('../constants/index')
 
 async function verifyUserOwnershipMW(req, res, next) {
   const { name, storieId } = req.params

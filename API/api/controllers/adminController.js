@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const { errors: { serverError } } = require('../../constants')
+const { errors: { serverError } } = require('../../constants/index')
 const banOrUnbanUser = require('../services/admin/user/banOrUnbanUser')
 const deleteBannedUser = require('../services/admin/user/deleteBannedUser')
 const deleteUserReport = require('../services/admin/user/deleteUserReport')

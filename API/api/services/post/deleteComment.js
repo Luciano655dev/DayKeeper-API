@@ -3,7 +3,7 @@ const findPost = require('./get/findPost')
 const {
     errors: { notFound, unauthorized },
     success: { deleted }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const deleteComment = async (props) => {
     const {

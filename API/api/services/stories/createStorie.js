@@ -5,7 +5,7 @@ const {
     stories: { maxStoriesPerDay },
     errors: { maxQuantityToday },
     success: { created }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const createStorie = async(props)=>{
     const {

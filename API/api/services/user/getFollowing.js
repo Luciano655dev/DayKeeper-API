@@ -4,7 +4,7 @@ const { hideUserData } = require('../../repositories')
 const {
   errors: { notFound },
   success: { fetched }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const getFollowing = async(props)=>{
   const { name } = props

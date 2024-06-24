@@ -1,6 +1,6 @@
 const User = require('../../../api/models/User')
 const { sendVerificationEmail } = require('../../../api/utils/emailHandler')
-const { serverError, fieldsNotFilledIn, notFound } = require('../../../constants')
+const { serverError, fieldsNotFilledIn, notFound } = require('../../../constants/index')
 const bcrypt = require('bcrypt')
 
 const userValidation = async(req, res, next)=>{

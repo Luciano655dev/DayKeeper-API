@@ -7,7 +7,7 @@ const {
     admin: { daysToDeleteBannedUser },
     errors: { notFound, unauthorized },
     success: { deleted }
-} = require('../../../../constants')
+} = require('../../../../constants/index')
 
 const deleteBannedUser = async(props)=>{
     const {

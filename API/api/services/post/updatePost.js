@@ -4,7 +4,7 @@ const findPost = require('./get/findPost')
 const {
   errors: { notFound, inputTooLong },
   success: { updated }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const updatePost = async(req)=>{
   const newData = req.body

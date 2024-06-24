@@ -1,5 +1,5 @@
 const Post = require('../api/models/Post')
-const { serverError, notFound } = require('../constants')
+const { serverError, notFound } = require('../constants/index')
 
 async function verifyUserOwnershipMW(req, res, next) {
   try {

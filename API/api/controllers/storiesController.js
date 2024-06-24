@@ -1,4 +1,4 @@
-const { errors: { serverError } } = require('../../constants')
+const { errors: { serverError } } = require('../../constants/index')
 
 //  SERVICES
 const createStorie = require(`../services/stories/createStorie`)

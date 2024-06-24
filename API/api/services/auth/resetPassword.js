@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const {
   errors: { fieldsNotFilledIn, notFound, unauthorized, invalidValue },
   success: { reseted }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const resetPassword = async (props) => {
   const { verificationCode, email, password } = props

@@ -4,7 +4,7 @@ const { userPostsPipeline } = require('../../repositories')
 
 const {
     success: { fetched }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const getUserPosts = async({ page, maxPageSize, order, name, id })=>{
     try{

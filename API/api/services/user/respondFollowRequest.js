@@ -2,7 +2,7 @@ const User = require('../../models/User')
 const {
   errors: { notFound, unauthorized, custom: customErr },
   success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const respondeFollowRequest = async(props)=>{
   const { name, response, loggedUserId } = props

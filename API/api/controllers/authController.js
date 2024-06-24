@@ -1,4 +1,4 @@
-const { errors: { serverError } } = require('../../constants')
+const { errors: { serverError } } = require('../../constants/index')
 
 const register = require('../services/auth/register')
 const login = require('../services/auth/login')

@@ -1,12 +1,12 @@
 const User = require('../../models/User')
-const { defaultPfp } = require('../../../constants')
 const bcrypt = require('bcrypt')
 const { sendVerificationEmail } = require('../../utils/emailHandler')
 
 const {
+    defaultPfp,
     auth: { registerCodeExpiresTime },
     success: { created }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const register = async(props) => {
     const { name: username, email, password } = props

@@ -1,33 +1,4 @@
 module.exports = {
-    maxPageSize: 100,
-    stories: {
-        maxStoriesPerDay: 5
-    },
-    post: {
-        maxCommentLength: 500,
-    },
-    user: {
-        maxReportReasonLength: 1000,
-    },
-    admin: {
-        maxReportMessageLength: 1000,
-        daysToDeleteBannedUser: 30,
-        daysToDeleteBannedPost: 7
-    },
-    auth: {
-        resetTokenExpiresTime: '1h',
-        resetPasswordExpiresTime: 3600000, // 1 h
-        registerCodeExpiresTime: 600000, // 10 min
-        maxUsernameLength: 40,
-        maxEmailLength: 320,
-        maxPasswordLength: 50
-    },
-    defaultPfp: {
-        name: 'Doggo.jpg',
-        key: 'Doggo.jpg',
-        url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg",
-        mimetype: 'image/jpeg'
-    },
     errorGif: {
         name: '404',
         id: '',
@@ -91,50 +62,6 @@ module.exports = {
             return {
                 code,
                 message,
-                ...props
-            }
-        }
-    },
-    success: {
-        updated: (data, props) => {
-            return {
-                code: 200,
-                message: `${data} updated successfully`,
-                ...props
-            }
-        },
-        created: (data, props) => {
-            return {
-                code: 201,
-                message: `${data} created successfully`,
-                ...props
-            }
-        },
-        deleted: (data, props) => {
-            return {
-                code: 204,
-                message: `${data} deleted successfully`,
-                ...props
-            }
-        },
-        fetched: (data, props) => {
-            return {
-                code: 200,
-                message: `${data} fetched successfully`,
-                ...props
-            }
-        },
-        reseted: (data, props) => {
-            return {
-                code: 205,
-                message: `${data} reseted successfully`,
-                ...props
-            }
-        },
-        custom: (message, props) => {
-            return {
-                code: 200,
-                message: message || ``,
                 ...props
             }
         }

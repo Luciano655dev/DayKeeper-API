@@ -6,7 +6,7 @@ const {
     admin: { maxReportMessageLength },
     errors: { inputTooLong, notFound },
     success: { custom }
-} = require(`../../../../constants`)
+} = require(`../../../../constants/index`)
 
 const banOrUnbanPost = async(props)=>{
     const {

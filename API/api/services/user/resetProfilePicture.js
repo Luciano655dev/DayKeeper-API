@@ -4,7 +4,7 @@ const {
   defaultPfp,
   errors: { notFound, custom: customErr },
   success: { reseted }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const reseteProfilePicture = async(props)=>{
     const { loggedUserId } = props

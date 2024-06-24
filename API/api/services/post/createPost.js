@@ -1,12 +1,10 @@
 const Post = require('../../models/Post')
-const formatDate = require("../../utils/formatDate")
 const getTodayDate = require(`../../utils/getTodayDate`)
 const deleteFile = require('../../utils/deleteFile')
-const { resetTime } = require('../../../config')
 
 const {
   success: { created }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const createPost = async(props)=>{
   const { data, loggedUserId, files } = props

@@ -1,9 +1,11 @@
 const AWS = require(`aws-sdk`)
+const { inappropriateLabels } = require(`../../constants/index`)
 const {
   aws: {
     accessKeyId,
     secretAccessKey,
-    defaultRegion
+    defaultRegion,
+    bucketName
   }
 } = require(`../../config`)
 
@@ -14,12 +16,6 @@ AWS.config.update({
 });
 
 const rekognition = new AWS.Rekognition()
-
-const {
-  aws: {
-    bucketName
-  }
-} = require(`../../config`)
 
 const detectInappropriateContent = async (imageKey, type = `image`) => {
   const params = type == `image` ? {
@@ -40,15 +36,6 @@ const detectInappropriateContent = async (imageKey, type = `image`) => {
 
   try {
     const response = await rekognition.detectModerationLabels(params).promise()
-    const inappropriateLabels = [
-      'Explicit',
-      'Exposed Female Genitalia',
-      'Explicit Nudity',
-      'Explicit Nudity',
-      'Exposed Male Genitalia',
-      'Exposed Buttocks or Anus',
-      'Violence'
-    ]
 
     for(let label of response.ModerationLabels){
       // log

@@ -1,6 +1,6 @@
 const User = require('../../../api/models/User')
 const BannedUser = require('../../../api/models/BannedUser')
-const { serverError, inputTooLong, fieldsNotFilledIn, auth } = require('../../../constants')
+const { serverError, inputTooLong, fieldsNotFilledIn, auth } = require('../../../constants/index')
 
 const userValidation = async(req, res, next)=>{
   const { name: username, email, password } = req.body

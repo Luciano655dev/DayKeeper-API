@@ -1,6 +1,6 @@
 const getDataWithPages = require(`../../getDataWithPages`)
 const { bannedElementPipeline } = require(`../../../repositories`)
-const { success: { fetched } } = require(`../../../../constants`)
+const { success: { fetched } } = require(`../../../../constants/index`)
 
 const getBannedPosts = async(props)=>{
     const {

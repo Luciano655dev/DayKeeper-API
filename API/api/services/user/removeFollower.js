@@ -2,7 +2,7 @@ const User = require("../../models/User")
 const {
   errors: { notFound, unauthorized, custom: customErr },
   success: { custom }
-} = require('../../../constants')
+} = require('../../../constants/index')
 
 const removeFollower = async(props)=>{
   const { name, loggedUserId } = props
