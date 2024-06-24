@@ -36,7 +36,7 @@ const postValidation = async(req, res, next)=>{
         })
 
         if (lastPostToday)
-        return handleBadRequest(400, "You can only make one post per day")
+            return handleBadRequest(400, "You can only make one post per day")
 
         return next()
     } catch(error){

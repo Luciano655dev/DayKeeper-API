@@ -1,6 +1,7 @@
+const { format, parse, isAfter, subDays } = require('date-fns')
 const DailyQuestion = require(`../../models/DailyQuestion`)
+const { getTodayDate } = require(`../../utils/getTodayDate`)
 const { resetTime } = require(`../../../config`)
-const formatDate = require(`../../utils/formatDate`)
 
 const {
     errors: { invalidValue, notFound, custom },
@@ -11,37 +12,36 @@ const getQuestion = async (props) => {
     const { date } = props
 
     try {
-        const dateRegexFormat = /^\d{2}-\d{2}-\d{4}$/
-
+        const dateRegexFormat = /^\d{2}-\d{2}-\d{4}$/ // dd-MM-yyyy
         if (!dateRegexFormat.test(date))
             return invalidValue(`date`)
 
-        const [questionDay, questionMonth, questionYear] = date.split('-').map(Number)
-        let now = new Date()
-        let todayDate = formatDate(now)
+        const now = new Date()
+        const requestedDate = parse(date, 'dd-MM-yyyy', new Date())
 
-        const requestedDate = new Date(questionYear, questionMonth - 1, questionDay)
-        if (requestedDate > now)
-            return custom(400, `you can not enter a future date`)
+        if (isAfter(requestedDate, now))
+            return custom(400, `you cannot enter a future date`)
 
-        if (todayDate.hour < resetTime)
-            now.setDate(now.getDate() - 1)
+        let adjustedNow = now
+        const currentHour = format(now, 'H')
 
-        const adjustedDate = formatDate(now)
-        let queryDateString = `${adjustedDate.day}-${adjustedDate.month}`
+        if (currentHour < resetTime)
+            adjustedNow = subDays(now, 1)
 
-        if (date === `${todayDate.day}-${todayDate.month}-${todayDate.year}`)
-            queryDateString = `${adjustedDate.day}-${adjustedDate.month}`
+        let queryDateString
+        if (date === getTodayDate)
+            queryDateString = format(requestedDate, 'dd-MM')
         else
-            queryDateString = `${questionDay}-${questionMonth}`
+            queryDateString = format(adjustedNow, 'dd-MM')
 
-        let question = await DailyQuestion.findOne({ day: queryDateString })
+        const question = await DailyQuestion.findOne({ day: queryDateString })
 
         if (!question)
             return notFound(`question`)
 
         return fetched(`question`, { question })
     } catch (error) {
+        console.log(error.message)
         throw new Error(error.message)
     }
 }

@@ -1,15 +1,13 @@
-const formatDate = require(`./formatDate`)
+const { format, getHours, subDays } = require(`date-fns`)
 const { resetTime } = require(`../../config`)
 
 const getTodayDate = ()=>{
-    let todayDate = new Date()
+    let todayDate = format(new Date(), `dd-MM-yyyy`)
 
-    if(formatDate(new Date()).hour < resetTime)
-        todayDate.setDate(todayDate.getDate() - 1)
+    if(getHours(new Date()) < resetTime)
+        todayDate = format(subDays(new Date, 1), `dd-MM-yyyy`)
 
-    todayDate = formatDate(todayDate)
-
-    return `${todayDate.day}-${todayDate.month}-${todayDate.year}`
+    return todayDate
 }
 
 module.exports = getTodayDate

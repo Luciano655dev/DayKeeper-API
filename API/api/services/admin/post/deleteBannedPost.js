@@ -1,6 +1,7 @@
 const User = require(`../../../models/User`)
 const Post = require(`../../../models/Post`)
 const deleteFile = require(`../../../utils/deleteFile`)
+const { differenceInDays } = require("date-fns")
 const { sendPostDeletionEmail } = require(`../../../utils/emailHandler`)
 const {
     admin: { maxReportMessageLength, daysToDeleteBannedPost },
@@ -38,7 +39,7 @@ const deleteBannedPosts = async(props)=>{
         if(latestBan.banned_by != loggedUserId)
             return unauthorized(`delete this post`, "Only the admin who banned this post can delete it")
 
-        const diffInDays = Math.abs(new Date() - latestBan.ban_date) / (1000 * 3600 * 24)
+        const diffInDays = differenceInDays(latestBan.ban_date, new Date())
         if(diffInDays < daysToDeleteBannedPost)
             return unauthorized(`delete this post`, "You can only delete a post if it has been banned for 7 or more days")
 
