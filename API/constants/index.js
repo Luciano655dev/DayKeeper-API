@@ -10,6 +10,13 @@ module.exports = {
         maxCommentLength: 500,
     },
     user: {
+        defaultPfp: {
+            name: 'Doggo.jpg',
+            key: 'Doggo.jpg',
+            url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg",
+            mimetype: 'image/jpeg'
+        },
+        defaultTimeZone: 'America/Sao_Paulo', // BRASILLLLLLLL
         maxReportReasonLength: 1000,
     },
     admin: {
@@ -24,12 +31,6 @@ module.exports = {
         maxUsernameLength: 40,
         maxEmailLength: 320,
         maxPasswordLength: 50
-    },
-    defaultPfp: {
-        name: 'Doggo.jpg',
-        key: 'Doggo.jpg',
-        url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg",
-        mimetype: 'image/jpeg'
     },
 
     inappropriateLabels: [ // for rekognition

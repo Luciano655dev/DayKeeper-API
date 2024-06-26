@@ -3,13 +3,13 @@ const bcrypt = require('bcrypt')
 const { sendVerificationEmail } = require('../../utils/emailHandler')
 
 const {
-    defaultPfp,
+    user: { defaultPfp, defaultTimeZone },
     auth: { registerCodeExpiresTime },
     success: { created }
 } = require('../../../constants/index')
 
 const register = async(props) => {
-    const { name: username, email, password } = props
+    const { name: username, email, password, timeZone } = props
     const img = defaultPfp
 
     // new 6 digit code
@@ -25,6 +25,7 @@ const register = async(props) => {
             name: username,
             email,
             bio: '',
+            timeZone: timeZone || defaultTimeZone,
             profile_picture: img,
             private: false,
             roles: [ 'user' ],
@@ -32,7 +33,7 @@ const register = async(props) => {
             blocked_users: [],
             verified_email: false,
             password: passwordHash,
-            creation_date: Date.now(),
+            created_at: Date.now(),
             verification_code: verificationCode,
             verification_time: verificationCodeTime
         })

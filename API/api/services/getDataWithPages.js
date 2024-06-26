@@ -39,20 +39,33 @@ const getDataWithPages = async ({ type, pipeline, order, following, page, maxPag
   newPipeline.push({ $match: matchCriteria })
 
   // ========== SORT ===========
+  const timeZoneCreation = {
+    $addFields: {
+      timeZoneMatch: {
+        $cond: [
+          { $eq: [{ $arrayElemAt: [{ $split: [
+            ( type == `Post` || type == `User` ) ? "$user_info.timeZone" : "timeZone", "/"
+          ] }, 0] }, mainUser.timeZone.split('/')[0]] },
+          1,
+          0
+        ]
+      }
+    }
+  }
   let sortPipeline
   switch (order) {
     case 'relevant':
-      sortPipeline = { $sort: { created_at: -1, relevance: -1, _id: 1 } }
+      sortPipeline = { $sort: { created_at: -1, relevance: -1, timeZoneMatch: -1, _id: 1 } }
       break
     case 'most_reports':
-      sortPipeline = { $sort: { numReports: -1 , _id: 1} }
+      sortPipeline = { $sort: { numReports: -1, timeZoneMatch: -1, _id: 1} }
       break
     case 'recent_ban':
       sortPipeline = { $sort: { "latestBan.ban_date": 1, _id: 1 } }
       break
     case 'recent':
     default: // default is 'recent'
-      sortPipeline = { $sort: { created_at: -1, _id: 1} }
+      sortPipeline = { $sort: { created_at: -1, timeZoneMatch: -1, _id: 1} }
       break
   }
 

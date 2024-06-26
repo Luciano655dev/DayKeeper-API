@@ -9,13 +9,14 @@ const userSchema = mongoose.Schema({
     key: String,
     url: String
   },
+  timeZone: String,
   bio: String,
   verified_email: Boolean,
   password: String,
   private: Boolean,
   roles: [ String ], // ['user', 'admin']
 
-  creation_date: {
+  created_at: {
     type: Date,
     default: Date.now,
     required: true

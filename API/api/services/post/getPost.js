@@ -1,4 +1,6 @@
 const findPost = require('./get/findPost')
+const convertTimeZone = require(`../../utils/convertTimeZone`)
+
 const {
     errors: { notFound },
     success: { fetched }
@@ -24,7 +26,10 @@ const getPost = async(props)=>{
         if (!post)
             return notFound('Post')
   
-        return fetched(`post`, { post })
+        return fetched(`post`, { post: {
+            ...post._doc,
+            created_at: convertTimeZone(post.created_at, post.user.timeZone)
+        } })
     } catch (error) {
         throw new Error(error.message)
     }

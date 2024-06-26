@@ -1,7 +1,7 @@
 const User = require('../../../api/models/User')
 const bcrypt = require('bcrypt')
 const deleteFile = require('../../../api/utils/deleteFile')
-const { serverError, inputTooLong, defaultPfp } = require('../../../constants/index')
+const { serverError, inputTooLong, user: { defaultPfp } } = require('../../../constants/index')
 
 const userValidation = async(req, res, next)=>{
     const {

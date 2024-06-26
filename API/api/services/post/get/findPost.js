@@ -16,7 +16,7 @@ async function findPost(userInput, posttitle, type = 'username', fieldsToPopulat
     if (type === 'username') {
       const user = await User.findOne({ name: userInput })
       if (!user) return null
-      query.user = user._id
+        query.user = user._id
     } else {
       query.user = userInput
     }

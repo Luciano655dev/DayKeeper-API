@@ -1,14 +1,14 @@
 const User = require('../../../api/models/User')
 const BannedUser = require('../../../api/models/BannedUser')
-const { serverError, inputTooLong, fieldsNotFilledIn, auth } = require('../../../constants/index')
+const { listTimeZones } = require(`timezone-support`)
+
+const {
+  auth: { maxEmailLength, maxUsernameLength, maxPasswordLength },
+  errors: { serverError, inputTooLong, fieldsNotFilledIn }
+} = require('../../../constants/index')
 
 const userValidation = async(req, res, next)=>{
-  const { name: username, email, password } = req.body
-  const {
-    maxEmailLength,
-    maxUsernameLength,
-    maxPasswordLength
-  } = auth
+  const { name: username, email, password, timeZone } = req.body
 
   try{
     const user = await User.findOne({ $or: [{ name: username }, { email }] })
@@ -32,6 +32,10 @@ const userValidation = async(req, res, next)=>{
 
     if (!password || password.length > maxPasswordLength)
       return res.status(413).json({ message: inputTooLong('Password') })
+
+    // time zone validation
+    if(!listTimeZones().includes(timeZone) && timeZone != `undefined`)
+      return res.status(400).json({ message: invalidValue(`TimeZone`) })
   
     return next()
   }catch(error){

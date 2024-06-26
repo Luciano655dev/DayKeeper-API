@@ -1,5 +1,6 @@
 const User = require('../../models/User')
 const mongoose = require('mongoose')
+const convertTimeZone = require(`../../utils/convertTimeZone`)
 const { hideUserData } = require('../../repositories')
 const {
     errors: { notFound },
@@ -33,6 +34,7 @@ const getUser = async(props) => {
         return fetched(`user`, { user: {
             ...user._doc,
             followers: user._doc.followers.length,
+            created_at: convertTimeZone(user.created_at, loggedUser.timeZone),
             status
         } })
     } catch (error) {

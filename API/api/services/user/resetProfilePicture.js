@@ -1,7 +1,7 @@
 const User = require('../../models/User')
 
 const {
-  defaultPfp,
+  user: { defaultPfp },
   errors: { notFound, custom: customErr },
   success: { reseted }
 } = require('../../../constants/index')
