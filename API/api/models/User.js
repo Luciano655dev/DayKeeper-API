@@ -4,10 +4,6 @@ const mongoose = require('mongoose')
 const userSchema = mongoose.Schema({
   name: String,
   email: String,
-  googleId: {
-    type: String,
-    required: false
-  },
   profile_picture: {
     name: String,
     key: String,
@@ -19,6 +15,15 @@ const userSchema = mongoose.Schema({
   password: String,
   private: Boolean,
   roles: [ String ], // ['user', 'admin']
+
+  googleId: {
+    type: String,
+    required: false
+  },
+  twitterId: {
+    type: String,
+    required: false
+  },
 
   created_at: {
     type: Date,

@@ -1,13 +1,10 @@
 const { errors: { serverError } } = require('../../constants/index')
 
 const register = require('../services/auth/register')
-const login = require('../services/auth/login')
 const confirmEmail = require('../services/auth/confirmEmail')
 const forgetPassword = require('../services/auth/forgetPassword')
 const resetPassword = require('../services/auth/resetPassword')
 const getUserData = require('../services/auth/getUserData')
-
-const googleAuth = require('../services/auth/googleAuth')
 
 // register
 const registerController = async(req, res) => {
@@ -15,28 +12,6 @@ const registerController = async(req, res) => {
     const { code, message, user } = await register(req.body)
 
     return res.status(code).json({ message, user })
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.message) })
-  }
-}
-
-// login
-const loginController = async(req, res)=>{
-  try {
-    const { code, message, token, user } = await login(req.body)
-
-    return res.status(code).json({ message, token, user })
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.message) })
-  }
-}
-
-// googleAuth
-const googleAuthController = async(req, res)=>{
-  try {
-    const { code, message, token, user } = await login(req.body)
-
-    return res.status(code).json({ message, token, user })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.message) })
   }
@@ -80,7 +55,7 @@ const resetPasswordController = async (req, res) => {
 // userData
 const userDataController = async(req, res)=>{
   try {
-    console.log(req.id)
+    console.log(`User Data controller, ${req.id}`)
     const { code, message, user } = await getUserData({...req.params, id: req.id})
 
     return res.status(code).json({ message, user })
@@ -91,8 +66,6 @@ const userDataController = async(req, res)=>{
 
 module.exports = {
   register: registerController,
-  login: loginController,
-  googleAuth: googleAuthController,
   userData: userDataController,
   confirmEmail: confirmEmailController,
   forgetPassword: forgetPasswordController,

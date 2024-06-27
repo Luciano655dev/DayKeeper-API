@@ -15,7 +15,8 @@ const register = async(props) => {
         password,
         timeZone,
         profile_picture,
-        googleId
+        googleId,
+        twitterId
     } = props
     
     const img = {
@@ -47,6 +48,7 @@ const register = async(props) => {
             password: passwordHash,
             created_at: Date.now(),
             googleId,
+            twitterId,
             verification_code: verificationCode,
             verification_time: verificationCodeTime
         })

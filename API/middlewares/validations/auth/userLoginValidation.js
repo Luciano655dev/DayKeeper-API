@@ -18,7 +18,7 @@ const userValidation = async(req, res, next)=>{
             return res.status(404).json({ message: notFound('User') })
 
         /* Email validation */
-        if(!user.verified_email){
+        if(!user.verified_email) {
             await sendVerificationEmail(user.name, user.email)
             return res.status(403).json({ message: "Your account is not active yet, we have just sent you a new confirmation email" })
         }

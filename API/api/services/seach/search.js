@@ -1,8 +1,6 @@
 const User = require('../../models/User')
 const getDataWithPages = require('../getDataWithPages')
-const formatDate = require('../../utils/formatDate')
 const { searchPostPipeline, searchUserPipeline } = require('../../repositories')
-const { resetTime } = require('../../../config')
 
 const {
     errors: { notFound },
@@ -26,9 +24,6 @@ const search = async (props) => {
         mainUser.following = await User.distinct('_id', { followers: loggedUserId })
         if(!mainUser || !mainUser.following)
             return notFound('User')
-
-        let todayDate = formatDate(Date.now())
-        todayDate = `${todayDate.hour < resetTime ? todayDate.day - 1 : todayDate.day}-${todayDate.month}-${todayDate.year}`
 
         const response = await getDataWithPages({
             type,

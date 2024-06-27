@@ -1,9 +1,13 @@
 const GoogleStrategy = require('passport-google-oauth20').Strategy
+const LocalStrategy = require('passport-local').Strategy
 const User = require('../models/User')
 const register = require(`../services/auth/register`)
-const { google: { clientId, clientSecret } } = require('../../config')
+const {
+  google: { clientId, clientSecret }
+} = require('../../config')
 
 module.exports = function(passport) {
+  // google auth
   passport.use(
     new GoogleStrategy(
       {
@@ -13,10 +17,9 @@ module.exports = function(passport) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          console.log(profile.photos[0].value)
           let user = await User.findOne({ $or: [
             { email: profile.emails[0].value },
-            { name: profile.displayName }
+            { googleId: profile.id }
           ] })
 
           if (user) {
@@ -36,6 +39,32 @@ module.exports = function(passport) {
         }
       }
     )
+  )
+
+  // Local Auth
+  passport.use(
+    new LocalStrategy({
+        usernameField: 'name',
+        passwordField: 'password'
+      }, async (email, password, done) => {
+        try {
+          /*
+            All the validations are done at the Middleware
+          */
+         
+          const user = await User.findOne({ $or: [
+            { name: email },
+            { email }
+          ] })
+
+          if (!user)
+            return done(null, false, { message: 'Email ou senha incorretos' })
+
+          return done(null, user)
+        } catch (error) {
+          return done(error)
+        }
+    })
   )
 
   passport.serializeUser((user, done) => {

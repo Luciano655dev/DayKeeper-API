@@ -14,7 +14,6 @@
     "aws-sdk": "^2.1646.0",
     "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
-    "better-format": "^0.0.8",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
@@ -29,6 +28,7 @@
     "nodemailer": "^6.9.8",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "passport-local": "^1.0.0",
     "timezone-support": "^3.1.0"
   },
   "devDependencies": {
