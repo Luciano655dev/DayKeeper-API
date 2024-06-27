@@ -4,6 +4,10 @@ const mongoose = require('mongoose')
 const userSchema = mongoose.Schema({
   name: String,
   email: String,
+  googleId: {
+    type: String,
+    required: false
+  },
   profile_picture: {
     name: String,
     key: String,

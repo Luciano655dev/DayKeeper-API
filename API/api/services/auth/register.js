@@ -9,8 +9,20 @@ const {
 } = require('../../../constants/index')
 
 const register = async(props) => {
-    const { name: username, email, password, timeZone } = props
-    const img = defaultPfp
+    const {
+        name: username,
+        email,
+        password,
+        timeZone,
+        profile_picture,
+        googleId
+    } = props
+    
+    const img = {
+        url: profile_picture,
+        name: `${username}'s_profile_picture_from_google`,
+        key: ``
+    } || defaultPfp
 
     // new 6 digit code
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
@@ -34,6 +46,7 @@ const register = async(props) => {
             verified_email: false,
             password: passwordHash,
             created_at: Date.now(),
+            googleId,
             verification_code: verificationCode,
             verification_time: verificationCodeTime
         })

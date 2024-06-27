@@ -17,6 +17,10 @@ module.exports = {
         defaultRegion: `us-east-1`,
         storageType: process.env.STORAGE_TYPE
     },
+    google: {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET
+    },
     mail: {
         service: process.env.EMAIL_SERVICE,
         host: process.env.EMAIL_HOST,

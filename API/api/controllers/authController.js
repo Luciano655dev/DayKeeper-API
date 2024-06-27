@@ -7,6 +7,8 @@ const forgetPassword = require('../services/auth/forgetPassword')
 const resetPassword = require('../services/auth/resetPassword')
 const getUserData = require('../services/auth/getUserData')
 
+const googleAuth = require('../services/auth/googleAuth')
+
 // register
 const registerController = async(req, res) => {
   try {
@@ -20,6 +22,17 @@ const registerController = async(req, res) => {
 
 // login
 const loginController = async(req, res)=>{
+  try {
+    const { code, message, token, user } = await login(req.body)
+
+    return res.status(code).json({ message, token, user })
+  } catch (error) {
+    return res.status(500).json({ message: serverError(error.message) })
+  }
+}
+
+// googleAuth
+const googleAuthController = async(req, res)=>{
   try {
     const { code, message, token, user } = await login(req.body)
 
@@ -79,6 +92,7 @@ const userDataController = async(req, res)=>{
 module.exports = {
   register: registerController,
   login: loginController,
+  googleAuth: googleAuthController,
   userData: userDataController,
   confirmEmail: confirmEmailController,
   forgetPassword: forgetPasswordController,
