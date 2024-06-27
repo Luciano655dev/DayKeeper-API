@@ -1,6 +1,10 @@
 const detectInappropriateContent = require(`../api/utils/detectInappropriateFile`)
 const deleteFile = require(`../api/utils/deleteFile`)
 
+const {
+    errors: { serverError }
+} = require('../constants/index')
+
 async function detectInappropriateContentMW(req, res, next){
     const files = req?.file ? [req.file] : req.files
 
@@ -10,7 +14,7 @@ async function detectInappropriateContentMW(req, res, next){
 
             if(!isAppropriate){
                 deleteFile(file.key)
-                return res.status(409).json({ message: `Esta imagem viola os termos de servico do DayKeeper` })
+                return res.status(409).json({ message: `This image violates DayKeeper's terms of service` })
             }
         }
 
@@ -19,8 +23,8 @@ async function detectInappropriateContentMW(req, res, next){
         for(let file of files)
             deleteFile(file.key)
 
-        console.log(`error no mw: ${error}`)
-        return res.status(400).json({ error })
+        console.log(`error at detectInapropriateFileMW: ${error}`)
+        return res.status(500).json({ message: serverError(error.message).message })
     }
 
 }

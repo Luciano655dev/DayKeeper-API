@@ -2,7 +2,7 @@ const deleteImage = require('../api/utils/deleteFile')
 const multer = require('multer')
 
 const handleMulterError = (err, req, res, next)=>{
-    console.log('erro no upload dos arquivos')
+    console.log('erro no upload dos arquivos MULTER')
     if (err instanceof multer.MulterError) {
         if(req?.files)
             for(let i in req.files)

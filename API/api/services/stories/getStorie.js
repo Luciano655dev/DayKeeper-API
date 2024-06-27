@@ -5,7 +5,7 @@ const getStorie = async(props)=>{
         name: userInput,
         storieTitle: storieInput,
         populate,
-        loggedUserId
+        loggedUser
     } = props
 
     let populateFields = populate ? populate.split(',') : []
@@ -15,7 +15,7 @@ const getStorie = async(props)=>{
             userInput,
             storieInput,
             fieldsToPopulate: populateFields,
-            loggedUserId,
+            loggedUserId: loggedUser._id,
             view: true
         })
 

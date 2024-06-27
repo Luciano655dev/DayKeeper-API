@@ -13,7 +13,7 @@ const {
 const deleteBannedUser = async(props)=>{
     const {
         name: username,
-        loggedUserId,
+        loggedUser,
         message
     } = props
 
@@ -28,9 +28,9 @@ const deleteBannedUser = async(props)=>{
         const latestBan = bannedUser.ban_history[bannedUser.ban_history.length-1]
 
         let adminUser = await User.findById(latestBan.banned_by)
-        if(!adminUser) adminUser = await User.findById(loggedUserId)
+        if(!adminUser) adminUser = loggedUser
 
-        if(adminUser._id != loggedUserId)
+        if(adminUser?._id != loggedUser._id)
             return unauthorized(`delete user`, "Only the admin who banned the user can delete it")
 
         const diffInDays = differenceInDays(latestBan.ban_date, new Date())

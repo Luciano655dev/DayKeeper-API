@@ -7,7 +7,7 @@ const {
 } = require('../../../constants/index')
 
 const createPost = async(props)=>{
-  const { data, loggedUserId, files } = props
+  const { data, loggedUser, files } = props
   const title = getTodayDate()
 
   try{
@@ -16,7 +16,7 @@ const createPost = async(props)=>{
       title,
       data,
       files,
-      user: loggedUserId,
+      user: loggedUser._id,
       created_at: Date.now(),
       reactions: [],
       comments: []

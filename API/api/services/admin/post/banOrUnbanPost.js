@@ -13,16 +13,13 @@ const banOrUnbanPost = async(props)=>{
         name: username,
         posttitle,
         reason,
-        loggedUserId
+        loggedUser
     } = props
 
     if(reason.length > maxReportMessageLength)
         return inputTooLong(`Reason`)
 
     try {
-        const loggedUser = await User.findById(loggedUserId)
-        if(!loggedUser) return notFound(`Admin Profile`)
-
         const userPost = await User.findOne({ name: username })
         if(!userPost) return notFound(`User`)
 
@@ -41,7 +38,7 @@ const banOrUnbanPost = async(props)=>{
                     $set: {
                         banned: false,
                         "ban_history.$[elem].unban_date": Date.now(),
-                        "ban_history.$[elem].unbanned_by": loggedUserId,
+                        "ban_history.$[elem].unbanned_by": loggedUser._id,
                         "ban_history.$[elem].unban_message": message
                     }
                 },
@@ -71,7 +68,7 @@ const banOrUnbanPost = async(props)=>{
             },
             $push: {
                 ban_history: {
-                    banned_by: loggedUserId,
+                    banned_by: loggedUser._id,
                     ban_date: Date.now(),
                     ban_message: message
                 }

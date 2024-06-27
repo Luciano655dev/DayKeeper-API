@@ -5,7 +5,7 @@ const searchController = async (req, res) => {
     try {
         const { code, response } = await search({
             ...req.query,
-            id: req.id
+            user: req.user
         })
 
         return res.status(code).json(response)

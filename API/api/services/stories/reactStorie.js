@@ -11,7 +11,7 @@ const reactStorie = async (props) => {
         name: username,
         storieTitle: storieInput,
         reaction,
-        loggedUserId
+        loggedUser
     } = props
 
     if (!reaction || reaction < 0 || reaction >= 5)
@@ -25,7 +25,7 @@ const reactStorie = async (props) => {
             userInput: username,
             storieInput,
             fieldsToPopulate: [`user`],
-            loggedUserId,
+            loggedUserId: loggedUser._id,
             view: true
         })
         if(reactStorie?.stories == `undefined`)
@@ -35,7 +35,7 @@ const reactStorie = async (props) => {
     
         /* Verify if the user has reacted before */
         const existingReactionIndex = reactedStorie.reactions.findIndex(
-            (reaction) => reaction.user == loggedUserId
+            (reaction) => reaction.user == loggedUser._id
         )
     
         /* if exists */
@@ -49,7 +49,7 @@ const reactStorie = async (props) => {
             }
         } else {
             /* If dont exists, add new reaction */
-            reactedStorie.reactions.push({ user: loggedUserId, reaction })
+            reactedStorie.reactions.push({ user: loggedUser._id, reaction })
         }
 
         await reactedStorie.save()

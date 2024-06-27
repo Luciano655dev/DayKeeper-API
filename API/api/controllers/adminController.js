@@ -1,5 +1,3 @@
-const mongoose = require('mongoose')
-
 const { errors: { serverError } } = require('../../constants/index')
 const banOrUnbanUser = require('../services/admin/user/banOrUnbanUser')
 const deleteBannedUser = require('../services/admin/user/deleteBannedUser')
@@ -21,7 +19,7 @@ const banOrUnbanUserController = async(req, res)=>{
         const { code, message, user } = banOrUnbanUser({
             ...req.params,
             message: req.body.message || '',
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({ message, user })
@@ -35,7 +33,7 @@ const deleteBannedUserController = async(req, res)=>{
         const { code, message, ban_info, user } = await deleteBannedUser({
             ...req.params,
             message: req.body.message || ``,
-            loggedUserId: req.id
+            loggedUser: req.user
         })
         
         return res.status(code).json({ message, ban_info, user })
@@ -79,7 +77,7 @@ const getBannedUsersController = async(req, res)=>{
         const { code, response } = await getBannedUsers({
             page,
             maxPageSize,
-            loggedUserId: new mongoose.Types.ObjectId(req.id)
+            loggedUser: req.user
         })
 
         return res.status(code).json(response)
@@ -94,7 +92,7 @@ const banOrUnbanPostController = async(req, res)=>{
         const { code, message, post } = await banOrUnbanPost({
             ...req.params,
             reason: req.body.reason || '',
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({
@@ -111,7 +109,7 @@ const deleteBannedPostController = async(req, res)=>{
         const { code, message, post } = deleteBannedPosts({
             ...req.params,
             message: req.body.message || '',
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({ message, post })
@@ -153,7 +151,7 @@ const getBannedPostsController = async(req, res)=>{
 
     try{
         const { response, code } = await getBannedPosts({
-            loggedUserId: new mongoose.Types.ObjectId(req.id),
+            loggedUser: req.user,
             page,
             maxPageSize
         })
@@ -170,7 +168,7 @@ const banOrUnbanStorieController = async(req, res)=>{
         const { code, message } = await banOrUnbanStorie({
             ...req.params,
             reason: req.body.reason || '',
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({ message })

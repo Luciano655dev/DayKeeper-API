@@ -9,7 +9,7 @@ const {
 const updatePost = async(req)=>{
   const newData = req.body
   const { posttitle } = req.params
-  const loggedUserId = req.id
+  const loggedUser = req.user
 
   try{
     const handleBadRequest = (returnObj) => {
@@ -20,7 +20,7 @@ const updatePost = async(req)=>{
     }
 
     const post = await findPost(
-      loggedUserId,
+      loggedUser._id,
       posttitle,
       'userId',
       [ 'user' ]
@@ -49,13 +49,13 @@ const updatePost = async(req)=>{
   
     /* Create Post */
     const updatedPost = await Post.findOneAndUpdate(
-      { title: posttitle, user: loggedUserId },
+      { title: posttitle, user: loggedUser._id },
       {
         $set: {
           ...newData,
           title: posttitle,
           files,
-          user: loggedUserId,
+          user: loggedUser._id,
           created_at: post.created_at,
           edited_at: Date.now(),
           reactions: post.reactions,

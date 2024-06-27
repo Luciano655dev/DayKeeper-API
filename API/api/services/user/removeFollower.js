@@ -5,21 +5,20 @@ const {
 } = require('../../../constants/index')
 
 const removeFollower = async(props)=>{
-  const { name, loggedUserId } = props
+  const { name, loggedUser } = props
 
   try{
     const followUser = await User.findOne({ name })
-    const mainUser = await User.findById(loggedUserId)
 
     // validations
-    if(!followUser || !mainUser)
+    if(!followUser)
       return notFound("User")
-    if(!mainUser.private)
+    if(!loggedUser.private)
       return unauthorized(`remove follower`, "Only private accounts can remove followers")
-    if(!mainUser.followers.includes(followUser._id))
+    if(!loggedUser.followers.includes(followUser._id))
       return customErr(404, "This user does not follow you")
 
-    await User.updateOne({ name: mainUser.name }, { $pull: { followers: followUser._id } })
+    await User.updateOne({ name: loggedUser.name }, { $pull: { followers: followUser._id } })
     
     return custom(`${followUser.name} was removed from his followers`)
   }catch(error){

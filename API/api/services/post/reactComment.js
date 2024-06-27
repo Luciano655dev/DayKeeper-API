@@ -10,7 +10,7 @@ const reactComment = async (props) => {
         name: username,
         posttitle,
         usercomment,
-        loggedUserId,
+        loggedUser,
         reaction
     } = props
 
@@ -35,7 +35,7 @@ const reactComment = async (props) => {
     
         /* Verify if the user has reacted before */
         const existingReactionIndex = post.comments[userCommentIndex].reactions.findIndex(
-            (reactionObj) => reactionObj.user === loggedUserId
+            (reactionObj) => reactionObj.user === loggedUser._id
         )
     
         /* if true */
@@ -49,7 +49,7 @@ const reactComment = async (props) => {
             }
         } else {
             /* If false, add new reaction */
-            post.comments[userCommentIndex].reactions.push({ user: loggedUserId, reaction })
+            post.comments[userCommentIndex].reactions.push({ user: loggedUser._id, reaction })
         }
     
         await post.save()

@@ -12,7 +12,7 @@ const reportPost = async(props)=>{
   const {
     storieTitle: storieId,
     reason,
-    loggedUserId
+    loggedUser
   } = props
 
   if(reason.length > maxReportReasonLength)
@@ -26,13 +26,13 @@ const reportPost = async(props)=>{
     if(!reportedStorie)
       return notFound('Storie')
 
-    if(reportedStorie.reports.find(report => report.user == loggedUserId))
+    if(reportedStorie.reports.find(report => report.user == loggedUser._id))
       return doubleAction()
 
     const updatedStorie = await Storie.findByIdAndUpdate(storieId, {
       $addToSet: {
         reports: {
-          user: loggedUserId,
+          user: loggedUser._id,
           created_at: new Date(),
           reason
         }

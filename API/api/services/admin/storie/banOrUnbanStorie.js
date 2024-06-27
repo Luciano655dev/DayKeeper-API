@@ -13,16 +13,13 @@ const banOrUnbanStorie = async(props)=>{
     const {
         storieId,
         reason,
-        loggedUserId
+        loggedUser
     } = props
 
     if(reason.length > maxReportMessageLength)
         return inputTooLong(`Message`)
 
     try {
-        const mainUser = await User.findById(loggedUserId)
-        if(!mainUser) return notFound(`Admin Profile`)
-
         if(!mongoose.Types.ObjectId.isValid(storieId))
             return invalidValue(`Storie ID`)
 
@@ -35,7 +32,7 @@ const banOrUnbanStorie = async(props)=>{
                     $set: {
                         banned: false,
                         "ban_history.$[elem].unban_date": Date.now(),
-                        "ban_history.$[elem].unbanned_by": loggedUserId,
+                        "ban_history.$[elem].unbanned_by": loggedUser._id,
                         "ban_history.$[elem].unban_message": reason
                     }
                 },
@@ -49,7 +46,7 @@ const banOrUnbanStorie = async(props)=>{
                 email: deletedStorie.user.email,
                 title: deletedStorie.title,
                 id: deletedStorie._id,
-                adminUsername: mainUser.name,
+                adminUsername: loggedUser.name,
                 reason
             })
 
@@ -62,7 +59,7 @@ const banOrUnbanStorie = async(props)=>{
             },
             $push: {
                 ban_history: {
-                    banned_by: loggedUserId,
+                    banned_by: loggedUser._id,
                     ban_date: Date.now(),
                     ban_message: reason
                 }
@@ -74,13 +71,12 @@ const banOrUnbanStorie = async(props)=>{
             email: deletedStorie.user.email,
             title: deletedStorie.title,
             id: deletedStorie._id,
-            adminUsername: mainUser.name,
+            adminUsername: loggedUser.name,
             reason
         })
         
         return custom(`${deletedStorie.user.name}'s Storie from ${deletedStorie.title} banned successfully`)
     } catch (error) {
-        console.log(error)
         throw new Error(error.message)
     }
 }

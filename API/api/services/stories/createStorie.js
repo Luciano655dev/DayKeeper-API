@@ -11,7 +11,7 @@ const createStorie = async(props)=>{
     const {
         text,
         file,
-        loggedUserId
+        loggedUser
     } = props
 
     try{
@@ -25,7 +25,7 @@ const createStorie = async(props)=>{
             title: `${todayDate}`,
             file,
             text,
-            user: loggedUserId,
+            user: loggedUser._id,
             created_at: new Date(),
             views: [],
             reactions: [],

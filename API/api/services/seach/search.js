@@ -17,24 +17,21 @@ const search = async (props) => {
     const following = props.following
     const type = props.type || 'Post'
 
-    const loggedUserId = props.id
+    const loggedUser = props.user
 
     try {
-        const mainUser = await User.findById(loggedUserId)
-        mainUser.following = await User.distinct('_id', { followers: loggedUserId })
-        if(!mainUser || !mainUser.following)
-            return notFound('User')
+        loggedUser.following = await User.distinct('_id', { followers: loggedUser._id })
 
         const response = await getDataWithPages({
             type,
             pipeline: type == 'Post' ?
-                searchPostPipeline(searchQuery, mainUser) :
-                searchUserPipeline(searchQuery, mainUser),
+                searchPostPipeline(searchQuery, loggedUser) :
+                searchUserPipeline(searchQuery, loggedUser),
             order,
             following,
             page,
             maxPageSize
-        }, mainUser)
+        }, loggedUser)
 
         return fetched(`data`, { response })
     } catch (error) {

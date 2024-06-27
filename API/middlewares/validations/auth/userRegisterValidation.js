@@ -4,7 +4,7 @@ const { listTimeZones } = require(`timezone-support`)
 
 const {
   auth: { maxEmailLength, maxUsernameLength, maxPasswordLength },
-  errors: { serverError, inputTooLong, fieldsNotFilledIn }
+  errors: { serverError }
 } = require('../../../constants/index')
 
 const userValidation = async(req, res, next)=>{
@@ -17,29 +17,29 @@ const userValidation = async(req, res, next)=>{
 
     const emailIsBanned = await BannedUser.findOne({ email })
     if(emailIsBanned)
-      return res.status(403).json({ message: "Este email foi banido" })
+      return res.status(403).json({ message: "This email is banned" })
 
     // User Input validations
     if (!username || !email || !password)
-      return res.status(400).json({ message: fieldsNotFilledIn })
+      return res.status(400).json({ message: `Username, email or password is not filled in` })
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email) || email.length > maxEmailLength)
       return res.status(400).json({ message: "Enter a valid email" })
 
     if (!username || username.length > maxUsernameLength)
-      return res.status(413).json({ message: inputTooLong('Username') })
+      return res.status(413).json({ message: `Username is too long` })
 
     if (!password || password.length > maxPasswordLength)
-      return res.status(413).json({ message: inputTooLong('Password') })
+      return res.status(413).json({ message: `Password is too long` })
 
     // time zone validation
     if(!listTimeZones().includes(timeZone) && timeZone != `undefined`)
-      return res.status(400).json({ message: invalidValue(`TimeZone`) })
+      return res.status(400).json({ message: `TimeZone is invalid` })
   
     return next()
   }catch(error){
-    return res.status(500).json({ message: serverError(error.message) })
+    return res.status(500).json({ message: serverError(error.message).message })
   }
 }
 

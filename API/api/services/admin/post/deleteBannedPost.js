@@ -14,16 +14,13 @@ const deleteBannedPosts = async(props)=>{
         name: username,
         posttitle,
         message,
-        loggedUserId
+        loggedUser
     } = props
 
     if(message.length > maxReportMessageLength)
         return inputTooLong(`Message`)
 
     try{
-        const loggedUser = await User.findById(loggedUserId)
-        if(!loggedUser)return notFound(`User`)
-
         const userPost = await User.findOne({ name: username })
         if(!userPost)return notFound(`User`)
 
@@ -31,12 +28,12 @@ const deleteBannedPosts = async(props)=>{
             title: posttitle,
             user: userPost._id
         })
-        if(!deletedPost)return notFound(`Post`)
+        if(!deletedPost) return notFound(`Post`)
 
         const latestBan = deletedPost.ban_history[deletedPost.ban_history.length-1]
         if(deletedPost.banned != "true")
             return unauthorized(`delete this post`, `this post isn't banned`)
-        if(latestBan.banned_by != loggedUserId)
+        if(latestBan.banned_by != loggedUser._id)
             return unauthorized(`delete this post`, "Only the admin who banned this post can delete it")
 
         const diffInDays = differenceInDays(latestBan.ban_date, new Date())
@@ -53,7 +50,7 @@ const deleteBannedPosts = async(props)=>{
             deleteFile(deletedPost.files[i].key)
 
         const adminUser = await User.findById(latestBan.banned_by)
-        if(!adminUser) adminUser = await User.findById(loggedUserId)
+        if(!adminUser) adminUser = loggedUser
 
         const latest_ban = deletedPost.ban_history[deletedPost.ban_history - 1]
         
@@ -62,7 +59,7 @@ const deleteBannedPosts = async(props)=>{
             username: userPost.name,
             email: userPost.email,
             id: deletedPost._id,
-            adminUsername: loggedUser,
+            adminUsername: loggedUser.name,
             reason: latest_ban.ban_message,
             message
         })

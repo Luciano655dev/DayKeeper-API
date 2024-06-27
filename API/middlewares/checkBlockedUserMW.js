@@ -3,15 +3,14 @@ const { serverError } = require('../constants/index')
 
 async function checkBlockedUserMW(req, res, next){
     const { name } = req.params
-    const loggedUserId = req.id
+    const loggedUser = req.user
 
     try{
-        const mainUser = await User.findById(loggedUserId)
         const blockedUser = await User.findOne({ name })
 
         if(
-            !mainUser.blocked_users.includes(blockedUser._id) &&
-            !blockedUser.blocked_users.includes(mainUser._id)
+            !loggedUser.blocked_users.includes(blockedUser._id) &&
+            !blockedUser.blocked_users.includes(loggedUser._id)
         ) return next()
 
         return res.status(402).json({ message: "This user blocked you or you blocked him" })

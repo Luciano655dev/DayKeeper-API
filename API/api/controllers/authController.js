@@ -55,8 +55,10 @@ const resetPasswordController = async (req, res) => {
 // userData
 const userDataController = async(req, res)=>{
   try {
-    console.log(`User Data controller, ${req.id}`)
-    const { code, message, user } = await getUserData({...req.params, id: req.id})
+    const { code, message, user } = await getUserData({
+      ...req.params,
+      id: req.user._id
+    })
 
     return res.status(code).json({ message, user })
   } catch (error) {

@@ -1,5 +1,5 @@
 const deleteFile = require('../../../api/utils/deleteFile')
-const { serverError, inputTooLong } = require('../../../constants/index')
+const { serverError } = require('../../../constants/index')
 
 const postEditValidation = async (req, res, next) => {
   const { data } = req.body
@@ -18,11 +18,11 @@ const postEditValidation = async (req, res, next) => {
 
   try {
     if (data && data.length > maxDataLength)
-    return handleBadRequest(413, inputTooLong('Text'))
+      return handleBadRequest(413, `Text is too long`)
 
     return next()
   }catch(error){
-    return handleBadRequest(500, serverError(error.message))
+    return handleBadRequest(500, serverError(error.message).message)
   }
 }
 

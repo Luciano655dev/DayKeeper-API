@@ -15,7 +15,7 @@ const blockUser = require('../services/user/blockUser')
 // getUserByName
 const getUserController = async(req, res) => {
   try {
-    const { code, message, user } = await getUser({ ...req.params, loggedUserId: req.id})
+    const { code, message, user } = await getUser({ ...req.params, loggedUser: req.user})
 
     return res.status(code).json({ message, user })
   } catch (error) {
@@ -35,7 +35,7 @@ const getUserPostsController = async (req, res)=>{
       order,
       maxPageSize,
       page,
-      id: req.id
+      user: req.user
     })
 
     return res.status(200).json(response)
@@ -47,7 +47,7 @@ const getUserPostsController = async (req, res)=>{
 // updateUser
 const updateUserController = async(req, res) => {
   try{
-    const { code, message, user } = await updateUser({ ...req.body, file: req.file, loggedUserId: req.id })
+    const { code, message, user } = await updateUser({ ...req.body, file: req.file, loggedUser: req.user })
 
     return res.status(code).json({ message, user })
   } catch (error){
@@ -58,7 +58,7 @@ const updateUserController = async(req, res) => {
 // reseteProfilePicture
 const reseteProfilePictureController = async(req, res)=>{
   try{
-    const { code, message } = await reseteProfilePicture({ loggedUserId: req.id })
+    const { code, message } = await reseteProfilePicture({ loggedUser: req.user })
 
     return res.status(code).json({ message })
   } catch (error){
@@ -69,7 +69,7 @@ const reseteProfilePictureController = async(req, res)=>{
 // deleteUser
 const deleteUserController = async (req, res) => {
   try {
-    const { code, message, data } = await deleteUser({ loggedUserId: req.id }) 
+    const { code, message, data } = await deleteUser({ loggedUser: req.user }) 
 
     return res.status(code).json({ message, data })
   } catch (error) {
@@ -80,7 +80,7 @@ const deleteUserController = async (req, res) => {
 // followUser
 const followUserController = async (req, res) => {
   try {
-    const { code, message } = await followUser({ loggedUserId: req.id, ...req.params })
+    const { code, message } = await followUser({ loggedUser: req.user, ...req.params })
 
     return res.status(code).json({ message })
   } catch (error) {
@@ -91,10 +91,9 @@ const followUserController = async (req, res) => {
 // respondFollowRequest (private users only)
 const respondFollowRequestController = async(req, res)=>{
   const response = req.query.response == 'true'
-  const loggedUserId = req.id
   
   try{
-    const { code, message } = await respondFollowRequest({ ...req.params, response, loggedUserId })
+    const { code, message } = await respondFollowRequest({ ...req.params, response, loggedUser: req.user })
 
     return res.status(code).json({ message })
   }catch(error){
@@ -105,7 +104,7 @@ const respondFollowRequestController = async(req, res)=>{
 // removeFollower (private users only)
 const removeFollowerController = async(req, res)=>{
   try{
-    const { code, message } = await removeFollower({ ...req.params, loggedUserId: req.id })
+    const { code, message } = await removeFollower({ ...req.params, loggedUser: req.user })
 
     return res.status(code).json({ message })
   }catch(error){
@@ -118,7 +117,7 @@ const reportUserController = async(req, res)=>{
   try{
     const { code, message, reason, user } = await reportUser({
       ...req.params,
-      loggedUserId: req.id,
+      loggedUser: req.user,
       reason: req.body.reason || ''
     })
 
@@ -153,7 +152,7 @@ const getFollowersController = async(req, res)=>{
 // blockUser
 const blockUserController = async(req, res)=>{
   try{
-    const { code, message } = await blockUser({ ...req.params, loggedUserId: req.id })
+    const { code, message } = await blockUser({ ...req.params, loggedUser: req.user })
 
     return res.status(code).json({ message })
   }catch (error) {

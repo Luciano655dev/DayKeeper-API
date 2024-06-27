@@ -8,13 +8,13 @@ const {
 const deletePost = async(props)=>{
   const {
     posttitle,
-    loggedUserId
+    loggedUser
   } = props
 
   try{
     const deletedPost = await Post.findOneAndDelete({
       title: posttitle,
-      user: loggedUserId
+      user: loggedUser._id
     })
 
     if(!deletedPost)

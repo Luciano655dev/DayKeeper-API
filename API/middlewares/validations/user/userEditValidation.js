@@ -1,7 +1,11 @@
 const User = require('../../../api/models/User')
 const bcrypt = require('bcrypt')
 const deleteFile = require('../../../api/utils/deleteFile')
-const { serverError, inputTooLong, user: { defaultPfp } } = require('../../../constants/index')
+const {
+    auth: { maxEmailLength, maxBioLength, maxUsernameLength, maxPasswordLength },
+    user: { defaultPfp },
+    errors: { serverError }
+} = require('../../../constants/index')
 
 const userValidation = async(req, res, next)=>{
     const {
@@ -10,10 +14,6 @@ const userValidation = async(req, res, next)=>{
         bio,
         lastPassword
     } = req.body
-    const maxEmailLength = 320
-    const maxBioLength = 500
-    const maxUsernameLength = 40
-    const maxPasswordLength = 50
 
     const handleBadRequest = (errCode, message)=>{
         if(req.file) deleteFile(req.file.key)
@@ -22,7 +22,7 @@ const userValidation = async(req, res, next)=>{
 
     try{
         /* Availability validation */
-        const loggedUser = await User.findById(req.id)
+        const loggedUser = req.user
         if(await User.findOne({ email }) && email != loggedUser.email)
             return handleBadRequest(409, "Email is already being used")
         if(
@@ -41,17 +41,17 @@ const userValidation = async(req, res, next)=>{
         ) return handleBadRequest(400, "Enter a valid email")
 
         if( bio && bio.length > maxBioLength )
-            return handleBadRequest(413, inputTooLong('Bio'))
+            return handleBadRequest(413, 'Bio is too long')
 
         if( username && username.length > maxUsernameLength )
-            return handleBadRequest(413, inputTooLong('Username'))
+            return handleBadRequest(413, 'Username is too long')
 
         if(password){
             if(password.length > maxPasswordLength)
-                return handleBadRequest(413, inputTooLong('Password'))
+                return handleBadRequest(413, 'Password is too long')
 
             const checkPassword = await bcrypt.compare(lastPassword, loggedUser.password)
-            if (!checkPassword) return handleBadRequest(401, "A senha antiga esta incorreta")
+            if (!checkPassword) return handleBadRequest(401, "The last password is incorrect")
         }
 
         /* Delete last profiel picture if user uploads a new one */
@@ -60,7 +60,7 @@ const userValidation = async(req, res, next)=>{
 
         return next()
     }catch(error){
-        return handleBadRequest(500, serverError(error.message))
+        return handleBadRequest(500, serverError(error.message).message)
     }
 }
 

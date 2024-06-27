@@ -12,7 +12,10 @@ const deleteComment = require('../services/post/deleteComment')
 // getPostByName
 const getPostController = async(req, res)=>{
   try {
-    const { code, message, post } = await getPost({ ...req.params, queryParams: req.query.populate })
+    const { code, message, post } = await getPost({
+      ...req.params,
+      queryParams: req.query.populate
+    })
 
     return res.status(code).json({ message, post })
   } catch (error) {
@@ -34,7 +37,7 @@ const createPostController = async(req, res)=>{
   try{
     const { code, message, post } = await createPost({
       ...req.body,
-      loggedUserId: req.id,
+      loggedUser: req.user,
       files
     })
 
@@ -60,7 +63,7 @@ const deletePostController = async(req, res)=>{
   try{
     const { code, message, post } = await deletePost({
       ...req.params,
-      loggedUserId: req.id
+      loggedUser: req.user
     })
 
     return res.status(code).json({ message, post })
@@ -77,7 +80,7 @@ const reportPostController = async(req, res)=>{
     const { code, message, post } = await reportPost({
       ...req.params,
       reason,
-      loggedUserId: req.id
+      loggedUser: req.user
     })
 
     return res.status(code).json({ message, reason, post })
@@ -91,7 +94,7 @@ const reactPostController = async (req, res) => {
   try {
     const { code, message, post } = await reactPost({
       ...req.params,
-      loggedUserId: req.id,
+      loggedUser: req.user,
       ...req.body
     })
 
@@ -107,7 +110,7 @@ const commentPostController = async(req, res)=>{
     const { code, message, post } = await commentPost({
       ...req.params,
       ...req.body,
-      loggedUserId: req.id
+      loggedUser: req.user
     })
 
     return res.status(code).json({ message, post })
@@ -122,7 +125,7 @@ const reactCommentController = async (req, res) => {
     const { code, message, post } = await reactComment({
       ...req.params,
       ...req.body,
-      loggedUserId: req.id
+      loggedUser: req.user
     })
 
     return res.status(code).json({ message, post })
@@ -136,7 +139,7 @@ const deleteCommentController = async (req, res) => {
   try{
     const { code, message, post } = await deleteComment({
       ...req.params,
-      loggedUserId: req.id
+      loggedUser: req.user
     })
 
     return res.status(code).json({ message, post })

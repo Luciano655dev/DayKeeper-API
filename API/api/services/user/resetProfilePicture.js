@@ -7,21 +7,17 @@ const {
 } = require('../../../constants/index')
 
 const reseteProfilePicture = async(props)=>{
-    const { loggedUserId } = props
+    const { loggedUser } = props
 
     try{
-      // delete last PFP
-      const user = await User.findById(loggedUserId)
-      if(!user) return notFound("User")
-  
-      if(user.profile_picture.key == defaultPfp.key)
+      if(loggedUser.profile_picture.key == defaultPfp.key)
         return customErr("Sour profile photo is already the default")
   
       // deleteLastPFP
-      if (user.profile_picture.name != defaultPfp.name)
-        deleteFile(user.profile_picture.key)
+      if (loggedUser.profile_picture.name != defaultPfp.name)
+        deleteFile(loggedUser.profile_picture.key)
   
-      const updatedUser = await User.findByIdAndUpdate(loggedUserId,
+      const updatedUser = await User.findByIdAndUpdate(loggedUser._id,
         {
           $set: {
             profile_picture: defaultPfp,
@@ -30,7 +26,7 @@ const reseteProfilePicture = async(props)=>{
       )
       await updatedUser.save()
   
-      return reseted(`${user.name}'s profile picture reseted successfully`)
+      return reseted(`${loggedUser.name}'s profile picture reseted successfully`)
     } catch (error){
       throw new Error(error.message)
     }

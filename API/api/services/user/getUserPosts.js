@@ -6,13 +6,11 @@ const {
     success: { fetched }
 } = require('../../../constants/index')
 
-const getUserPosts = async({ page, maxPageSize, order, name, id })=>{
+const getUserPosts = async({ page, maxPageSize, order, name, user })=>{
     try{
-        let mainUser = await User.findById(id)
-
         const response = getDataWithPages({
             type: 'Post',
-            pipeline: userPostsPipeline(mainUser, name),
+            pipeline: userPostsPipeline(user, name),
             order,
             page,
             maxPageSize

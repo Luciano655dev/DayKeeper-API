@@ -8,7 +8,7 @@ const {
 } = require('../../../constants/index')
 
 const getUser = async(props) => {
-    const { name: userInput, loggedUserId } = props
+    const { name: userInput, loggedUser } = props
 
     try {
         /* Search by name or id */
@@ -19,14 +19,12 @@ const getUser = async(props) => {
         if (!user)
             return notFound('User')
 
-        const loggedUser = await User.findById(loggedUserId).select("-password")
-
         let status = `error`
-        if(user._doc.followers.includes(loggedUserId.toString()))
+        if(user._doc.followers.includes(loggedUser._id.toString()))
             status = `following`
         else if(loggedUser.blocked_users.includes(user._id.toString()))
             status = `blocked`
-        else if(user._doc._id == loggedUserId.toString())
+        else if(user._doc._id == loggedUser._id.toString())
             status = `logged`
         else
             status = `default`

@@ -9,7 +9,7 @@ const reportUser = async(props)=>{
   const {
     name,
     reason,
-    loggedUserId
+    loggedUser
   } = props
 
   if(reason.length > maxReportReasonLength)
@@ -20,11 +20,11 @@ const reportUser = async(props)=>{
     if(!userReported)
       return notFound("User")
 
-    if(userReported.reports.find( report => report.user == loggedUserId ))
+    if(userReported.reports.find( report => report.user == loggedUser._id ))
       return doubleAction()
 
     /* block reported user */
-    await User.findByIdAndUpdate(loggedUserId,
+    await User.findByIdAndUpdate(loggedUser._id,
       {
         $addToSet: {
           blocked_users: userReported._id
@@ -37,7 +37,7 @@ const reportUser = async(props)=>{
       {
         $addToSet: {
           reports: {
-            user: loggedUserId,
+            user: loggedUser._id,
             created_at: new Date(),
             reason
           }

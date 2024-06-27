@@ -4,7 +4,7 @@ const { serverError, inputTooLong, fieldsNotFilledIn } = require('../../../const
 
 const postValidation = async(req, res, next)=>{
     const { data } = req.body
-    const loggedUserId = req.id
+    const loggedUser = req.user
     const maxDataLength = 1000
 
     try{
@@ -21,17 +21,17 @@ const postValidation = async(req, res, next)=>{
 
         /* Input Validations */
         if (!data)
-            return handleBadRequest(400, fieldsNotFilledIn)
+            return handleBadRequest(400, `Data is not filled in`)
     
         if (data.length > maxDataLength)
-        return handleBadRequest(413, inputTooLong('Text'))
+            return handleBadRequest(413, `Text is too long`)
 
         /* One post per day */
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
         const lastPostToday = await Post.findOne({ 
-            user: loggedUserId, 
+            user: loggedUser._id, 
             created_at: { $gte: today }
         })
 

@@ -11,25 +11,22 @@ const getUserStories = async(props)=>{
     let {
         name,
         order,
-        loggedUserId,
+        loggedUser,
         following,
         page,
         maxPageSize
     } = props
 
     try{
-        const mainUser = await User.findById(loggedUserId)
-        if(!mainUser)
-            return notFound(`User`)
 
         const response = await getDataWithPages({
             type: `Storie`,
-            pipeline: userStoriesPipeline(mainUser, name),
+            pipeline: userStoriesPipeline(loggedUser, name),
             order: order == `recent` ? order : `relevant`,
             following: `following`,
             page,
             maxPageSize
-        }, mainUser)
+        }, loggedUser)
 
         return fetched("User Stories", { response })
     }catch(error){

@@ -1,7 +1,10 @@
 const User = require('../../../api/models/User')
 const { sendVerificationEmail } = require('../../../api/utils/emailHandler')
-const { serverError, fieldsNotFilledIn, notFound } = require('../../../constants/index')
 const bcrypt = require('bcrypt')
+
+const {
+    errors: { serverError }
+} = require(`../../../constants/index`)
 
 const userValidation = async(req, res, next)=>{
     // userInput is email or username
@@ -10,12 +13,12 @@ const userValidation = async(req, res, next)=>{
     try{
         /* Input validations */
         if (!userInput || !password)
-            return res.status(400).json({ message: fieldsNotFilledIn })
+            return res.status(400).json({ message: `name or password is not filled in` })
 
         /* User validation */
         const user = await User.findOne({ $or: [{ name: userInput }, { email: userInput }] })
         if(!user)
-            return res.status(404).json({ message: notFound('User') })
+            return res.status(404).json({ message: `User not found` })
 
         /* Email validation */
         if(!user.verified_email) {
@@ -30,7 +33,7 @@ const userValidation = async(req, res, next)=>{
 
         return next()
     }catch(error){
-        return res.status(500).json({ message: serverError(error.message) })
+        return res.status(500).json({ message: serverError(error.message).message })
     }
 }
 

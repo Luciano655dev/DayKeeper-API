@@ -6,14 +6,14 @@ const getBannedPosts = async(props)=>{
     const {
         page,
         maxPageSize,
-        loggedUserId
+        loggedUser
     } = props
     
     try{
 
         const response = await getDataWithPages({
             type: `Post`,
-            pipeline: bannedElementPipeline(loggedUserId),
+            pipeline: bannedElementPipeline(loggedUser._id),
             order: `recent_ban`,
             page,
             maxPageSize

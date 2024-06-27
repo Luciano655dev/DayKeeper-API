@@ -1,24 +1,16 @@
-const jwt = require('jsonwebtoken')
-const { secret } = require('../config')
+const {
+  errors: { serverError }
+} = require(`../constants/index`)
 
 async function checkTokenMW(req, res, next) {
-  const authHeader = req.headers["authorization"]
-  const token = authHeader ? authHeader.split(" ")[1] : null
-
   try {
-    if(token){
-      const decoded = jwt.verify(token, secret)
-      req.id = decoded.id
-      return next()
-    } else if(req.isAuthenticated()){
-      req.id = req.user._id
+    if(req.isAuthenticated()){
       return next()
     }
 
-    return res.status(409).json({ message: "Invalid User or Token" })
-  } catch (err) {
-    console.log(err)
-    return res.status(409).json({ message: "Invalid Token" })
+    return res.status(409).json({ message: "Invalid Login" })
+  } catch (error) {
+    return res.status(409).json({ message: serverError(error.message).message })
   }
 }
 

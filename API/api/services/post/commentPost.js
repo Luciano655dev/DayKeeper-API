@@ -14,7 +14,7 @@ const {
 
 const commentPost = async(props)=>{
   let {
-    loggedUserId,
+    loggedUser,
     name: username,
     posttitle,
     comment,
@@ -57,15 +57,15 @@ const commentPost = async(props)=>{
 
     let newComments = [ ...post.comments, {
       created_at: Date.now(),
-      user: loggedUserId,
+      user: loggedUser._id,
       reactions: [],
       comment,
       gif
     }]
 
     /* Remove user's comment if exists */
-    if(post.comments.findIndex(comment => comment.user._id == loggedUserId) !== -1)
-      newComments = [...post.comments].filter( comment => comment.user._id != loggedUserId)
+    if(post.comments.findIndex(comment => comment.user._id == loggedUser._id) !== -1)
+      newComments = [...post.comments].filter( comment => comment.user._id != loggedUser._id)
 
     const commentedPost = await Post.findOneAndUpdate(
       { title: posttitle, user: user._id },

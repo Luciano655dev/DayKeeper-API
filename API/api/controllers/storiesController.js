@@ -22,7 +22,7 @@ const createStorieController = async (req, res) => {
         const { code, message, storie } = await createStorie({
             file,
             text: req.body.text,
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({ message, storie })
@@ -46,7 +46,7 @@ const reactStorieController = async (req, res) => {
         const { code, message, storie } = await reactStorie({
             ...req.params,
             ...req.body,
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({ message, storie })
@@ -60,7 +60,7 @@ const reportStorieController = async (req, res) => {
         const { code, message, storie } = await reportStorie({
             ...req.params,
             ...req.body,
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({ message, storie })
@@ -75,7 +75,7 @@ const getStorieController = async (req, res) => {
         const { code, message, stories } = await getStorie({
             ...req.params,
             populate: req.query.populate,
-            loggedUserId: req.id
+            loggedUser: req.user
         })
 
         return res.status(code).json({ message, stories })
@@ -88,7 +88,7 @@ const getStorieController = async (req, res) => {
 const getUserStoriesController = async (req, res) => {
     try {
         const { code, message, response } = await getUserStories({
-            loggedUserId: req.id,
+            loggedUser: req.user,
             ...req.params,
             ...req.query
         })

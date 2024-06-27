@@ -15,22 +15,18 @@ const deleteUserFromDatabase = require('./delete/deleteUser')
 const deleteStories = require('./delete/deleteStories')
 
 const deleteUser = async(props)=>{
-  const { userId } = props
+  const { loggedUser } = props
 
   try {
-    const user = await User.findById(userId)
-    if(!user)
-      return notFound("User")
-    
-    await deleteProfilePicture(user)
-    const deletedPostReactions = await deletePostReactions(userId)
-    const deletedComments = await deleteUserComments(userId)
-    const deletedCommentReactions = await deleteCommentReactions(userId)
-    const deletedFollowers = await deleteFollowers(userId)
-    const deletedFollowRequests = await deleteFollowRequests(userId)
-    const deletedPosts = await deletePosts(userId)
-    const deletedUser = await deleteUserFromDatabase(userId)
-    const deletedStories = await deleteStories(userId)
+    await deleteProfilePicture(loggedUser)
+    const deletedPostReactions = await deletePostReactions(loggedUser._id)
+    const deletedComments = await deleteUserComments(loggedUser._id)
+    const deletedCommentReactions = await deleteCommentReactions(loggedUser._id)
+    const deletedFollowers = await deleteFollowers(loggedUser._id)
+    const deletedFollowRequests = await deleteFollowRequests(loggedUser._id)
+    const deletedPosts = await deletePosts(loggedUser._id)
+    const deletedUser = await deleteUserFromDatabase(loggedUser._id)
+    const deletedStories = await deleteStories(loggedUser._id)
 
     return deleted("User", {
       user: deletedUser,

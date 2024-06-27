@@ -10,7 +10,7 @@ const deleteComment = async (props) => {
         name: username,
         posttitle,
         usercomment,
-        loggedUserId
+        loggedUser
     } = props
 
     try{
@@ -30,9 +30,8 @@ const deleteComment = async (props) => {
             return notFound('Comment')
     
         /* Verify if the user is the post owner or the comment owner */
-        console.log(post.user._id, loggedUserId, mainUser._id)
         if (
-            post.user._id.toString() !== loggedUserId &&
+            post.user._id.toString() !== loggedUser._id &&
             post.user._id.toString() !== mainUser._id
         ) return unauthorized("You can not delet comments on this post")
     

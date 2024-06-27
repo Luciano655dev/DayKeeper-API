@@ -10,7 +10,7 @@ const reactPost = async (props) => {
         name: username,
         posttitle,
         reaction,
-        loggedUserId
+        loggedUser
     } = props
 
     if (!reaction || reaction < 0 || reaction >= 5)
@@ -27,7 +27,7 @@ const reactPost = async (props) => {
         /* Verify if the user has reacted before */
         const existingReactionIndex = reactedPost.reactions.findIndex(
             (reaction) =>
-            reaction.user == loggedUserId
+            reaction.user == loggedUser._id
         )
     
         /* if true */
@@ -41,7 +41,7 @@ const reactPost = async (props) => {
             }
         } else {
             /* If false, add new reaction */
-            reactedPost.reactions.push({ user: loggedUserId, reaction })
+            reactedPost.reactions.push({ user: loggedUser._id, reaction })
         }
 
         await reactedPost.save()

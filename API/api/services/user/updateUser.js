@@ -14,16 +14,12 @@ const updateUser = async(params) => {
     password,
     bio,
     file,
-    loggedUserId
+    loggedUser
   } = params
 
   try{
-    const user = await User.findById(loggedUserId)
-    if(!user)
-      return notFound('User')
-
     // Check Email
-    if(email && (user.email != email))
+    if(email && (loggedUser.email != email))
       sendVerificationEmail(name, email)
 
     // check and create password
@@ -34,28 +30,28 @@ const updateUser = async(params) => {
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      loggedUserId,
+      loggedUser._id,
       {
         $set: {
-          name: name || user.name,
-          email: email || user.email,
-          password: password || user.password,
-          bio: bio || user.bio || '',
+          name: name || loggedUser.name,
+          email: email || loggedUser.email,
+          password: password || loggedUser.password,
+          bio: bio || loggedUser.bio || '',
           profile_picture: (
             file ?
             {
               name: file.originalname,
               key: file.key,
               url: file.location
-            } : user.profile_picture
+            } : loggedUser.profile_picture
           ),
           follow_requests: [],
-          verified_email: ( typeof email == 'undefined' ? user.verified_email : (user.email == email) ),
+          verified_email: ( typeof email == 'undefined' ? loggedUser.verified_email : (loggedUser.email == email) ),
         },
       },
       { new: true }
     )
-    if(!user)
+    if(!updatedUser)
       return notFound('User')
 
     await updatedUser.save()
