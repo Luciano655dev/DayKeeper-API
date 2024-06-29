@@ -7,14 +7,17 @@ const {
 } = require('../../../constants/index')
 
 const updatePost = async(req)=>{
-  const newData = req.body
-  const { posttitle } = req.params
-  const loggedUser = req.user
+  const {
+    newData, // req.body
+    posttitle, // req.params
+    loggedUser, // req.user
+    reqFiles, // req.files
+  } = props
 
   try{
     const handleBadRequest = (returnObj) => {
-      for(let i in req.files)
-        deleteFile(req.files[i].key)
+      for(let i in reqFiles)
+        deleteFile(reqFiles[i].key)
 
       return returnObj
     }
@@ -29,8 +32,8 @@ const updatePost = async(req)=>{
       return handleBadRequest(notFound('Post'))
 
     /* Verify File Limit */
-    const keep_files = req.body.keep_files.split('').map(Number) || []
-    const maxFiles = ((post.files.length - 1) - (post.files.length - keep_files.length)) + req.files.length
+    const keep_files = newData.keep_files.split('').map(Number) || []
+    const maxFiles = ((post.files.length - 1) - (post.files.length - keep_files.length)) + reqFiles.length
     if(maxFiles >= 5)
       return handleBadRequest(inputTooLong(`image field`))
 
@@ -44,7 +47,12 @@ const updatePost = async(req)=>{
     }
     
     const newPostfiles = files.filter((el, index)=>keep_files.includes(index))
-    const newFiles = req.files.map( file => { return { name: file.originalname, key: file.key, mimetype: file.mimetype, url: file.location } })
+    const newFiles = reqFiles.map( file => { return {
+      name: file.originalname,
+      key: file.key,
+      mimetype: file.mimetype,
+      url: file.location
+    } })
     files = [...newPostfiles, ...newFiles]
   
     /* Create Post */

@@ -50,7 +50,12 @@ const createPostController = async(req, res)=>{
 // updatePost
 const updatePostController = async(req, res)=>{
   try{
-    const { code, message, post } = await updatePost(req)
+    const { code, message, post } = await updatePost({
+      newData: req.body,
+      ...req.params, // { posttitle }
+      loggedUser: req.user,
+      reqFiles: req.files
+    })
 
     return res.status(code).json({ message, post })
   } catch (error){
