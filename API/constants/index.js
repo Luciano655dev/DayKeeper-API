@@ -22,7 +22,8 @@ module.exports = {
     admin: {
         maxReportMessageLength: 1000,
         daysToDeleteBannedUser: 30,
-        daysToDeleteBannedPost: 7
+        daysToDeleteBannedPost: 7,
+        daysToDeleteBannedStorie: 3
     },
     auth: {
         resetTokenExpiresTime: '1h',
