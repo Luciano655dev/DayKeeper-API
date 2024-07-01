@@ -59,7 +59,7 @@ const userPostsPipeline = (mainUser, name) => [
         user: 1,
         files: 1,
         created_at: 1,
-        reactions: 1,
+        likes: 1,
         comments: { $size: '$comments' },
         user_info: 1
       }

@@ -27,14 +27,10 @@ const storieSchema = mongoose.Schema({
             ref: 'User'
         }
     ],
-    reactions: [
+    likes: [
         {
-            user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User'
-            },
-            created_at: { type: Date, default: Date.now() },
-            reaction: Number
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         }
     ],
 

@@ -1,10 +1,10 @@
 const Post = require('../../../models/Post')
 
-const deleteCommentReactions = async(loggedUserId)=>{
+const deleteCommentsLikes = async(loggedUserId)=>{
     try {
         const response = await Post.updateMany({}, {
             $pull: {
-                'comments.$[].reactions': { user: loggedUserId }
+                'comments.$[].likes': loggedUserId
             }
         })
     
@@ -14,4 +14,4 @@ const deleteCommentReactions = async(loggedUserId)=>{
     }
 }
 
-module.exports = deleteCommentReactions
+module.exports = deleteCommentsLikes

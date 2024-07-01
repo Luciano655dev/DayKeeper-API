@@ -59,7 +59,7 @@ const userStoriesPipeline = (mainUser, name) => [
         file: 1,
         created_at: 1,
         views: mainUser.name == name ? 1 : 0,
-        reactions: mainUser.name == name ? 1 : 0
+        likes: mainUser.name == name ? 1 : 0
       }
     }
 ]

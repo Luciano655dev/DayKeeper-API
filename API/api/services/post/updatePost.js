@@ -66,7 +66,7 @@ const updatePost = async(req)=>{
           user: loggedUser._id,
           created_at: post.created_at,
           edited_at: Date.now(),
-          reactions: post.reactions,
+          likes: post.likes,
           comments: post.comments,
           _id: post._id
         }

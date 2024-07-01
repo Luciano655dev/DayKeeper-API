@@ -58,7 +58,7 @@ const commentPost = async(props)=>{
     let newComments = [ ...post.comments, {
       created_at: Date.now(),
       user: loggedUser._id,
-      reactions: [],
+      likes: [],
       comment,
       gif
     }]

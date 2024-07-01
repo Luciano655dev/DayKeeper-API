@@ -60,13 +60,10 @@ const postSchema = mongoose.Schema({
         }
     }],
 
-    reactions: [
+    likes: [
         {
-            user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User'
-            },
-            reaction: Number
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         }
     ],
     comments: [
@@ -85,10 +82,10 @@ const postSchema = mongoose.Schema({
                 type: Date,
                 default: Date.now()
             },
-            reactions: [
+            likes: [
                 {
-                    user: String,
-                    reaction: Number
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'User'
                 }
             ],
         }

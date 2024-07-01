@@ -1,13 +1,11 @@
-const User = require('../../models/User')
 const {
-  errors: { notFound },
   success: { deleted }
 } = require('../../../constants/index')
 
 const deleteProfilePicture = require("./delete/deleteProfilePicture")
-const deletePostReactions = require('./delete/deletePostReactions')
+const deletePostsLikes = require('./delete/deletePostsLikes')
 const deleteUserComments = require('./delete/deleteUserComments')
-const deleteCommentReactions = require('./delete/deleteCommentReactions')
+const deleteCommentsLikes = require('./delete/deleteCommentsLikes')
 const deleteFollowers = require("./delete/deleteFollowers")
 const deleteFollowRequests = require('./delete/deleteFollowRequests')
 const deletePosts = require('./delete/deletePosts')
@@ -19,9 +17,9 @@ const deleteUser = async(props)=>{
 
   try {
     await deleteProfilePicture(loggedUser)
-    const deletedPostReactions = await deletePostReactions(loggedUser._id)
+    const deletedPostsLikes = await deletePostsLikes(loggedUser._id)
     const deletedComments = await deleteUserComments(loggedUser._id)
-    const deletedCommentReactions = await deleteCommentReactions(loggedUser._id)
+    const deletedCommentsLikes = await deleteCommentsLikes(loggedUser._id)
     const deletedFollowers = await deleteFollowers(loggedUser._id)
     const deletedFollowRequests = await deleteFollowRequests(loggedUser._id)
     const deletedPosts = await deletePosts(loggedUser._id)
@@ -31,9 +29,9 @@ const deleteUser = async(props)=>{
     return deleted("User", {
       user: deletedUser,
       posts: deletedPosts,
-      post_reactions: deletedPostReactions,
+      posts_likes: deletedPostsLikes,
       comments: deletedComments,
-      comment_reactions: deletedCommentReactions,
+      comments_likes: deletedCommentsLikes,
       followers: deletedFollowers,
       follow_requests: deletedFollowRequests,
       stories: deletedStories

@@ -21,7 +21,7 @@ module.exports = {
   },
   hideStorieData: {
     views: 0,
-    reactions: 0
+    likes: 0
   },
   hideGeneralData: {
     banned: 0,

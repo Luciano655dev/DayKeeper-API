@@ -28,7 +28,7 @@ const createStorie = async(props)=>{
             user: loggedUser._id,
             created_at: new Date(),
             views: [],
-            reactions: [],
+            likes: [],
             reports: []
         })
 
