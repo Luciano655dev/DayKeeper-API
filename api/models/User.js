@@ -20,10 +20,6 @@ const userSchema = mongoose.Schema({
     type: String,
     required: false
   },
-  twitterId: {
-    type: String,
-    required: false
-  },
 
   created_at: {
     type: Date,

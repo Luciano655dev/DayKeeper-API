@@ -7,6 +7,9 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 dotenv.config()
 
+// Jobs
+require(`./api/jobs/deleteUsersWithoutConfirmedEmail`)
+
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
