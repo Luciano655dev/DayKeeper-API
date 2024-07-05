@@ -16,8 +16,14 @@ const resetPassword = async (props) => {
 
     if (!user)
       return notFound("User")
-    if (user.verification_code !== verificationCode)
+    if (user.verification_code !== verificationCode){
+      // Delete the old verification code
+      user.verification_code = undefined
+      user.verification_time = undefined
+      await user.save()
+
       return invalidValue(`Verification code`)
+    }
     if(user.verification_time < Date.now())
       return unauthorized(`confirm email`, `time expired`)
 

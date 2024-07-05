@@ -15,9 +15,15 @@ const confirmEmail = async(props)=>{
 
         if (!user)
             return notFound(`user`)
-    
-        if (user.verification_code !== verificationCode)
+
+        // Delete the old code 
+        if (user.verification_code !== verificationCode) {
+            user.verification_code = undefined
+            user.verification_time = undefined
+            await user.save()
+            
             return invalidValue(`Verification code`)
+        }
 
         if(user.verification_time < Date.now())
             return unauthorized(`confirm email`, `time expired`)
