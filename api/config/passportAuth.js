@@ -19,7 +19,7 @@ module.exports = function(passport) {
         try {
           let user = await User.findOne({ $or: [
             { email: profile.emails[0].value },
-            { googleId: profile.id }
+            { google_id: profile.id }
           ] })
 
           if (user) {
@@ -27,7 +27,7 @@ module.exports = function(passport) {
           } else {
             const response = await register({
               name: profile.displayName.split(` `).join(``),
-              googleId: profile.id,
+              google_id: profile.id,
               email: profile.emails[0].value,
               profile_picture: profile.photos[0].value
             })

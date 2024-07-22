@@ -1,6 +1,8 @@
 const express = require('express')
 const session = require('express-session')
 const mongoose = require('mongoose')
+const firebaseAdmin = require('firebase-admin')
+const serviceAccountKey = require('./firebase-admin-sdk.json')
 const passport = require('passport')
 const passportConfig = require('./api/config/passportAuth')
 const cors = require('cors')
@@ -8,7 +10,13 @@ const dotenv = require('dotenv')
 dotenv.config()
 
 // Jobs
-require(`./api/jobs/deleteUsersWithoutConfirmedEmail`)
+require('./api/jobs/deleteUsersWithoutConfirmedEmail')
+require('./api/jobs/sendNewDayNotifications.js')
+
+// Initialize Firebase
+firebaseAdmin.initializeApp({
+  credential: firebaseAdmin.credential.cert(serviceAccountKey)
+})
 
 const app = express()
 app.use(express.json())

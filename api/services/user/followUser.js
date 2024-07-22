@@ -1,4 +1,13 @@
 const User = require("../../models/User")
+const sendNotification = require('../../utils/sendNotification')
+
+const {
+  notifications: { follow: {
+    newFollower: newFollowerNotification,
+    newFollowRequest: newFollowRequestNotification,
+  } }
+} = require('../../../constants/index')
+
 const {
   errors: { notFound, custom: customErr },
   success: { custom }
@@ -31,11 +40,12 @@ const followUser = async(props)=>{
 
       /* Send follow request */
       await User.updateOne({ name }, { $push: { follow_requests: loggedUser._id } })
+      sendNotification(user._id, newFollowRequestNotification(loggedUser.name))
       return custom(`You sent a follow request to ${name}`)
     }
 
     await User.updateOne({ name }, { $push: { followers: loggedUser._id } })
-
+    sendNotification(user._id, newFollowerNotification(loggedUser.name))
     return custom(`You started following ${name}`)
   } catch (error) {
     throw new Error(error.message)

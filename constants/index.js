@@ -1,3 +1,4 @@
+const notifications = require('./notifications')
 const { errors, errorGif } = require(`./errors`)
 const success = require(`./success`)
 
@@ -64,5 +65,6 @@ module.exports = {
     
     errorGif,
     errors,
-    success
+    success,
+    notifications
 }

@@ -16,10 +16,15 @@ const userSchema = mongoose.Schema({
   private: Boolean,
   roles: [ String ], // ['user', 'admin']
 
-  googleId: {
+  google_id: {
     type: String,
     required: false
   },
+
+  device_tokens: [{
+    type: String,
+    required: false
+  }],
 
   created_at: {
     type: Date,
