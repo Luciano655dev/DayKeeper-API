@@ -1,26 +1,28 @@
-const GoogleStrategy = require('passport-google-oauth20').Strategy
-const LocalStrategy = require('passport-local').Strategy
-const User = require('../models/User')
+const GoogleStrategy = require("passport-google-oauth20").Strategy
+const LocalStrategy = require("passport-local").Strategy
+const User = require("../models/User")
 const register = require(`../services/auth/register`)
 const {
-  google: { clientId, clientSecret }
-} = require('../../config')
+  google: { clientId, clientSecret },
+} = require("../../config")
 
-module.exports = function(passport) {
+module.exports = function (passport) {
   // google auth
   passport.use(
     new GoogleStrategy(
       {
         clientID: clientId,
         clientSecret,
-        callbackURL: '/auth/google/callback'
+        callbackURL: "/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await User.findOne({ $or: [
-            { email: profile.emails[0].value },
-            { google_id: profile.id }
-          ] })
+          let user = await User.findOne({
+            $or: [
+              { email: profile.emails[0].value },
+              { google_id: profile.id },
+            ],
+          })
 
           if (user) {
             return done(null, user)
@@ -29,7 +31,7 @@ module.exports = function(passport) {
               name: profile.displayName.split(` `).join(``),
               google_id: profile.id,
               email: profile.emails[0].value,
-              profile_picture: profile.photos[0].value
+              profile_picture: profile.photos[0].value,
             })
 
             done(null, response.user)
@@ -43,32 +45,32 @@ module.exports = function(passport) {
 
   // Local Auth
   passport.use(
-    new LocalStrategy({
-        usernameField: 'name',
-        passwordField: 'password'
-      }, async (email, password, done) => {
+    new LocalStrategy(
+      {
+        usernameField: "name",
+        passwordField: "password",
+      },
+      async (email, password, done) => {
         try {
           /*
             All the validations are done at the Middleware
           */
-         
-          const user = await User.findOne({ $or: [
-            { name: email },
-            { email }
-          ] })
+
+          const user = await User.findOne({ $or: [{ name: email }, { email }] })
 
           if (!user)
-            return done(null, false, { message: 'Email ou senha incorretos' })
+            return done(null, false, { message: "Incorrect email or password" })
 
           return done(null, user)
         } catch (error) {
           return done(error)
         }
-    })
+      }
+    )
   )
 
   passport.serializeUser((user, done) => {
-    done(null, user.id)
+    done(null, user._id)
   })
 
   passport.deserializeUser(async (id, done) => {

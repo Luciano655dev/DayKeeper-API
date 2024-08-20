@@ -41,7 +41,7 @@ const fileSizeLimit = 4 * 1024 * 1024 * 1024 // 4 GB
 const MulterConfig = (mediaType) => {
   let allowedMimes = []
 
-  switch(mediaType){
+  switch (mediaType) {
     case "image":
       allowedMimes = [
         "image/jpeg",
@@ -65,7 +65,7 @@ const MulterConfig = (mediaType) => {
 
   return {
     dest: path.resolve(__dirname, "..", "tmp", "uploads"),
-    storage: storageTypes[process.env.STORAGE_TYPE],
+    storage: storageTypes["s3"],
     limits: {
       fileSize: fileSizeLimit,
     },

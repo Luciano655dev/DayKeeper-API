@@ -1,12 +1,10 @@
 const {
-  errors: { serverError }
+  errors: { serverError },
 } = require(`../constants/index`)
 
 async function checkTokenMW(req, res, next) {
   try {
-    if(req.isAuthenticated()){
-      return next()
-    }
+    if (req.isAuthenticated()) return next()
 
     return res.status(409).json({ message: "Invalid Login" })
   } catch (error) {
