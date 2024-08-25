@@ -26,19 +26,19 @@ const detectInappropriateFileMW = require("../middlewares/detectInappropriateFil
 
 // Routes
 router.get(
+  "/:name",
+  checkTokenMW,
+  checkBannedUserMW,
+  checkPrivateUserMW,
+  getTodayStories
+) // get today user stories
+router.get(
   "/:name/all",
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
   getUserStories
 ) // get user stories
-router.get(
-  "/:name/today",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getTodayStories
-) // get today user stories
 router.get(
   "/:name/:storieTitle",
   checkTokenMW,

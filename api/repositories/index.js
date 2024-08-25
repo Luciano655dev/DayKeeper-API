@@ -1,4 +1,4 @@
-const searchPostPipeline = require('./searchPostPipeline')
+const searchPostPipeline = require("./searchPostPipeline")
 const searchUserPipeline = require(`./searchUserPipeline`)
 const userPostsPipeline = require(`./userPostsPipeline`)
 const reportedElementPipeline = require(`./reportedElementPipeline`)
@@ -13,7 +13,8 @@ module.exports = {
     blocked_users: false,
     verified_email: false,
     roles: false,
-    banned: false
+    banned: false,
+    device_tokens: false,
   },
   hidePostData: {
     reportd: false,
@@ -21,16 +22,16 @@ module.exports = {
   },
   hideStorieData: {
     views: 0,
-    likes: 0
+    likes: 0,
   },
   hideGeneralData: {
     banned: 0,
     ban_history: 0,
-    reports: 0
+    reports: 0,
   },
   searchPostPipeline,
   searchUserPipeline,
   userPostsPipeline,
   reportedElementPipeline,
-  bannedElementPipeline
+  bannedElementPipeline,
 }

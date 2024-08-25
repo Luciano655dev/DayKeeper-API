@@ -24,6 +24,7 @@ const verifyPostOwnershipMW = require("../middlewares/verifyPostOwnershipMW")
 const checkPrivateUserMW = require("../middlewares/checkPrivateUserMW")
 const checkBlockedUserMW = require("../middlewares/checkBlockedUserMW")
 const checkBannedUserMW = require("../middlewares/checkBannedUserMW")
+const checkSameDayMW = require("../middlewares/checkSameDayMW")
 
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
@@ -49,6 +50,7 @@ router.put(
   "/:posttitle",
   checkTokenMW,
   verifyPostOwnershipMW,
+  checkSameDayMW,
   multer(multerConfig("both")).array("files", 5),
   detectInappropriateFileMW,
   handleMulterError,
@@ -76,6 +78,7 @@ router.post(
 router.post(
   "/:name/:posttitle/comment",
   checkTokenMW,
+  checkSameDayMW,
   checkBannedUserMW,
   checkPrivateUserMW,
   checkBlockedUserMW,
@@ -89,6 +92,7 @@ router.delete(
 router.post(
   "/:name/:posttitle/like/:usercomment",
   checkTokenMW,
+  checkSameDayMW,
   checkBannedUserMW,
   checkPrivateUserMW,
   checkBlockedUserMW,

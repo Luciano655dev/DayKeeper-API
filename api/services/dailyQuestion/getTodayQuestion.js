@@ -16,9 +16,9 @@ const getQuestion = async () => {
 
     const question = await DailyQuestion.findOne({ day: queryDateString })
 
-    if (!question) return notFound(`question`)
+    if (!question) return notFound(`Question`)
 
-    return fetched(`question`, { question })
+    return fetched(`Question`, { question })
   } catch (error) {
     throw new Error(error.message)
   }

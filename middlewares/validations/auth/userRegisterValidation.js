@@ -1,27 +1,31 @@
-const User = require('../../../api/models/User')
-const BannedUser = require('../../../api/models/BannedUser')
+const User = require("../../../api/models/User")
+const BannedUser = require("../../../api/models/BannedUser")
 const { listTimeZones } = require(`timezone-support`)
 
 const {
   auth: { maxEmailLength, maxUsernameLength, maxPasswordLength },
-  errors: { serverError }
-} = require('../../../constants/index')
+  errors: { serverError },
+} = require("../../../constants/index")
 
-const userValidation = async(req, res, next)=>{
+const userValidation = async (req, res, next) => {
   const { name: username, email, password, timeZone } = req.body
 
-  try{
+  try {
     const user = await User.findOne({ $or: [{ name: username }, { email }] })
-    if(user)
-      return res.status(409).json({ message: "This username or email has already been registered" })
+    if (user)
+      return res
+        .status(409)
+        .json({ message: "This username or email has already been registered" })
 
     const emailIsBanned = await BannedUser.findOne({ email })
-    if(emailIsBanned)
+    if (emailIsBanned)
       return res.status(403).json({ message: "This email is banned" })
 
     // User Input validations
     if (!username || !email || !password)
-      return res.status(400).json({ message: `Username, email or password is not filled in` })
+      return res
+        .status(400)
+        .json({ message: `Username, email or password is not filled in` })
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email) || email.length > maxEmailLength)
@@ -34,11 +38,11 @@ const userValidation = async(req, res, next)=>{
       return res.status(413).json({ message: `Password is too long` })
 
     // time zone validation
-    if(!listTimeZones().includes(timeZone) && timeZone != `undefined`)
+    if (timeZone && !listTimeZones().includes(timeZone))
       return res.status(400).json({ message: `TimeZone is invalid` })
-  
+
     return next()
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({ message: serverError(error.message).message })
   }
 }

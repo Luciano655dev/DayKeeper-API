@@ -9,7 +9,7 @@ const {
 const checkTokenMW = require("../middlewares/checkTokenMW")
 
 // Routes
-router.get("/today", checkTokenMW, getTodayQuestion)
+router.get("/", checkTokenMW, getTodayQuestion)
 router.get("/:date", checkTokenMW, getQuestion)
 
 module.exports = router

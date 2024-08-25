@@ -12,7 +12,7 @@ const getQuestion = async (props) => {
 
   try {
     const dateRegexFormat = /^\d{2}-\d{2}-\d{4}$/ // dd-MM-yyyy
-    if (!dateRegexFormat.test(date)) return invalidValue(`date`)
+    if (!dateRegexFormat.test(date)) return invalidValue(`Date`)
 
     const requestedDate = parse(date, "dd-MM-yyyy", new Date())
     const todayDate = parse(getTodayDate(), "dd-MM-yyyy", new Date())
@@ -23,9 +23,9 @@ const getQuestion = async (props) => {
     let queryDateString = format(requestedDate, "dd-MM")
     const question = await DailyQuestion.findOne({ day: queryDateString })
 
-    if (!question) return notFound(`question`)
+    if (!question) return notFound(`Question`)
 
-    return fetched(`question`, { question })
+    return fetched(`Question`, { question })
   } catch (error) {
     console.log(error.message)
     throw new Error(error.message)

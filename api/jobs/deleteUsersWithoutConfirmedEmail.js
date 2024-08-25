@@ -1,14 +1,19 @@
 const User = require(`../models/User`)
 const cron = require(`node-cron`)
 
-const deleteUsersWithoutConfirmedEmail = async()=>{
-    try{
-        await User.deleteMany({ verified_email: false })
-    }catch(error){
-        console.log(error)
-        return
-    }
+const deleteUsersWithoutConfirmedEmail = async () => {
+  try {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+
+    await User.deleteMany({
+      verified_email: false,
+      creation_date: { $lt: twentyFourHoursAgo.toISOString() },
+    })
+  } catch (error) {
+    console.log(error)
+    return
+  }
 }
 
 // Every day at 00:00:00
-cron.schedule('0 0 * * *', deleteUsersWithoutConfirmedEmail)
+cron.schedule("0 0 * * *", deleteUsersWithoutConfirmedEmail)
