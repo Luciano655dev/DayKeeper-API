@@ -1,48 +1,48 @@
-const findStorie = require('./get/findStorie')
+const Storie = require("../../models/Storie")
+const findStorie = require("./get/findStorie")
 const mongoose = require(`mongoose`)
 
 const {
-    errors: { invalidValue, notFound },
-    success: { custom }
-} = require('../../../constants/index')
+  errors: { invalidValue, notFound },
+  success: { custom },
+} = require("../../../constants/index")
 
 const reactStorie = async (props) => {
-    const {
-        name: username,
-        storieTitle: storieInput,
-        loggedUser
-    } = props
-  
-    try {
-        if(!mongoose.Types.ObjectId.isValid(storieInput))
-            return invalidValue(`Storie ID`)
+  const { name: username, title, loggedUser } = props
 
-        let reactedStorie = await findStorie({
-            userInput: username,
-            storieInput,
-            fieldsToPopulate: [`user`],
-            loggedUserId: loggedUser._id,
-            view: true
-        })
-        if(reactStorie?.stories == `undefined`)
-            return notFound(`Storie`)
+  try {
+    if (!mongoose.Types.ObjectId.isValid(title))
+      return invalidValue(`Storie ID`)
 
-        storie = reactedStorie.stories
+    let reactedStorie = await findStorie({
+      userInput: username,
+      title,
+      hideLikes: false,
+      fieldsToPopulate: [`user`],
+      loggedUserId: loggedUser._id,
+      view: true,
+    })
+    if (!reactedStorie) return notFound(`Storie`)
 
-        const userLikeIndex = storie.likes.indexOf(loggedUser._id)
+    const userLikeIndex = reactedStorie.likes.indexOf(loggedUser._id)
 
-        if (userLikeIndex > -1) // add like
-            storie.likes.splice(userLikeIndex, 1)
-        else // remove like
-            storie.likes.push(loggedUser._id)
-
-        await reactedStorie.save()
-    
-        return custom("The like was added or removed from the Storie", { storie: reactedStorie })
-    } catch (error) {
-        console.log(error)
-      throw new Error(error.message)
+    if (userLikeIndex == -1) {
+      // add like
+      reactedStorie.likes.push(loggedUser._id)
+    } else {
+      // remove like
+      reactedStorie.likes.splice(userLikeIndex, 1)
     }
+
+    await reactedStorie.save()
+
+    return custom("The like was added or removed from the Storie", 200, {
+      storie: reactedStorie,
+    })
+  } catch (error) {
+    console.log(error)
+    throw new Error(error.message)
+  }
 }
 
 module.exports = reactStorie

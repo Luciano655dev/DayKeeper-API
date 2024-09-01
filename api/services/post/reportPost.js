@@ -1,32 +1,25 @@
-const User = require('../../models/User')
-const Post = require('../../models/Post')
+const User = require("../../models/User")
+const Post = require("../../models/Post")
 const {
   user: { maxReportReasonLength },
   errors: { inputTooLong, notFound, doubleAction },
-  success: { custom }
-} = require('../../../constants/index')
+  success: { custom },
+} = require("../../../constants/index")
 
-const reportPost = async(props)=>{
-  const {
-    name: username,
-    posttitle,
-    reason,
-    loggedUser
-  } = props
+const reportPost = async (props) => {
+  const { name: username, title, reason, loggedUser } = props
 
-  if(reason.length > maxReportReasonLength)
-    return inputTooLong('Reason')
+  if (reason.length > maxReportReasonLength) return inputTooLong("Reason")
 
-  try{
+  try {
     const postUser = await User.findOne({ name: username })
     const reportedPost = await Post.findOne({
       user: postUser._id,
-      title: posttitle
+      title: title,
     })
-    if(!reportedPost)
-      return notFound('Post')
+    if (!reportedPost) return notFound("Post")
 
-    if(reportedPost.reports.find(report => report.user == loggedUser._id))
+    if (reportedPost.reports.find((report) => report.user == loggedUser._id))
       return doubleAction()
 
     await Post.findByIdAndUpdate(reportedPost._id, {
@@ -34,13 +27,13 @@ const reportPost = async(props)=>{
         reports: {
           user: loggedUser._id,
           created_at: new Date(),
-          reason
-        }
-      }
+          reason,
+        },
+      },
     })
 
     return custom("Post reported successfully")
-  }catch(error){
+  } catch (error) {
     throw new Error(error.message)
   }
 }

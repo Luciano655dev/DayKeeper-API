@@ -1,15 +1,13 @@
-const User = require('../../../models/User')
+const Followers = require("../../../models/Followers")
 
-const deleteFollowers = async(loggedUserId)=>{
-  try{
-    const response = await User.updateMany({}, {
-      $pull: {
-        followers: { user: loggedUserId }
-      }
+const deleteFollowers = async (loggedUserId) => {
+  try {
+    const response = await Followers.deleteMany({
+      $or: [{ followerId: loggedUserId }, { followingId: loggedUserId }],
     })
 
     return response.nModified
-  }catch(error){
+  } catch (error) {
     throw new Error(error.message)
   }
 }

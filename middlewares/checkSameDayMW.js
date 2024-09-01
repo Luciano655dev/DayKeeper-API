@@ -5,7 +5,7 @@ const {
 } = require("../constants/index")
 
 async function checkSameDayMW(req, res, next) {
-  const date = req.params.posttitle || req.params.storieTitle
+  const date = req.params.title || "00-00-0000"
 
   try {
     const postDate = parse(date, "dd-MM-yyyy", new Date())

@@ -1,53 +1,48 @@
 const User = require("../../models/User")
 const Post = require("../../models/Post")
-const axios = require('axios')
-const findPost = require('./get/findPost')
-const { giphy: { apiKey } } = require('../../../config')
-const { hideUserData } = require('../../repositories')
+const axios = require("axios")
+const findPost = require("./get/findPost")
+const {
+  giphy: { apiKey },
+} = require("../../../config")
+const { hideUserData, hidePostData } = require("../../repositories")
 
 const {
   post: { maxCommentLength },
   errors: { fieldsNotFilledIn, inputTooLong, notFound },
   errroGif,
-  success: { created }
-} = require('../../../constants/index')
+  success: { created },
+} = require("../../../constants/index")
 
-const commentPost = async(props)=>{
-  let {
-    loggedUser,
-    name: username,
-    posttitle,
-    comment,
-    gif
-  } = props
+const commentPost = async (props) => {
+  let { loggedUser, name: username, title, comment, gif } = props
 
   /* Validations */
-  if(!comment)
-    return fieldsNotFilledIn(`comment`)
-  if(comment.length > maxCommentLength)
-    return inputTooLong('Comment')
+  if (!comment) return fieldsNotFilledIn(`comment`)
+  if (comment.length > maxCommentLength) return inputTooLong("Comment")
 
-  try{
-    const post = await findPost(
-      username,
-      posttitle,
-      'username',
-      []
-  )
+  try {
+    const post = await findPost({
+      userInput: username,
+      title,
+      type: "username",
+      fieldsToPopulate: [],
+    }).select(hidePostData)
     const user = await User.findOne({ name: username })
-    if(!post || !user)
-      return notFound('Post or User')
+    if (!post || !user) return notFound("Post or User")
 
-    if(gif){
+    if (gif) {
       try {
-        gif = await axios.get(`https://api.giphy.com/v1/gifs/${gif}?api_key=${apiKey}`)
+        gif = await axios.get(
+          `https://api.giphy.com/v1/gifs/${gif}?api_key=${apiKey}`
+        )
 
         gif = {
           name: gif.data.data.title,
           id: gif.data.data.id,
-          url: gif.data.data.images.original.url
+          url: gif.data.data.images.original.url,
         }
-      }catch(err){
+      } catch (err) {
         gif = errroGif
 
         /* Error in Giphy API debug */
@@ -55,37 +50,46 @@ const commentPost = async(props)=>{
       }
     }
 
-    let newComments = [ ...post.comments, {
-      created_at: Date.now(),
-      user: loggedUser._id,
-      likes: [],
-      comment,
-      gif
-    }]
+    let newComments = [
+      ...post.comments,
+      {
+        created_at: Date.now(),
+        user: loggedUser._id,
+        likes: [],
+        comment,
+        gif,
+      },
+    ]
 
     /* Remove user's comment if exists */
-    if(post.comments.findIndex(comment => comment.user._id == loggedUser._id) !== -1)
-      newComments = [...post.comments].filter( comment => comment.user._id != loggedUser._id)
+    if (
+      post.comments.findIndex(
+        (comment) => comment.user._id == loggedUser._id
+      ) !== -1
+    )
+      newComments = [...post.comments].filter(
+        (comment) => comment.user._id != loggedUser._id
+      )
 
     const commentedPost = await Post.findOneAndUpdate(
-      { title: posttitle, user: user._id },
+      { title: title, user: user._id },
       {
-        comments: newComments
+        comments: newComments,
       },
       { new: true }
     ).populate({
-      path: 'comments',
+      path: "comments",
       populate: {
-        path: 'user',
+        path: "user",
         match: { banned: { $ne: true } },
-        select: hideUserData
-      }
+        select: hideUserData,
+      },
     })
 
     await commentedPost.save()
 
     return created(`comment`, { post: commentedPost })
-  } catch (error){
+  } catch (error) {
     throw new Error(error.message)
   }
 }

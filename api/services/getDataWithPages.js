@@ -2,6 +2,8 @@ const Post = require("../models/Post")
 const User = require("../models/User")
 const Storie = require(`../models/Storie`)
 
+const { maxPageSize: defaultMaxPageSie } = require("../../constants/index")
+
 const getDataWithPages = async (
   { type, pipeline, order, following, page, maxPageSize },
   mainUser
@@ -10,7 +12,7 @@ const getDataWithPages = async (
   maxPageSize = Number(maxPageSize)
 
   if (isNaN(page)) page = 1
-  if (isNaN(maxPageSize)) maxPageSize = 5
+  if (isNaN(maxPageSize)) maxPageSize = defaultMaxPageSie
 
   const skipCount = (page - 1) * maxPageSize
   let newPipeline = [...pipeline]

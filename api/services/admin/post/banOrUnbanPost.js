@@ -12,7 +12,7 @@ const {
 } = require(`../../../../constants/index`)
 
 const banOrUnbanPost = async (props) => {
-  const { name: username, posttitle, reason, loggedUser } = props
+  const { name: username, title, reason, loggedUser } = props
 
   if (reason.length > maxReportMessageLength) return inputTooLong(`Reason`)
 
@@ -21,7 +21,7 @@ const banOrUnbanPost = async (props) => {
     if (!userPost) return notFound(`User`)
 
     const deletedPost = await Post.findOne({
-      title: posttitle,
+      title: title,
       user: userPost._id,
     })
     if (!deletedPost) return notFound(`User`)
@@ -29,7 +29,7 @@ const banOrUnbanPost = async (props) => {
     if (deletedPost.banned == "true") {
       await Post.updateOne(
         {
-          title: posttitle,
+          title,
           user: userPost._id,
         },
         {
@@ -61,7 +61,7 @@ const banOrUnbanPost = async (props) => {
 
     await Post.updateOne(
       {
-        title: posttitle,
+        title: title,
         user: userPost._id,
       },
       {

@@ -1,4 +1,4 @@
-const User = require("../api/models/User")
+const findUser = require("../api/services/user/get/findUser")
 const {
   errors: { serverError },
 } = require("../constants/index")
@@ -8,7 +8,7 @@ async function checkPrivateUserMW(req, res, next) {
   const loggedUser = req.user
 
   try {
-    const user = await User.findOne({ name })
+    const user = await findUser({ userInput: name, hideData: false })
     if (!user) return res.status(404).json({ message: `User not found` })
 
     if (

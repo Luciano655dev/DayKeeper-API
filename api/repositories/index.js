@@ -17,7 +17,7 @@ module.exports = {
     device_tokens: false,
   },
   hidePostData: {
-    reportd: false,
+    reports: false,
     ban_history: false,
   },
   hideStorieData: {

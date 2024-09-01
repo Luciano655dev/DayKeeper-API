@@ -1,22 +1,27 @@
-const User = require('../../../models/User')
-const Post = require('../../../models/Post')
-const { hideUserData, hidePostData } = require('../../../repositories')
+const Post = require("../../../models/Post")
+const findUser = require("../../user/get/findUser")
+const { hideUserData, hidePostData } = require("../../../repositories")
 
-async function findPost(userInput, posttitle, type = 'username', fieldsToPopulate = []) {
+async function findPost({
+  userInput = "",
+  title = "",
+  type = "username",
+  fieldsToPopulate = [],
+}) {
   try {
     let post = {}
 
-    const populateOptions = fieldsToPopulate.map(field => ({
+    const populateOptions = fieldsToPopulate.map((field) => ({
       path: field,
       match: { banned: { $ne: true } },
-      select: hideUserData
+      select: hideUserData,
     }))
 
-    const query = { title: posttitle }
-    if (type === 'username') {
-      const user = await User.findOne({ name: userInput })
+    const query = { title: title }
+    if (type === "username") {
+      const user = await findUser({ userInput, hideData: true })
       if (!user) return null
-        query.user = user._id
+      query.user = user._id
     } else {
       query.user = userInput
     }

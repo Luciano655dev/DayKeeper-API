@@ -20,7 +20,7 @@ async function detectInappropriateContentMW(req, res, next) {
       if (!isAppropriate) {
         deleteFile(file.key)
         return res
-          .status(409)
+          .status(400)
           .json({ message: `This image violates DayKeeper's terms of service` })
       }
     }

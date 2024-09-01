@@ -40,7 +40,7 @@ router.get(
   getUserStories
 ) // get user stories
 router.get(
-  "/:name/:storieTitle",
+  "/:name/:title",
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
@@ -56,7 +56,7 @@ router.post(
   createStorie
 ) // createStories
 router.post(
-  "/:name/:storieTitle",
+  "/:name/:title",
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
@@ -69,7 +69,7 @@ router.delete(
   deleteStorie
 ) // delete a storie
 router.post(
-  `/:name/:storieTitle/report`,
+  `/:name/:title/report`,
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,

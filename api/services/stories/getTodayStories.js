@@ -1,5 +1,8 @@
 const getTodayDate = require(`../../utils/getTodayDate`)
 const findStorie = require(`./get/findStorie`)
+const {
+  success: { fetched },
+} = require("../../../constants/index")
 
 const getStorie = async (props) => {
   const { name: userInput, populate, loggedUser } = props
@@ -16,7 +19,7 @@ const getStorie = async (props) => {
       view: true,
     })
 
-    return response
+    return fetched("Stories", { stories: response })
   } catch (error) {
     throw new Error(error.message)
   }

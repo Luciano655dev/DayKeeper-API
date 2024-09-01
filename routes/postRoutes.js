@@ -30,7 +30,7 @@ const detectInappropriateFileMW = require("../middlewares/detectInappropriateFil
 
 // Routes
 router.get(
-  "/:name/:posttitle",
+  "/:name/:title",
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
@@ -47,9 +47,8 @@ router.post(
   createPost
 ) // Create Post
 router.put(
-  "/:posttitle",
+  "/:title",
   checkTokenMW,
-  verifyPostOwnershipMW,
   checkSameDayMW,
   multer(multerConfig("both")).array("files", 5),
   detectInappropriateFileMW,
@@ -57,18 +56,18 @@ router.put(
   postEditValidation,
   updatePost
 ) // Edit Post
-router.delete("/:posttitle", checkTokenMW, verifyPostOwnershipMW, deletePost) // Delete Post
+router.delete("/:title", checkTokenMW, deletePost) // Delete Post
 
-// interaction
+// ========== interaction ==========
 router.post(
-  "/:name/:posttitle/report",
+  "/:name/:title/report",
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
   reportPost
 ) // Report a post
 router.post(
-  "/:name/:posttitle/like",
+  "/:name/:title/like",
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
@@ -76,7 +75,7 @@ router.post(
   reactPost
 ) // React to a Post
 router.post(
-  "/:name/:posttitle/comment",
+  "/:name/:title/comment",
   checkTokenMW,
   checkSameDayMW,
   checkBannedUserMW,
@@ -84,13 +83,9 @@ router.post(
   checkBlockedUserMW,
   commentPost
 ) // Comment in a post
-router.delete(
-  "/:name/:posttitle/comment/:usercomment",
-  checkTokenMW,
-  deleteComment
-) // Delete a comment
+router.delete("/:name/:title/comment/:usercomment", checkTokenMW, deleteComment) // Delete a comment
 router.post(
-  "/:name/:posttitle/like/:usercomment",
+  "/:name/:title/like/:usercomment",
   checkTokenMW,
   checkSameDayMW,
   checkBannedUserMW,
@@ -98,5 +93,11 @@ router.post(
   checkBlockedUserMW,
   reactComment
 ) // Like a comment
+
+/*
+  GET /:name/:title/likes
+  GET /:name/:title/comments
+  GET /:name/:title/:userComment/likes
+*/
 
 module.exports = router

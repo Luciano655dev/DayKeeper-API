@@ -1,37 +1,35 @@
-const findPost = require('./get/findPost')
+const findPost = require("./get/findPost")
 
 const {
-    success: { custom }
-} = require('../../../constants/index')
+  success: { custom },
+} = require("../../../constants/index")
 
-const reactPost = async (props) => {
-    const {
-        name: username,
-        posttitle,
-        loggedUser
-    } = props
-  
-    try {
-        let post = await findPost(
-            username,
-            posttitle,
-            'username',
-            [ 'user' ]
-        )
+const likePost = async (props) => {
+  const { name: username, title, loggedUser } = props
 
-        const userLikeIndex = post.likes.indexOf(loggedUser._id)
+  try {
+    let post = await findPost({
+      userInput: username,
+      title,
+      type: "username",
+      fieldsToPopulate: ["user"],
+    })
 
-        if (userLikeIndex > -1) // add like
-            post.likes.splice(userLikeIndex, 1)
-        else // remove like
-            post.likes.push(loggedUser._id)
+    const userLikeIndex = post.likes.indexOf(loggedUser._id)
 
-        await post.save()
-    
-        return custom("The like was added or removed from the post", { post })
-    } catch (error) {
-      throw new Error(error.message)
-    }
+    if (userLikeIndex > -1)
+      // add like
+      post.likes.splice(userLikeIndex, 1)
+    // remove like
+    else post.likes.push(loggedUser._id)
+
+    await post.save()
+
+    return custom("The like was added or removed from the post", 200, { post })
+  } catch (error) {
+    console.log(error)
+    throw new Error(error.message)
+  }
 }
 
-module.exports = reactPost
+module.exports = likePost
