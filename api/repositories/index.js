@@ -6,6 +6,7 @@ const bannedElementPipeline = require(`./bannedElementPipeline`)
 
 const getFollowersPipeline = require("./getFollowersPipeline")
 const getFollowingPipeline = require("./getFollowingPipeline")
+const getFollowRequestsPipeline = require("./getFollowRequestsPipeline")
 
 module.exports = {
   hideUserData: {
@@ -39,4 +40,5 @@ module.exports = {
   bannedElementPipeline,
   getFollowersPipeline,
   getFollowingPipeline,
+  getFollowRequestsPipeline,
 }

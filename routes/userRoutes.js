@@ -9,6 +9,7 @@ const {
   followUser,
   getFollowing,
   getFollowers,
+  getFollowRequests,
   respondFollowRequest,
   removeFollower,
   blockUser,
@@ -54,6 +55,17 @@ router.get(
   checkBannedUserMW,
   checkPrivateUserMW,
   getFollowing
+)
+router.get(
+  /*
+    the 'name' here does not make any fucking difference
+    since you're the only one who can see your follow requests
+  */
+  "/:name/follow_requests",
+  checkTokenMW,
+  checkBannedUserMW,
+  checkPrivateUserMW,
+  getFollowRequests
 )
 router.post("/:name/follow", checkTokenMW, checkBannedUserMW, followUser)
 router.post(
