@@ -1,4 +1,5 @@
 const User = require("../../models/User")
+const Followers = require("../../models/Followers")
 const getDataWithPages = require("../getDataWithPages")
 const { searchPostPipeline, searchUserPipeline } = require("../../repositories")
 
@@ -23,8 +24,8 @@ const search = async (props) => {
   const loggedUser = props.user
 
   try {
-    loggedUser.following = await User.distinct("_id", {
-      followers: loggedUser._id,
+    loggedUser.following = await Followers.countDocuments({
+      followerId: loggedUser._id,
     })
 
     const response = await getDataWithPages(

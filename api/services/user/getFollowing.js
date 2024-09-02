@@ -1,22 +1,27 @@
-const User = require('../../models/User')
-const { hideUserData } = require('../../repositories')
+const findUser = require("../user/get/findUser")
+const getDataWithPages = require("../getDataWithPages")
+const { getFollowingPipeline } = require("../../repositories/index")
 
 const {
   errors: { notFound },
-  success: { fetched }
-} = require('../../../constants/index')
+  success: { fetched },
+} = require("../../../constants/index")
 
-const getFollowing = async(props)=>{
-  const { name } = props
+const getFollowing = async (props) => {
+  const { name, page, maxPageSize } = props
 
-  try{
-    const user = await User.findOne({ name })
-    if(!user)
-      return notFound("User")
+  try {
+    const user = await findUser({ userInput: name })
+    if (!user) return notFound("User")
 
-    const usersFollowing = await User.find({ followers: user._id }).select(hideUserData)
+    const response = await getDataWithPages({
+      pipeline: getFollowingPipeline(user._id),
+      type: "Follower",
+      page,
+      maxPageSize,
+    })
 
-    return fetched(`following users`, { users: usersFollowing })
+    return fetched(`Following`, { response })
   } catch (error) {
     throw new Error(error.message)
   }

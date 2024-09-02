@@ -4,6 +4,9 @@ const userPostsPipeline = require(`./userPostsPipeline`)
 const reportedElementPipeline = require(`./reportedElementPipeline`)
 const bannedElementPipeline = require(`./bannedElementPipeline`)
 
+const getFollowersPipeline = require("./getFollowersPipeline")
+const getFollowingPipeline = require("./getFollowingPipeline")
+
 module.exports = {
   hideUserData: {
     password: false,
@@ -34,4 +37,6 @@ module.exports = {
   userPostsPipeline,
   reportedElementPipeline,
   bannedElementPipeline,
+  getFollowersPipeline,
+  getFollowingPipeline,
 }

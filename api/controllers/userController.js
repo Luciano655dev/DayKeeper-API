@@ -153,10 +153,21 @@ const reportUserController = async (req, res) => {
 
 // getFollowing
 const getFollowingController = async (req, res) => {
-  try {
-    const { code, users } = await getFollowing({ ...req.params })
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
 
-    return res.status(code).json({ users })
+  try {
+    const { code, message, response } = await getFollowing({
+      ...req.params,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
   } catch (error) {
     return res.status(500).json({ message: `${error}` })
   }
@@ -164,10 +175,21 @@ const getFollowingController = async (req, res) => {
 
 // getFollowers
 const getFollowersController = async (req, res) => {
-  try {
-    const { code, users } = await getFollowers({ ...req.params })
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
 
-    return res.status(code).json({ users })
+  try {
+    const { code, message, response } = await getFollowers({
+      ...req.params,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
   } catch (error) {
     return res.status(500).json({ message: `${error}` })
   }

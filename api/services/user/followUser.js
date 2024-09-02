@@ -9,7 +9,7 @@ const {
       newFollowRequest: newFollowRequestNotification,
     },
   },
-  maxFollowingCount,
+  maxFollowingCount, // not using
   errors: { notFound, custom: customErr },
   success: { custom },
 } = require("../../../constants/index")

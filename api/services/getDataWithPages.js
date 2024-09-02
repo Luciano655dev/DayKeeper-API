@@ -1,6 +1,7 @@
 const Post = require("../models/Post")
 const User = require("../models/User")
-const Storie = require(`../models/Storie`)
+const Storie = require("../models/Storie")
+const Followers = require("../models/Followers")
 
 const { maxPageSize: defaultMaxPageSie } = require("../../constants/index")
 
@@ -19,30 +20,82 @@ const getDataWithPages = async (
 
   // ========== FOLLOWING ==========
   let canApplyFollowing = type == `Post` || type == `User`
-  let matchCriteria = {}
-  if (following === "following" && canApplyFollowing) {
-    matchCriteria =
-      type === "Post"
-        ? { user: { $in: mainUser.following } }
-        : { _id: { $in: mainUser.following } }
-  } else if (following === "friends" && canApplyFollowing) {
-    matchCriteria =
-      type === "Post"
-        ? {
-            $and: [
-              { user: { $in: mainUser.following } },
-              { "user_info.followers": mainUser._id },
-            ],
-          }
-        : {
-            $and: [
-              { _id: { $in: mainUser.following } },
-              { followers: mainUser._id },
-            ],
-          }
-  }
+  if (canApplyFollowing && following) {
+    const userIdField = type === "Post" ? "user_info._id" : "_id"
 
-  newPipeline.push({ $match: matchCriteria })
+    if (following === "following") {
+      newPipeline.push({
+        $lookup: {
+          from: "followers",
+          let: { userId: `$${userIdField}` },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$followerId", mainUser._id] },
+                    { $eq: ["$followingId", "$$userId"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "following_info",
+        },
+      })
+
+      newPipeline.push({ $match: { "following_info.0": { $exists: true } } })
+    } else if (following === "friends") {
+      newPipeline.push({
+        $lookup: {
+          from: "followers",
+          let: { userId: `$${userIdField}` },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$followerId", mainUser._id] },
+                    { $eq: ["$followingId", "$$userId"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "following_info",
+        },
+      })
+
+      newPipeline.push({
+        $lookup: {
+          from: "followers",
+          let: { userId: `$${userIdField}` },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$followingId", mainUser._id] },
+                    { $eq: ["$followerId", "$$userId"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "followers_info",
+        },
+      })
+
+      newPipeline.push({
+        $match: {
+          $and: [
+            { "following_info.0": { $exists: true } },
+            { "followers_info.0": { $exists: true } },
+          ],
+        },
+      })
+    }
+  }
 
   // ========== SORT ===========
   let sortPipeline
@@ -81,11 +134,27 @@ const getDataWithPages = async (
       { $unwind: "$totalCount" },
     ]
 
-    const Model = type === "Post" ? Post : type === "Storie" ? Storie : User
+    let Model
+    switch (type) {
+      case "Post":
+        Model = Post
+        break
+      case "Storie":
+        Model = Storie
+        break
+      case "User":
+        Model = User
+        break
+      case "Follower":
+        Model = Followers
+        break
+      default:
+        throw new Error(`Invalid type: ${type}`)
+    }
+
     const result = await Model.aggregate(aggregationPipeline)
     const { data, totalCount } = result[0] || { data: [], totalCount: 0 }
 
-    // Corrigido o cálculo de totalPages
     const totalPages = Math.ceil(totalCount.total / maxPageSize) || 0
 
     return {

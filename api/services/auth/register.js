@@ -45,7 +45,6 @@ const register = async (props) => {
       profile_picture: img,
       private: false,
       roles: ["user"],
-      followers: [],
       blocked_users: [],
       verified_email: false,
       password: passwordHash,

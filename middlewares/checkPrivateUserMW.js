@@ -1,3 +1,4 @@
+const Followers = require("../api/models/Followers")
 const findUser = require("../api/services/user/get/findUser")
 const {
   errors: { serverError },
@@ -11,11 +12,16 @@ async function checkPrivateUserMW(req, res, next) {
     const user = await findUser({ userInput: name, hideData: false })
     if (!user) return res.status(404).json({ message: `User not found` })
 
+    const isFollowing = await Followers.findOne({
+      followerId: loggedUser._id,
+      followingId: user._id,
+      required: { $ne: true },
+    })
+
     if (
-      loggedUser.roles.includes("admin") ||
-      !user.private ||
-      user.followers.includes(loggedUser._id) ||
-      user._id.toString() == loggedUser._id.toString()
+      !user.private || // the user is not private
+      isFollowing || // the loggedUser is following the user
+      user._id.equals(loggedUser._id) // the user is the loggedUser
     )
       return next()
 

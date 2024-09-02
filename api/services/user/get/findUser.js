@@ -12,12 +12,12 @@ const findUser = async ({
     const populateOptions = fieldsToPopulate.map((field) => ({
       path: field,
       match: { banned: { $ne: true } },
-      select: hideUserData,
+      select: { ...hideUserData },
     }))
     const hideDataObj = hideData ? hideUserData : {}
 
     let user = await User.findOne({ name: userInput })
-      .select(hideDataObj)
+      .select(hideUserData)
       .populate(populateOptions)
     if (!user && mongoose.Types.ObjectId.isValid(userInput))
       user = await User.findById(userInput)

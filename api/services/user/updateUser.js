@@ -1,4 +1,5 @@
 const User = require("../../models/User")
+const Followers = require("../../models/Followers")
 const bcrypt = require("bcrypt")
 const { sendVerificationEmail } = require("../../utils/emailHandler")
 
@@ -8,7 +9,12 @@ const {
 } = require("../../../constants/index")
 
 const updateUser = async (params) => {
-  const { name, email, password, bio, file, private, loggedUser } = params
+  const { name, email, password, bio, file, loggedUser } = params
+
+  const private = // true or false
+    params?.private && (params?.private == "true" || params?.private == "false")
+      ? params.private
+      : loggedUser.private
 
   try {
     // Check Email
@@ -21,6 +27,13 @@ const updateUser = async (params) => {
       password = passwordHash
     }
 
+    if (private != loggedUser.private && private == false) {
+      await Followers.deleteMany({
+        following: loggedUser._id,
+        required: true,
+      })
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       loggedUser._id,
       {
@@ -29,7 +42,7 @@ const updateUser = async (params) => {
           email: email || loggedUser.email,
           password: password || loggedUser.password,
           bio: bio || loggedUser.bio || "",
-          private: private || loggedUser.private,
+          private,
           profile_picture: file
             ? {
                 name: file.originalname,
@@ -37,7 +50,6 @@ const updateUser = async (params) => {
                 url: file.location,
               }
             : loggedUser.profile_picture,
-          follow_requests: [],
           verified_email: !email
             ? loggedUser.verified_email
             : loggedUser.email == email,

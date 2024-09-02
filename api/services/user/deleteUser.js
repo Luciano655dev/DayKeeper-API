@@ -15,6 +15,7 @@ const deleteUser = async (props) => {
   const { loggedUser } = props
 
   try {
+    // retirado followRequests
     await deleteProfilePicture(loggedUser)
     const deletedPostsLikes = await deletePostsLikes(loggedUser._id)
     const deletedComments = await deleteUserComments(loggedUser._id)
