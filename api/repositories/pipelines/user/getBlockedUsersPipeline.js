@@ -1,3 +1,5 @@
+const hideUserData = require("../../hideProject/hideUserData")
+
 const getBlockedUsersPipeline = (userId) => [
   {
     $match: {
@@ -12,14 +14,7 @@ const getBlockedUsersPipeline = (userId) => [
       as: "blockedInfo",
       pipeline: [
         {
-          $project: {
-            password: 0,
-            ban_history: 0,
-            reports: 0,
-            verified_email: 0,
-            roles: 0,
-            banned: 0,
-          },
+          $project: hideUserData,
         },
       ],
     },

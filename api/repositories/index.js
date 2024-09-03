@@ -1,38 +1,28 @@
-const searchPostPipeline = require("./searchPostPipeline")
-const searchUserPipeline = require(`./searchUserPipeline`)
-const userPostsPipeline = require(`./userPostsPipeline`)
-const reportedElementPipeline = require(`./reportedElementPipeline`)
-const bannedElementPipeline = require(`./bannedElementPipeline`)
+const searchPostPipeline = require("./pipelines/search/searchPostPipeline")
+const searchUserPipeline = require(`./pipelines/search/searchUserPipeline`)
+const userPostsPipeline = require(`./pipelines/user/userPostsPipeline`)
+const reportedElementPipeline = require(`./pipelines/general/reportedElementPipeline`)
+const bannedElementPipeline = require(`./pipelines/admin/bannedElementPipeline`)
 
-const getFollowersPipeline = require("./getFollowersPipeline")
-const getFollowingPipeline = require("./getFollowingPipeline")
-const getFollowRequestsPipeline = require("./getFollowRequestsPipeline")
-const getBlockedUsersPipeline = require("./getBlockedUsersPipeline")
+const getFollowersPipeline = require("./pipelines/user/getFollowersPipeline")
+const getFollowingPipeline = require("./pipelines/user/getFollowingPipeline")
+const getFollowRequestsPipeline = require("./pipelines/user/getFollowRequestsPipeline")
+const getBlockedUsersPipeline = require("./pipelines/user/getBlockedUsersPipeline")
+
+// Hide Projects
+const hideUserData = require(`./hideProject/hideUserData`)
+const hidePostData = require(`./hideProject/hidePostData`)
+const hideStorieData = require("./hideProject/hideStorieData")
+const hideGeneralData = require(`./hideProject/hideGeneralData`)
+
+// Admin Pipelines
 
 module.exports = {
-  hideUserData: {
-    password: false,
-    ban_history: false,
-    reports: false,
-    follow_requests: false,
-    verified_email: false,
-    roles: false,
-    banned: false,
-    device_tokens: false,
-  },
-  hidePostData: {
-    reports: false,
-    ban_history: false,
-  },
-  hideStorieData: {
-    views: 0,
-    likes: 0,
-  },
-  hideGeneralData: {
-    banned: 0,
-    ban_history: 0,
-    reports: 0,
-  },
+  hideUserData,
+  hidePostData,
+  hideStorieData,
+  hideGeneralData,
+
   searchPostPipeline,
   searchUserPipeline,
   userPostsPipeline,

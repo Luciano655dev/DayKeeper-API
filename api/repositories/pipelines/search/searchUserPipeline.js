@@ -1,3 +1,5 @@
+const hideUserData = require("../../hideProject/hideUserData")
+
 const searchUserPipeline = (searchQuery, mainUser) => [
   {
     $lookup: {
@@ -60,18 +62,7 @@ const searchUserPipeline = (searchQuery, mainUser) => [
     },
   },
   {
-    $project: {
-      password: 0,
-      ban_history: 0,
-      reports: 0,
-      follow_requests: 0,
-      blocked_users: 0,
-      verified_email: 0,
-      roles: 0,
-      banned: 0,
-      device_tokens: 0,
-      following_info: 0,
-    },
+    $project: hideUserData,
   },
 ]
 

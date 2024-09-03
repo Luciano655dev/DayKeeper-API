@@ -1,5 +1,5 @@
 const getDataWithPages = require(`../getDataWithPages`)
-const userStoriesPipeline = require(`../../repositories/userStoriesPipeline`)
+const { userStoriesPipeline } = require(`../../repositories/index`)
 
 const {
   success: { fetched },
