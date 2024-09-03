@@ -7,6 +7,7 @@ const bannedElementPipeline = require(`./bannedElementPipeline`)
 const getFollowersPipeline = require("./getFollowersPipeline")
 const getFollowingPipeline = require("./getFollowingPipeline")
 const getFollowRequestsPipeline = require("./getFollowRequestsPipeline")
+const getBlockedUsersPipeline = require("./getBlockedUsersPipeline")
 
 module.exports = {
   hideUserData: {
@@ -14,7 +15,6 @@ module.exports = {
     ban_history: false,
     reports: false,
     follow_requests: false,
-    blocked_users: false,
     verified_email: false,
     roles: false,
     banned: false,
@@ -41,4 +41,5 @@ module.exports = {
   getFollowersPipeline,
   getFollowingPipeline,
   getFollowRequestsPipeline,
+  getBlockedUsersPipeline,
 }

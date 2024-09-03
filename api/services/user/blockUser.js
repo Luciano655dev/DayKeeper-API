@@ -1,4 +1,5 @@
-const User = require("../../models/User")
+const findUser = require("./get/findUser")
+const Blocks = require("../../models/Blocks")
 const Followers = require("../../models/Followers")
 const {
   errors: { notFound, custom: customErr },
@@ -9,27 +10,33 @@ const blockUser = async (props) => {
   const { name, loggedUser } = props
 
   try {
-    const blockedUser = await User.findOne({ name })
+    const blockedUser = await findUser({ userInput: name })
 
     /* Validations */
-    if (!loggedUser || !blockedUser) return notFound("User")
-    if (blockUser.name == loggedUser.name)
+    if (!blockedUser) return notFound("User")
+    if (blockedUser.name == loggedUser.name)
       return customErr(409, `You can not block yourself`)
 
     /* Unblock */
-    if (loggedUser.blocked_users.includes(blockedUser._id)) {
-      await User.updateOne(
-        { name: loggedUser.name },
-        { $pull: { blocked_users: blockedUser._id } }
-      )
-      return custom(`${blockedUser.name} successfully unblocked`)
+    const blockRelation = await Blocks.findOne({
+      blockId: loggedUser._id,
+      blockedId: blockedUser._id,
+    })
+    if (blockRelation) {
+      // if the user is already blocked
+      await Blocks.deleteOne({
+        blockId: loggedUser._id,
+        blockedId: blockedUser._id,
+      })
+      return custom(`${name} successfully unblocked`)
     }
 
     /* Block */
-    await User.updateOne(
-      { _id: loggedUser._id },
-      { $push: { blocked_users: blockedUser._id } }
-    )
+    const newBlockRelation = new Blocks({
+      blockId: loggedUser._id,
+      blockedId: blockedUser._id,
+    })
+    await newBlockRelation.save()
 
     // delete follows and follow request between the users
     await Followers.deleteMany({
@@ -39,10 +46,9 @@ const blockUser = async (props) => {
       ],
     })
 
-    await blockedUser.save()
-
-    return custom(`${blockedUser.name} successfully blocked`)
+    return custom(`${name} successfully blocked`)
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }

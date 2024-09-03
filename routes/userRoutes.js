@@ -13,6 +13,7 @@ const {
   respondFollowRequest,
   removeFollower,
   blockUser,
+  getBlockedUsers,
   reportUser,
 } = require("../api/controllers/userController")
 
@@ -63,8 +64,6 @@ router.get(
   */
   "/:name/follow_requests",
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
   getFollowRequests
 )
 router.post("/:name/follow", checkTokenMW, checkBannedUserMW, followUser)
@@ -83,6 +82,15 @@ router.delete(
 
 // Interactions
 router.post("/:name/block", checkTokenMW, checkBannedUserMW, blockUser)
+router.get(
+  "/:name/get_blocks",
+  /*
+    the 'name' here does not make any fucking difference
+    since you're the only one who can see your follow requests
+  */
+  checkTokenMW,
+  getBlockedUsers
+)
 router.post("/:name/report", checkTokenMW, checkBannedUserMW, reportUser)
 
 // posts

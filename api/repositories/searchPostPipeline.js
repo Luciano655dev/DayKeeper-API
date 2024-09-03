@@ -14,7 +14,6 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
             password: 0,
             ban_history: 0,
             reports: 0,
-            blocked_users: 0,
             verified_email: 0,
             roles: 0,
             banned: 0,
@@ -47,9 +46,28 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
     },
   },
   {
+    $lookup: {
+      from: "blocks",
+      let: { blockedId: "$user_info._id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ["$blockId", mainUser._id] },
+                { $eq: ["$blockedId", "$$blockedId"] },
+              ],
+            },
+          },
+        },
+      ],
+      as: "block_info",
+    },
+  },
+  {
     $match: {
       $and: [
-        { user: { $nin: mainUser.blocked_users } },
+        { "block_info.0": { $exists: false } },
         { "user_info.banned": { $ne: "true" } },
         {
           $or: [

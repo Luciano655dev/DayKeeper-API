@@ -7,6 +7,8 @@ const deleteUser = require("../services/user/deleteUser")
 const followUser = require("../services/user/followUser")
 const respondFollowRequest = require("../services/user/respondFollowRequest")
 const removeFollower = require("../services/user/removeFollower")
+const blockUser = require("../services/user/blockUser")
+const getBlockedUsers = require("../services/user/getBlockedUsers")
 const reportUser = require("../services/user/reportUser")
 const getFollowing = require("../services/user/getFollowing")
 const getFollowers = require("../services/user/getFollowers")
@@ -230,6 +232,28 @@ const blockUserController = async (req, res) => {
   }
 }
 
+// getBlockedUsers
+const getBlockedUsersController = async (req, res) => {
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getBlockedUsers({
+      loggedUser: req.user,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
+  }
+}
+
 module.exports = {
   getUser: getUserController,
   getUserPosts: getUserPostsController,
@@ -243,5 +267,6 @@ module.exports = {
   respondFollowRequest: respondFollowRequestController,
   removeFollower: removeFollowerController,
   blockUser: blockUserController,
+  getBlockedUsers: getBlockedUsersController,
   reportUser: reportUserController,
 }

@@ -43,14 +43,6 @@ const userSchema = mongoose.Schema({
     required: false,
   },
 
-  blocked_users: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-  ],
-
   reports: [
     {
       user: {

@@ -1,22 +1,15 @@
-const getFollowersPipeline = (userId) => [
+const getBlockedUsersPipeline = (userId) => [
   {
     $match: {
-      $and: [
-        {
-          followingId: userId,
-        },
-        {
-          $or: [{ requested: false }, { requested: { $exists: false } }],
-        },
-      ],
+      blockId: userId,
     },
   },
   {
     $lookup: {
       from: "users",
-      localField: "followerId",
+      localField: "blockedId",
       foreignField: "_id",
-      as: "followerInfo",
+      as: "blockedInfo",
       pipeline: [
         {
           $project: {
@@ -32,15 +25,15 @@ const getFollowersPipeline = (userId) => [
     },
   },
   {
-    $unwind: "$followerInfo",
+    $unwind: "$blockedInfo",
   },
   {
     $replaceRoot: {
       newRoot: {
-        $mergeObjects: [{ followerId: "$followerId" }, "$followerInfo"],
+        $mergeObjects: [{ blockedId: "$blockedId" }, "$blockedInfo"],
       },
     },
   },
 ]
 
-module.exports = getFollowersPipeline
+module.exports = getBlockedUsersPipeline

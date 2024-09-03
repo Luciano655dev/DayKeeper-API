@@ -14,7 +14,6 @@ const userPostsPipeline = (mainUser, name) => [
             password: 0,
             ban_history: 0,
             reports: 0,
-            blocked_users: 0,
             verified_email: 0,
             roles: 0,
             banned: 0,
