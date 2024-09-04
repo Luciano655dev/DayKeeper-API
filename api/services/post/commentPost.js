@@ -1,17 +1,15 @@
-const User = require("../../models/User")
-const Post = require("../../models/Post")
+const PostComments = require("../../models/PostComments")
 const axios = require("axios")
 const findPost = require("./get/findPost")
 const {
   giphy: { apiKey },
 } = require("../../../config")
-const { hideUserData, hidePostData } = require("../../repositories")
 
 const {
   post: { maxCommentLength },
   errors: { fieldsNotFilledIn, inputTooLong, notFound },
   errroGif,
-  success: { created },
+  success: { created, deleted },
 } = require("../../../constants/index")
 
 const commentPost = async (props) => {
@@ -27,10 +25,20 @@ const commentPost = async (props) => {
       title,
       type: "username",
       fieldsToPopulate: [],
-    }).select(hidePostData)
-    const user = await User.findOne({ name: username })
-    if (!post || !user) return notFound("Post or User")
+    })
+    if (!post) return notFound("Post")
 
+    const userHasCommented = await PostComments.exists({
+      userId: loggedUser._id,
+      postId: post._id,
+    })
+
+    if (userHasCommented) {
+      await PostComments.deleteOne({ userId: loggedUser._id, postId: post._id })
+      return deleted("Comment")
+    }
+
+    /* Get Gif */
     if (gif) {
       try {
         gif = await axios.get(
@@ -46,49 +54,19 @@ const commentPost = async (props) => {
         gif = errroGif
 
         /* Error in Giphy API debug */
-        console.log(err)
+        console.Error(err)
       }
     }
 
-    let newComments = [
-      ...post.comments,
-      {
-        created_at: Date.now(),
-        user: loggedUser._id,
-        likes: [],
-        comment,
-        gif,
-      },
-    ]
-
-    /* Remove user's comment if exists */
-    if (
-      post.comments.findIndex(
-        (comment) => comment.user._id == loggedUser._id
-      ) !== -1
-    )
-      newComments = [...post.comments].filter(
-        (comment) => comment.user._id != loggedUser._id
-      )
-
-    const commentedPost = await Post.findOneAndUpdate(
-      { title: title, user: user._id },
-      {
-        comments: newComments,
-      },
-      { new: true }
-    ).populate({
-      path: "comments",
-      populate: {
-        path: "user",
-        match: { banned: { $ne: true } },
-        select: hideUserData,
-      },
+    const newComment = new PostComments({
+      userId: loggedUser._id,
+      postId: post._id,
+      comment,
+      gif,
     })
+    await newComment.save()
 
-    await commentedPost.save()
-
-    return created(`comment`, { post: commentedPost })
+    return created(`Comment`, { post })
   } catch (error) {
     throw new Error(error.message)
   }

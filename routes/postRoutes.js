@@ -7,6 +7,8 @@ const {
   deletePost,
   reportPost,
   likePost,
+  getPostLikes,
+  getPostComments,
   commentPost,
   reactComment,
   deleteComment,
@@ -73,7 +75,15 @@ router.post(
   checkPrivateUserMW,
   checkBlockedUserMW,
   likePost
-) // React to a Post
+) // Like a Post
+router.get(
+  "/:name/:title/likes",
+  checkTokenMW,
+  checkBannedUserMW,
+  checkPrivateUserMW,
+  checkBlockedUserMW,
+  getPostLikes
+) // get post likes
 router.post(
   "/:name/:title/comment",
   checkTokenMW,
@@ -83,6 +93,14 @@ router.post(
   checkBlockedUserMW,
   commentPost
 ) // Comment in a post
+router.get(
+  "/:name/:title/comments",
+  checkTokenMW,
+  checkBannedUserMW,
+  checkPrivateUserMW,
+  checkBlockedUserMW,
+  getPostComments
+)
 router.delete("/:name/:title/comment/:usercomment", checkTokenMW, deleteComment) // Delete a comment
 router.post(
   "/:name/:title/like/:usercomment",

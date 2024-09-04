@@ -58,9 +58,50 @@ const userPostsPipeline = (mainUser, name) => [
     },
   },
   {
+    $lookup: {
+      from: "postComments",
+      let: { postId: "$_id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ["$postId", "$$postId"] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalComments: { $sum: 1 },
+            userCommented: {
+              $push: {
+                $cond: [
+                  { $eq: ["$userId", mainUser._id] },
+                  {
+                    comment: "$comment",
+                    gif: "$gif",
+                    created_at: "$created_at",
+                  },
+                  false,
+                ],
+              },
+            },
+          },
+        },
+      ],
+      as: "comment_info",
+    },
+  },
+  {
+    $unwind: {
+      path: "$comment_info",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
     $addFields: {
       likes: { $ifNull: ["$like_info.totalLikes", 0] },
       userLiked: { $gt: ["$like_info.userLiked", 0] },
+      comments: { $ifNull: ["$comment_info.totalComments", 0] },
+      userCommented: { $ifNull: ["$comment_info.userCommented", false] },
     },
   },
   {
@@ -73,7 +114,8 @@ const userPostsPipeline = (mainUser, name) => [
       created_at: 1,
       likes: 1,
       userLiked: 1,
-      comments: { $size: "$comments" },
+      comments: 1,
+      userCommented: 1,
       user_info: 1,
     },
   },

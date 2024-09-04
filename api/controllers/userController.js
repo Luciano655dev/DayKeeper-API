@@ -1,4 +1,6 @@
-const { serverError } = require("../../constants/index")
+const {
+  errors: { serverError },
+} = require("../../constants/index")
 const getUser = require("../services/user/getUser")
 const getUserPosts = require("../services/user/getUserPosts")
 const updateUser = require("../services/user/updateUser")
@@ -39,7 +41,7 @@ const getUserPostsController = async (req, res) => {
   const { name } = req.params
 
   try {
-    const response = await getUserPosts({
+    const { code, message, data } = await getUserPosts({
       name,
       order,
       maxPageSize,
@@ -47,7 +49,7 @@ const getUserPostsController = async (req, res) => {
       user: req.user,
     })
 
-    return res.status(200).json(response)
+    return res.status(code).json({ message, data })
   } catch (error) {
     return res.status(500).json({ message: serverError(String(error)) })
   }
@@ -197,6 +199,7 @@ const getFollowersController = async (req, res) => {
   }
 }
 
+// Get Follow Requests
 const getFollowRequestsController = async (req, res) => {
   const page = Number(req.query?.page) || 1
   const maxPageSize = req.query?.maxPageSize

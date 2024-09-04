@@ -1,15 +1,11 @@
-const Post = require('../../../models/Post')
+const PostComments = require("../../../models/PostComments")
 
-const deleteUserComments = async(loggedUserId)=>{
-  try{
-    const response = await Post.updateMany({}, {
-      $pull: {
-        comments: { user: loggedUserId }
-      }
-    })
+const deleteUserComments = async (loggedUserId) => {
+  try {
+    const response = await PostComments.deleteMany({ userId: loggedUserId })
 
     return response.nModified
-  }catch(error){
+  } catch (error) {
     throw new Error(error.message)
   }
 }

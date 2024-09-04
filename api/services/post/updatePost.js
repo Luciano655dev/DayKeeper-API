@@ -7,7 +7,6 @@ const {
 } = require("../../../constants/index")
 
 const updatePost = async (props) => {
-  // TODO: See if i need to do anything here related to the post likes
   const {
     newData, // req.body
     title, // req.params

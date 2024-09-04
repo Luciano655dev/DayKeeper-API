@@ -18,7 +18,6 @@ const createPost = async (props) => {
       files,
       user: loggedUser._id,
       created_at: Date.now(),
-      comments: [],
     })
 
     await post.save()

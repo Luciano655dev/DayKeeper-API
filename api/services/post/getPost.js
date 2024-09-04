@@ -1,4 +1,5 @@
 const PostLikes = require("../../models/PostLikes")
+const PostComments = require("../../models/PostComments")
 const findPost = require("./get/findPost")
 const convertTimeZone = require(`../../utils/convertTimeZone`)
 
@@ -28,12 +29,22 @@ const getPost = async (props) => {
       userId: loggedUserId,
     })
 
+    const commentCounter = await PostComments.countDocuments({
+      postId: post._id,
+    })
+    const userComment = await PostComments.findOne({
+      postId: post._id,
+      userId: loggedUserId,
+    })
+
     return fetched(`post`, {
       post: {
         ...post._doc,
         created_at: convertTimeZone(post.created_at, post.user.timeZone),
         likes: likeCounter,
         hasLiked,
+        comments: commentCounter,
+        userComment,
       },
     })
   } catch (error) {

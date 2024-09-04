@@ -62,31 +62,6 @@ const postSchema = mongoose.Schema({
       },
     },
   ],
-
-  comments: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-      comment: String,
-      gif: {
-        name: String,
-        id: String,
-        url: String,
-      },
-      created_at: {
-        type: Date,
-        default: Date.now(),
-      },
-      likes: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-      ],
-    },
-  ],
 })
 
 const Post = mongoose.model("Post", postSchema)
