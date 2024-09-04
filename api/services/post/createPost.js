@@ -1,16 +1,16 @@
-const Post = require('../../models/Post')
+const Post = require("../../models/Post")
 const getTodayDate = require(`../../utils/getTodayDate`)
-const deleteFile = require('../../utils/deleteFile')
+const deleteFile = require("../../utils/deleteFile")
 
 const {
-  success: { created }
-} = require('../../../constants/index')
+  success: { created },
+} = require("../../../constants/index")
 
-const createPost = async(props)=>{
+const createPost = async (props) => {
   const { data, loggedUser, files } = props
   const title = getTodayDate()
 
-  try{
+  try {
     /* Create post */
     const post = new Post({
       title,
@@ -18,17 +18,15 @@ const createPost = async(props)=>{
       files,
       user: loggedUser._id,
       created_at: Date.now(),
-      likes: [],
-      comments: []
+      comments: [],
     })
 
     await post.save()
 
     return created(`post`, { post })
-  } catch (error){
+  } catch (error) {
     /* Delete previous files */
-    for(let i in req.files)
-      deleteFile(req.files[i].key)
+    for (let i in req.files) deleteFile(req.files[i].key)
 
     throw new Error(error.message)
   }

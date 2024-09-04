@@ -5,13 +5,10 @@ const {
 } = require("../constants/index")
 
 async function checkPrivateUserMW(req, res, next) {
-  const { name } = req.params
   const loggedUser = req.user
+  const user = req.fetchedUser
 
   try {
-    const user = await findUser({ userInput: name, hideData: false })
-    if (!user) return res.status(404).json({ message: `User not found` })
-
     const isFollowing = await Followers.findOne({
       followerId: loggedUser._id,
       followingId: user._id,

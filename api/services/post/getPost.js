@@ -1,3 +1,4 @@
+const PostLikes = require("../../models/PostLikes")
 const findPost = require("./get/findPost")
 const convertTimeZone = require(`../../utils/convertTimeZone`)
 
@@ -7,7 +8,7 @@ const {
 } = require("../../../constants/index")
 
 const getPost = async (props) => {
-  const { title, name: username, queryParams } = props
+  const { title, name: username, queryParams, loggedUserId } = props
 
   let populateFields = queryParams ? queryParams.split(",") : []
 
@@ -21,10 +22,18 @@ const getPost = async (props) => {
 
     if (!post) return notFound("Post")
 
+    const likeCounter = await PostLikes.countDocuments({ postId: post._id })
+    const hasLiked = await PostLikes.exists({
+      postId: post._id,
+      userId: loggedUserId,
+    })
+
     return fetched(`post`, {
       post: {
         ...post._doc,
         created_at: convertTimeZone(post.created_at, post.user.timeZone),
+        likes: likeCounter,
+        hasLiked,
       },
     })
   } catch (error) {

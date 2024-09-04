@@ -6,7 +6,7 @@ const createPost = require("../services/post/createPost")
 const updatePost = require("../services/post/updatePost")
 const deletePost = require("../services/post/deletePost")
 const reportPost = require("../services/post/reportPost")
-const reactPost = require("../services/post/reactPost")
+const likePost = require("../services/post/likePost")
 const commentPost = require("../services/post/commentPost")
 const reactComment = require("../services/post/reactComment")
 const deleteComment = require("../services/post/deleteComment")
@@ -17,6 +17,7 @@ const getPostController = async (req, res) => {
     const { code, message, post } = await getPost({
       ...req.params,
       queryParams: req.query.populate,
+      loggedUserId: req.user.id,
     })
 
     return res.status(code).json({ message, post })
@@ -98,10 +99,10 @@ const reportPostController = async (req, res) => {
   }
 }
 
-// reactPost
-const reactPostController = async (req, res) => {
+// likePost
+const likePostController = async (req, res) => {
   try {
-    const { code, message, post } = await reactPost({
+    const { code, message, post } = await likePost({
       ...req.params,
       loggedUser: req.user,
       ...req.body,
@@ -163,7 +164,7 @@ module.exports = {
   updatePost: updatePostController,
   deletePost: deletePostController,
   reportPost: reportPostController,
-  reactPost: reactPostController,
+  likePost: likePostController,
   commentPost: commentPostController,
   reactComment: reactCommentController,
   deleteComment: deleteCommentController,

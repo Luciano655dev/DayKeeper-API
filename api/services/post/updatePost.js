@@ -7,6 +7,7 @@ const {
 } = require("../../../constants/index")
 
 const updatePost = async (props) => {
+  // TODO: See if i need to do anything here related to the post likes
   const {
     newData, // req.body
     title, // req.params
@@ -69,7 +70,6 @@ const updatePost = async (props) => {
           user: loggedUser._id,
           created_at: post.created_at,
           edited_at: Date.now(),
-          likes: post.likes,
           comments: post.comments,
           _id: post._id,
         },

@@ -1,15 +1,11 @@
-const Post = require('../../../models/Post')
+const PostLikes = require("../../../models/PostLikes")
 
-const deletePostsLikes = async(loggedUserId)=>{
-  try{
-    const response = await Post.updateMany({}, {
-      $pull: {
-        likes: loggedUserId
-      }
-    })
-  
+const deletePostsLikes = async (loggedUserId) => {
+  try {
+    const response = await PostLikes.deleteMany({ userId: loggedUserId })
+
     return response.nModified
-  }catch(error){
+  } catch (error) {
     throw new Error(error.message)
   }
 }

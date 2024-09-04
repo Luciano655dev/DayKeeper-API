@@ -55,7 +55,6 @@ const userStoriesPipeline = (mainUser, name) => [
             user_info: true,
             created_at: true,
             views: true,
-            likes: true,
           }
         : {
             file: true,

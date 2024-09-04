@@ -6,7 +6,7 @@ const {
   updatePost,
   deletePost,
   reportPost,
-  reactPost,
+  likePost,
   commentPost,
   reactComment,
   deleteComment,
@@ -72,7 +72,7 @@ router.post(
   checkBannedUserMW,
   checkPrivateUserMW,
   checkBlockedUserMW,
-  reactPost
+  likePost
 ) // React to a Post
 router.post(
   "/:name/:title/comment",

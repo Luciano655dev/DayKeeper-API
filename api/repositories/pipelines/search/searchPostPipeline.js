@@ -20,7 +20,7 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
   },
   {
     $unwind: "$user_info",
-  }, // Garantir que estamos lidando com um único usuário após o $lookup
+  },
   {
     $lookup: {
       from: "followers",
@@ -60,6 +60,37 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
     },
   },
   {
+    $lookup: {
+      from: "postLikes",
+      let: { postId: "$_id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: { $eq: ["$postId", "$$postId"] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalLikes: { $sum: 1 },
+            userLiked: {
+              $sum: {
+                $cond: [{ $eq: ["$userId", mainUser._id] }, 1, 0],
+              },
+            },
+          },
+        },
+      ],
+      as: "like_info",
+    },
+  },
+  {
+    $unwind: {
+      path: "$like_info",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
     $match: {
       $and: [
         { "block_info.0": { $exists: false } },
@@ -76,7 +107,7 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
             {
               $and: [
                 { "user_info.private": true },
-                { "following_info.0": { $exists: true } }, // Verifica se o usuário principal está seguindo o usuário privado
+                { "following_info.0": { $exists: true } },
               ],
             },
           ],
@@ -86,8 +117,10 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
   },
   {
     $addFields: {
-      relevance: { $sum: ["$likes", { $size: "$comments" }] },
+      relevance: { $sum: ["$like_info.totalLikes", { $size: "$comments" }] },
       isToday: { $eq: ["$title", todayDate] },
+      likes: { $ifNull: ["$like_info.totalLikes", 0] },
+      userLiked: { $gt: ["$like_info.userLiked", 0] },
     },
   },
   {
@@ -99,9 +132,9 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
       files: 1,
       created_at: 1,
       likes: 1,
+      userLiked: 1,
       comments: { $size: "$comments" },
       user_info: 1,
-      following_info: 0, // Exclui o campo following_info do resultado final
     },
   },
 ]
