@@ -10,7 +10,8 @@ const {
   getPostLikes,
   getPostComments,
   commentPost,
-  reactComment,
+  likeComment,
+  getCommentLikes,
   deleteComment,
 } = require("../api/controllers/postController")
 
@@ -100,7 +101,7 @@ router.get(
   checkPrivateUserMW,
   checkBlockedUserMW,
   getPostComments
-)
+) // Get Post COmments
 router.delete("/:name/:title/comment/:usercomment", checkTokenMW, deleteComment) // Delete a comment
 router.post(
   "/:name/:title/like/:usercomment",
@@ -109,8 +110,16 @@ router.post(
   checkBannedUserMW,
   checkPrivateUserMW,
   checkBlockedUserMW,
-  reactComment
+  likeComment
 ) // Like a comment
+router.get(
+  "/:name/:title/:usercomment/likes",
+  checkTokenMW,
+  checkBannedUserMW,
+  checkPrivateUserMW,
+  checkBlockedUserMW,
+  getCommentLikes
+)
 
 /*
   GET /:name/:title/likes

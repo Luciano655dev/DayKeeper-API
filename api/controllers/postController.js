@@ -10,7 +10,8 @@ const likePost = require("../services/post/likePost")
 const getPostLikes = require("../services/post/getPostLikes")
 const commentPost = require("../services/post/commentPost")
 const getPostComments = require("../services/post/getPostComments")
-const reactComment = require("../services/post/reactComment")
+const likeComment = require("../services/post/likeComment")
+const getCommentLikes = require("../services/post/getCommentLikes")
 const deleteComment = require("../services/post/deleteComment")
 
 // getPostByName
@@ -174,10 +175,10 @@ const getPostCommentsController = async (req, res) => {
   }
 }
 
-// reactComment
-const reactCommentController = async (req, res) => {
+// likeComment
+const likeCommentController = async (req, res) => {
   try {
-    const { code, message, post } = await reactComment({
+    const { code, message, post } = await likeComment({
       ...req.params,
       ...req.body,
       loggedUser: req.user,
@@ -186,6 +187,27 @@ const reactCommentController = async (req, res) => {
     return res.status(code).json({ message, post })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
+  }
+}
+
+const getCommentLikesController = async (req, res) => {
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getCommentLikes({
+      ...req.params,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -213,6 +235,7 @@ module.exports = {
   getPostLikes: getPostLikesController,
   commentPost: commentPostController,
   getPostComments: getPostCommentsController,
-  reactComment: reactCommentController,
+  likeComment: likeCommentController,
+  getCommentLikes: getCommentLikesController,
   deleteComment: deleteCommentController,
 }

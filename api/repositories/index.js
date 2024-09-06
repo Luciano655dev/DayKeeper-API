@@ -11,6 +11,7 @@ const getBlockedUsersPipeline = require("./pipelines/user/getBlockedUsersPipelin
 
 const getPostLikesPipeline = require("./pipelines/post/getPostLikesPipeline")
 const getPostCommentsPipeline = require("./pipelines/post/getPostCommentsPipeline")
+const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipeline")
 
 // Hide Projects
 const hideUserData = require(`./hideProject/hideUserData`)
@@ -37,4 +38,5 @@ module.exports = {
   getBlockedUsersPipeline,
   getPostLikesPipeline,
   getPostCommentsPipeline,
+  getCommentLikesPipeline,
 }

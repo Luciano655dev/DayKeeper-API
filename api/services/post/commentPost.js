@@ -1,6 +1,7 @@
 const PostComments = require("../../models/PostComments")
-const axios = require("axios")
 const findPost = require("./get/findPost")
+const deleteCommentLikes = require("./delete/deleteCommentLikes")
+const axios = require("axios")
 const {
   giphy: { apiKey },
 } = require("../../../config")
@@ -8,7 +9,7 @@ const {
 const {
   post: { maxCommentLength },
   errors: { fieldsNotFilledIn, inputTooLong, notFound },
-  errroGif,
+  errorGif,
   success: { created, deleted },
 } = require("../../../constants/index")
 
@@ -28,13 +29,16 @@ const commentPost = async (props) => {
     })
     if (!post) return notFound("Post")
 
-    const userHasCommented = await PostComments.exists({
+    const commentRelation = await PostComments.findOne({
       userId: loggedUser._id,
       postId: post._id,
     })
 
-    if (userHasCommented) {
+    if (commentRelation) {
+      // delete comment
+      await deleteCommentLikes(commentRelation._id)
       await PostComments.deleteOne({ userId: loggedUser._id, postId: post._id })
+
       return deleted("Comment")
     }
 
@@ -51,7 +55,7 @@ const commentPost = async (props) => {
           url: gif.data.data.images.original.url,
         }
       } catch (err) {
-        gif = errroGif
+        gif = errorGif
 
         /* Error in Giphy API debug */
         console.Error(err)

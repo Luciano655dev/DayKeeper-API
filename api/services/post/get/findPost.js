@@ -32,6 +32,7 @@ async function findPost({
 
     return post
   } catch (err) {
+    console.log("Error:" + err)
     return null
   }
 }

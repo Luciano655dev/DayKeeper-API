@@ -5,6 +5,7 @@ const Followers = require("../models/Followers")
 const Blocks = require("../models/Blocks")
 const PostLikes = require("../models/PostLikes")
 const PostComments = require("../models/PostComments")
+const CommentLikes = require("../models/CommentLikes")
 
 const { maxPageSize: defaultMaxPageSie } = require("../../constants/index")
 
@@ -159,6 +160,9 @@ const getDataWithPages = async (
         break
       case "PostComments":
         Model = PostComments
+        break
+      case "CommentLikes":
+        Model = CommentLikes
         break
       default:
         throw new Error(`Invalid type: ${type}`)
