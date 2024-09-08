@@ -6,9 +6,11 @@ const {
   getTodayStories,
   getStorie,
   createStorie,
-  reactStorie,
+  likeStorie,
+  getStorieLikes,
   deleteStorie,
   reportStorie,
+  getStorieViews,
 } = require("../api/controllers/storiesController")
 
 // Middlewares
@@ -38,14 +40,28 @@ router.get(
   checkBannedUserMW,
   checkPrivateUserMW,
   getUserStories
-) // get user stories
+) // get All User Stories
+router.get(
+  "/:storieId/likes",
+  checkTokenMW,
+  checkBannedUserMW,
+  checkPrivateUserMW,
+  getStorieLikes
+) // Get Storie Likes
+router.get(
+  "/:storieId/views",
+  checkTokenMW,
+  checkBannedUserMW,
+  checkPrivateUserMW,
+  getStorieViews
+) // Get Storie Views
 router.get(
   "/:name/:title",
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
   getStorie
-) // get today user stories
+) // get Storie
 
 router.post(
   "/create",
@@ -60,7 +76,7 @@ router.post(
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
-  reactStorie
+  likeStorie
 ) // react to a storie
 router.delete(
   "/:storieId",

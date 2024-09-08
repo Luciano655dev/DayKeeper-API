@@ -26,7 +26,7 @@ const userStoriesPipeline = (mainUser, name) => [
   {
     $match: {
       $and: [
-        { user: { $nin: mainUser.blocked_users } }, // cant be blocked
+        { user: { $ne: mainUser.blocked_users } }, // cant be blocked
         {
           "user_info.name": name, // find by name
         },

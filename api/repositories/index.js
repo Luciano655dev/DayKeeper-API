@@ -1,6 +1,7 @@
 const searchPostPipeline = require("./pipelines/search/searchPostPipeline")
 const searchUserPipeline = require(`./pipelines/search/searchUserPipeline`)
 const userPostsPipeline = require(`./pipelines/user/userPostsPipeline`)
+const userStoriesPipeline = require("./pipelines/user/userStoriesPipeline")
 const reportedElementPipeline = require(`./pipelines/general/reportedElementPipeline`)
 const bannedElementPipeline = require(`./pipelines/admin/bannedElementPipeline`)
 
@@ -12,6 +13,9 @@ const getBlockedUsersPipeline = require("./pipelines/user/getBlockedUsersPipelin
 const getPostLikesPipeline = require("./pipelines/post/getPostLikesPipeline")
 const getPostCommentsPipeline = require("./pipelines/post/getPostCommentsPipeline")
 const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipeline")
+
+const getStorieLikesPipeline = require("./pipelines/storie/getStorieLikesPipeline")
+const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipeline")
 
 // Hide Projects
 const hideUserData = require(`./hideProject/hideUserData`)
@@ -27,6 +31,7 @@ module.exports = {
   hideStorieData,
   hideGeneralData,
 
+  userStoriesPipeline,
   searchPostPipeline,
   searchUserPipeline,
   userPostsPipeline,
@@ -39,4 +44,6 @@ module.exports = {
   getPostLikesPipeline,
   getPostCommentsPipeline,
   getCommentLikesPipeline,
+  getStorieLikesPipeline,
+  getStorieViewsPipeline,
 }

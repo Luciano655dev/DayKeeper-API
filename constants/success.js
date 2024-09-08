@@ -8,14 +8,14 @@ module.exports = {
   },
   created: (data, props) => {
     return {
-      code: 201,
+      code: 200,
       message: `${data} created successfully`,
       ...props,
     }
   },
   deleted: (data, props) => {
     return {
-      code: 204,
+      code: 200,
       message: `${data} deleted successfully`,
       ...props,
     }

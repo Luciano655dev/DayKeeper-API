@@ -1,5 +1,5 @@
 const getTodayDate = require(`../../utils/getTodayDate`)
-const findStorie = require(`./get/findStorie`)
+const findStorieByDate = require(`./get/findStorieByDate`)
 const {
   success: { fetched },
 } = require("../../../constants/index")
@@ -11,15 +11,15 @@ const getStorie = async (props) => {
 
   try {
     const today = getTodayDate()
-    const response = findStorie({
+    const response = await findStorieByDate({
       userInput,
-      today,
+      title: today,
       fieldsToPopulate: populateFields,
       loggedUserId: loggedUser._id,
       view: true,
     })
 
-    return fetched("Stories", { stories: response })
+    return fetched("Stories", { data: response })
   } catch (error) {
     throw new Error(error.message)
   }

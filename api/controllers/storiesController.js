@@ -5,11 +5,13 @@ const {
 //  SERVICES
 const createStorie = require(`../services/stories/createStorie`)
 const deleteStorie = require(`../services/stories/deleteStories`)
-const reactStorie = require(`../services/stories/reactStorie`)
+const likeStorie = require(`../services/stories/likeStorie`)
+const getStorieLikes = require(`../services/stories/getStorieLikes`)
 const reportStorie = require(`../services/stories/reportStorie`)
 const getStorie = require(`../services/stories/getStorie`)
 const getTodayStories = require(`../services/stories/getTodayStories`)
 const getUserStories = require(`../services/stories/getUserStories`)
+const getStorieViews = require(`../services/stories/getStorieViews`)
 
 const createStorieController = async (req, res) => {
   if (!req.file)
@@ -45,9 +47,9 @@ const deleteStorieController = async (req, res) => {
   }
 }
 
-const reactStorieController = async (req, res) => {
+const likeStorieController = async (req, res) => {
   try {
-    const { code, message, storie } = await reactStorie({
+    const { code, message, storie } = await likeStorie({
       ...req.params,
       ...req.body,
       loggedUser: req.user,
@@ -56,6 +58,28 @@ const reactStorieController = async (req, res) => {
     return res.status(code).json({ message, storie })
   } catch (error) {
     return serverError(`${error}`)
+  }
+}
+
+const getStorieLikesController = async (req, res) => {
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getStorieLikes({
+      ...req.params,
+      loggedUser: req.user,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -76,13 +100,13 @@ const reportStorieController = async (req, res) => {
 // ========== GET ==========
 const getStorieController = async (req, res) => {
   try {
-    const { code, message, stories } = await getStorie({
+    const { code, message, data } = await getStorie({
       ...req.params,
       populate: req.query.populate,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, stories })
+    return res.status(code).json({ message, data })
   } catch (error) {
     console.log(error)
     return serverError(`${error}`)
@@ -91,13 +115,13 @@ const getStorieController = async (req, res) => {
 
 const getTodayStoriesController = async (req, res) => {
   try {
-    const { code, message, stories } = await getTodayStories({
+    const { code, message, data } = await getTodayStories({
       ...req.params,
       populate: req.query.populate,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, stories })
+    return res.status(code).json({ message, data })
   } catch (error) {
     console.log(error)
     return serverError(`${error}`)
@@ -118,13 +142,37 @@ const getUserStoriesController = async (req, res) => {
   }
 }
 
+const getStorieViewsController = async (req, res) => {
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getStorieViews({
+      ...req.params,
+      loggedUser: req.user,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
+  }
+}
+
 module.exports = {
   createStorie: createStorieController,
   deleteStorie: deleteStorieController,
-  reactStorie: reactStorieController,
+  likeStorie: likeStorieController,
   reportStorie: reportStorieController,
 
   getStorie: getStorieController,
   getTodayStories: getTodayStoriesController,
   getUserStories: getUserStoriesController,
+  getStorieLikes: getStorieLikesController,
+  getStorieViews: getStorieViewsController,
 }
