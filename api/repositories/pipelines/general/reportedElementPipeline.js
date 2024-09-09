@@ -1,24 +1,16 @@
-const reportedElementPipeline = [
-    {
-      $match: {
-        $and: [
-          { 
-            'banned': "false"
-          },
-          {
-            reports: {
-              $exists: true,
-              $not: { $size: 0 }
-            }
-          }
-        ]
-      },
+const reportedElementPipeline = (type = "") => [
+  {
+    $match: {
+      $and: [
+        {
+          banned: "false",
+        },
+        {
+          type,
+        },
+      ],
     },
-    {
-      $addFields: {
-        numReports: { $size: "$reports" }
-      },
-    }
+  },
 ]
 
 module.exports = reportedElementPipeline

@@ -1,5 +1,5 @@
-const User = require("../../models/User")
-const Post = require("../../models/Post")
+const findPost = require("./get/findPost")
+const Report = require("../../models/Report")
 const {
   user: { maxReportReasonLength },
   errors: { inputTooLong, notFound, doubleAction },
@@ -12,27 +12,29 @@ const reportPost = async (props) => {
   if (reason.length > maxReportReasonLength) return inputTooLong("Reason")
 
   try {
-    const postUser = await User.findOne({ name: username })
-    const reportedPost = await Post.findOne({
-      user: postUser._id,
+    const post = await findPost({
+      userInput: username,
       title: title,
+      type: "username",
     })
-    if (!reportedPost) return notFound("Post")
+    if (!post) return notFound("Post")
 
-    if (reportedPost.reports.find((report) => report.user == loggedUser._id))
-      return doubleAction()
+    const reportRelation = await Report.exists({
+      referenceId: post._id,
+      userId: loggedUser._id,
+      type: "post",
+    })
+    if (reportRelation) return doubleAction()
 
-    await Post.findByIdAndUpdate(reportedPost._id, {
-      $addToSet: {
-        reports: {
-          user: loggedUser._id,
-          created_at: new Date(),
-          reason,
-        },
-      },
+    await Report.create({
+      referenceId: post._id,
+      userId: loggedUser._id,
+      reason,
+      created_at: new Date(),
+      type: "post",
     })
 
-    return custom("Post reported successfully")
+    return custom("Post reported successfully", { reason })
   } catch (error) {
     throw new Error(error.message)
   }

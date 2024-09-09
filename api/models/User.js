@@ -43,18 +43,6 @@ const userSchema = mongoose.Schema({
     required: false,
   },
 
-  reports: [
-    {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-      created_at: { type: Date, default: Date.now() },
-      reason: String,
-    },
-  ],
-
   banned: { type: String, required: false },
 
   ban_history: [
