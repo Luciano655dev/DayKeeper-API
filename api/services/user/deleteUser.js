@@ -9,7 +9,13 @@ const deleteCommentsLikes = require("./delete/deleteCommentsLikes")
 const deleteFollowers = require("./delete/deleteFollowers")
 const deletePosts = require("./delete/deletePosts")
 const deleteUserFromDatabase = require("./delete/deleteUser")
+
 const deleteStories = require("./delete/deleteStories")
+const deleteStorieLikes = require("../stories/delete/deleteStorieLikes")
+const deleteStorieViews = require("../stories/delete/deleteStorieViews")
+
+const deleteReports = require("../delete/deleteReports")
+const deleteBanHistory = require("../delete/deleteBanHistory")
 
 const deleteUser = async (props) => {
   const { loggedUser } = props
@@ -23,7 +29,13 @@ const deleteUser = async (props) => {
     const deletedFollowers = await deleteFollowers(loggedUser._id)
     const deletedPosts = await deletePosts(loggedUser._id)
     const deletedUser = await deleteUserFromDatabase(loggedUser._id)
+
     const deletedStories = await deleteStories(loggedUser._id)
+    const deletedStorieLikes = await deleteStorieLikes(loggedUser._id)
+    const deletedStorieViews = await deleteStorieViews(loggedUser._id)
+
+    await deleteReports(loggedUser._id)
+    await deleteBanHistory(loggedUser._id)
 
     return deleted("User", {
       user: deletedUser,
@@ -33,6 +45,8 @@ const deleteUser = async (props) => {
       comments_likes: deletedCommentsLikes,
       followers: deletedFollowers,
       stories: deletedStories,
+      storie_views: deletedStorieViews,
+      storie_likes: deletedStorieLikes,
     })
   } catch (error) {
     throw new Error(error.message)

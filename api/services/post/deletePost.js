@@ -1,9 +1,10 @@
 const Post = require("../../models/Post")
-const PostLikes = require("../../models/PostLikes")
 const deleteFile = require("../../utils/deleteFile")
 const deletePostLikes = require("./delete/deletePostLikes")
 const deletePostComments = require("./delete/deletePostComments")
 const deleteCommentLikes = require("./delete/deleteCommentLikes")
+const deleteReports = require("../delete/deleteReports")
+const deleteBanHistory = require("../delete/deleteBanHistory")
 const {
   errors: { notFound },
   success: { deleted },
@@ -24,6 +25,9 @@ const deletePost = async (props) => {
     await deletePostLikes(deletedPost._id)
     await deletePostComments(deletedPost._id)
     await deleteCommentLikes(deletedPost._id)
+
+    await deleteReports(deletedPost._id)
+    await deleteBanHistory(deletedPost._id)
 
     // delete files
     for (let i in deletedPost?.files) deleteFile(deletedPost.files[i].key)

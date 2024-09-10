@@ -1,11 +1,11 @@
-const Storie = require('../../../models/Storie')
+const Storie = require("../../../models/Storie")
 
-const deleteStories = async(loggedUserId)=>{
-  try{
+const deleteStories = async (loggedUserId) => {
+  try {
     const response = await Storie.deleteMany({ user: loggedUserId })
 
     return response.nModified
-  }catch(error){
+  } catch (error) {
     throw new Error(error.message)
   }
 }

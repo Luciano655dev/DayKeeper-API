@@ -1,5 +1,7 @@
-const User = require(`../../../models/User`)
-const Post = require(`../../../models/Post`)
+const Post = require("../../../models/Post")
+const findPost = require("../../post/get/findPost")
+const findUser = require("../../user/get/findUser")
+const BanHistory = require("../../../models/BanHistory")
 
 const {
   sendPostBanEmail,
@@ -12,85 +14,78 @@ const {
 } = require(`../../../../constants/index`)
 
 const banOrUnbanPost = async (props) => {
-  const { name: username, title, reason, loggedUser } = props
+  const { name: userInput, title, reason, loggedUser } = props
 
   if (reason.length > maxReportMessageLength) return inputTooLong(`Reason`)
 
   try {
-    const userPost = await User.findOne({ name: username })
-    if (!userPost) return notFound(`User`)
-
-    const deletedPost = await Post.findOne({
-      title: title,
-      user: userPost._id,
+    const user = await findUser({ userInput })
+    if (!user) return notFound(`User`)
+    const post = await findPost({
+      userInput,
+      title,
+      populate: ["user"],
     })
-    if (!deletedPost) return notFound(`User`)
+    if (!post) return notFound(`Post`)
 
-    if (deletedPost.banned == "true") {
-      await Post.updateOne(
-        {
-          title,
-          user: userPost._id,
-        },
-        {
-          $set: {
-            banned: false,
-            "ban_history.$[elem].unban_date": Date.now(),
-            "ban_history.$[elem].unbanned_by": loggedUser._id,
-            "ban_history.$[elem].unban_message": message,
-          },
-        },
-        {
-          arrayFilters: [{ "elem.unban_date": { $exists: false } }],
-        }
-      )
+    if (post.banned == "true") {
+      // Create unban relation
+      const newBanHistoryRelation = new BanHistory({
+        entity_type: "post",
+        action_type: "unban",
+        entity_id: post._id,
 
+        unbanned_by: loggedUser._id,
+        unban_date: Date.now(),
+        uban_message: reason,
+      })
+      await newBanHistoryRelation.save()
+
+      await Post.updateOne({ _id: post._id }, { banned: false })
+
+      /*
       await sendPostUnbanEmail({
-        username: userPost.username,
-        email: userPost.email,
-        title: deletedPost.title,
-        id: deletedPost.id,
+        username: post.username,
+        email: post.email,
+        title: post.title,
+        id: post.id,
         adminUsername: loggedUser.name,
         reason,
       })
+        */
 
       return custom(
-        `${userPost.name}'s post from ${deletedPost.title} unbanned successfully`
+        `${user.name}'s post from ${post.title} unbanned successfully`
       )
     }
 
-    await Post.updateOne(
-      {
-        title: title,
-        user: userPost._id,
-      },
-      {
-        $set: {
-          banned: true,
-        },
-        $push: {
-          ban_history: {
-            banned_by: loggedUser._id,
-            ban_date: Date.now(),
-            ban_message: message,
-          },
-        },
-      }
-    )
+    const newBanHistoryRelation = new BanHistory({
+      entity_type: "post",
+      action_type: "ban",
+      entity_id: post._id,
 
+      banned_by: loggedUser._id,
+      ban_date: Date.now(),
+      ban_message: reason,
+    })
+    await newBanHistoryRelation.save()
+
+    await Post.updateOne({ _id: post._id }, { banned: true })
+
+    /*
     await sendPostBanEmail({
-      username: userPost.username,
-      email: userPost.email,
-      title: deletedPost.title,
-      id: deletedPost.id,
+      username: post.username,
+      email: post.email,
+      title: post.title,
+      id: post.id,
       adminUsername: loggedUser.name,
       reason,
     })
+    */
 
-    return custom(
-      `${userPost.name}'s post from ${deletedPost.title} banned successfully`
-    )
+    return custom(`${user.name}'s post from ${post.title} banned successfully`)
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }

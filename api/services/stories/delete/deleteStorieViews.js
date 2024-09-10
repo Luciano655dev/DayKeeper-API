@@ -1,9 +1,9 @@
 const StorieViews = require("../../../models/StorieViews")
 
-const deleteStorieViews = async (storieId) => {
+const deleteStorieViews = async (id) => {
   try {
     const response = await StorieViews.deleteMany({
-      storieId,
+      $or: [{ storieId: id }, { userId: id }],
     })
 
     return response.nModified

@@ -1,6 +1,15 @@
-const User = require(`../../../models/User`)
-const Post = require(`../../../models/Post`)
+const BanHistory = require(`../../../models/BanHistory`)
+const Post = require("../../../models/Post")
+const findPost = require("../../post/get/findPost")
+const findUser = require("../../user/get/findUser")
+
 const deleteFile = require(`../../../utils/deleteFile`)
+const deletePostLikes = require("../../post/delete/deletePostLikes")
+const deletePostComments = require("../../post/delete/deletePostComments")
+const deleteCommentLikes = require("../../post/delete/deleteCommentLikes")
+const deleteReports = require("../../delete/deleteReports")
+const deleteBanHistory = require("../../delete/deleteBanHistory")
+
 const { differenceInDays } = require("date-fns")
 const { sendPostDeletionEmail } = require(`../../../utils/emailHandler`)
 const {
@@ -10,25 +19,33 @@ const {
 } = require(`../../../../constants/index`)
 
 const deleteBannedPosts = async (props) => {
-  const { name: username, title, message, loggedUser } = props
+  const { name: userInput, title, message, loggedUser } = props
 
   if (message.length > maxReportMessageLength) return inputTooLong(`Message`)
 
   try {
-    const userPost = await User.findOne({ name: username })
-    if (!userPost) return notFound(`User`)
-
-    const deletedPost = await Post.findOne({
-      title: title,
-      user: userPost._id,
+    const user = await findUser({ userInput })
+    if (!user) return notFound(`User`)
+    const post = await findPost({
+      userInput,
+      title,
+      populate: ["user"],
     })
-    if (!deletedPost) return notFound(`Post`)
+    if (!post) return notFound(`Post`)
+    const adminUser = await findUser({ userInput: latestBan.banned_by })
 
-    const latestBan =
-      deletedPost.ban_history[deletedPost.ban_history.length - 1]
-    if (deletedPost.banned != "true")
+    if (post.banned != "true")
       return unauthorized(`delete this post`, `this post isn't banned`)
-    if (latestBan.banned_by != loggedUser._id)
+
+    const latestBan = await BanHistory.findOne({
+      entity_type: "post",
+      action_type: "ban",
+      entity_id: post._id,
+      ban_date: { $exists: true },
+    }).sort({ ban_date: -1 })
+
+    // VALIDATIONS
+    if (!latestBan.banned_by.equals(loggedUser._id) && adminUser)
       return unauthorized(
         `delete this post`,
         "Only the admin who banned this post can delete it"
@@ -41,18 +58,17 @@ const deleteBannedPosts = async (props) => {
         "You can only delete a post if it has been banned for 7 or more days"
       )
 
-    // delete post
-    await await Post.findOneAndDelete({
-      title: title,
-      user: userPost._id,
-    })
+    // DELETE POST
+    await Post.deleteOne({ _id: post._id })
+    for (let i in post.images) deleteFile(post.files[i].key)
 
-    for (let i in deletedPost.images) deleteFile(deletedPost.files[i].key)
+    await deletePostLikes(post._id)
+    await deletePostComments(post._id)
+    await deleteCommentLikes(post._id)
+    await deleteReports(post._id)
+    await deleteBanHistory(post._id)
 
-    const adminUser = await User.findById(latestBan.banned_by)
     if (!adminUser) adminUser = loggedUser
-
-    const latest_ban = deletedPost.ban_history[deletedPost.ban_history - 1]
 
     sendPostDeletionEmail({
       title: userPost.title,
@@ -60,7 +76,7 @@ const deleteBannedPosts = async (props) => {
       email: userPost.email,
       id: deletedPost._id,
       adminUsername: loggedUser.name,
-      reason: latest_ban.ban_message,
+      reason: latestBan.ban_message,
       message,
     })
 
