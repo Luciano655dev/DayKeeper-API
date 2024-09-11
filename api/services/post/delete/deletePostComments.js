@@ -1,8 +1,10 @@
 const PostComments = require("../../../models/PostComments")
 
-const deletePostComments = async (postId) => {
+const deletePostComments = async (id) => {
   try {
-    const response = await PostComments.deleteMany({ postId })
+    const response = await PostComments.deleteMany({
+      $and: [{ postId: id }, { postUserId: id }],
+    })
 
     return response.nModified
   } catch (error) {

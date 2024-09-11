@@ -5,9 +5,13 @@ const storieLikesSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  storieId: {
+  storieUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+  },
+  storieId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Storie",
   },
 })
 

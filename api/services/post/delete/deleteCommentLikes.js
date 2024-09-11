@@ -1,9 +1,9 @@
 const CommentLikes = require("../../../models/CommentLikes")
 
-const deleteCommentLikes = async (somethingId) => {
+const deleteCommentLikes = async (id) => {
   try {
     const response = await CommentLikes.deleteMany({
-      $or: [{ commentId: somethingId }, { postId: somethingId }],
+      $and: [{ $or: [{ commentId: id }, { postId: id }] }, { postUserId: id }],
     })
 
     return response.nModified

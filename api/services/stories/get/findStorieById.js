@@ -36,11 +36,21 @@ const findStorieById = async ({
         storieId: storie._id,
         userId: loggedUserId,
       })
-      // TODO: view counter too
+
+      const viewCounter = await StorieViews.countDocuments({
+        storieId: storie._id,
+      })
+      const hasViewed = await StorieViews.exists({
+        storieId: storie._id,
+        userId: loggedUserId,
+      })
+
       newStorie = {
         ...newStorie._doc,
         likes: likeCounter,
         hasLiked: hasLiked ? true : false,
+        views: viewCounter,
+        hasViewed: hasViewed ? true : false,
       }
     }
 

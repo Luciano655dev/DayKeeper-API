@@ -31,7 +31,7 @@ const detectInappropriateFileMW = require("../middlewares/detectInappropriateFil
 // Routes
 router.get("/:name", checkTokenMW, checkBannedUserMW, getUser)
 router.put(
-  "/update_user",
+  "/user",
   checkTokenMW,
   multer(multerConfig("image")).single("file"),
   detectInappropriateFileMW,
@@ -40,7 +40,7 @@ router.put(
   updateUser
 )
 router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
-router.delete("/delete_user", checkTokenMW, deleteUser)
+router.delete("/user", checkTokenMW, deleteUser)
 
 // Follows
 router.get(

@@ -22,6 +22,7 @@ const likeStorie = async (props) => {
 
     const likeRelation = await StorieLikes.findOne({
       storieId: storie._id,
+      storieUserId: storie.user._id,
       userId: loggedUser._id,
     })
 

@@ -31,6 +31,7 @@ const likePost = async (props) => {
     const newPostLikeRelation = new PostLikes({
       userId: loggedUser._id,
       postId: post._id,
+      postUserId: post.user._id,
     })
     await newPostLikeRelation.save()
     return custom("Post liked siccessfully", 200, { post })

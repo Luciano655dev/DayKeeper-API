@@ -15,7 +15,7 @@ const blockUser = async (props) => {
     /* Validations */
     if (!blockedUser) return notFound("User")
     if (blockedUser.name == loggedUser.name)
-      return customErr(409, `You can not block yourself`)
+      return customErr(400, `You can not block yourself`)
 
     /* Unblock */
     const blockRelation = await Blocks.findOne({
@@ -28,7 +28,7 @@ const blockUser = async (props) => {
         blockId: loggedUser._id,
         blockedId: blockedUser._id,
       })
-      return custom(`${name} successfully unblocked`)
+      return custom(`${name} unblocked successfully`)
     }
 
     /* Block */
@@ -46,9 +46,8 @@ const blockUser = async (props) => {
       ],
     })
 
-    return custom(`${name} successfully blocked`)
+    return custom(`${name} blocked successfully`)
   } catch (error) {
-    console.log(error)
     throw new Error(error.message)
   }
 }

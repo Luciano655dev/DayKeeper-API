@@ -9,7 +9,7 @@ const ReportSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  type: String,
+  type: String, // 'user', 'post' or 'storie'
   reason: String,
   created_at: Date,
 })

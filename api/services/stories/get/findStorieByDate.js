@@ -1,5 +1,6 @@
 const Storie = require(`../../../models/Storie`)
 const StorieLikes = require(`../../../models/StorieLikes`)
+const StorieViews = require(`../../../models/StorieViews`)
 const findUser = require(`../../user/get/findUser`)
 const viewStorie = require("../general/viewStorie")
 const populateOptions = require(`../../../utils/populateOptions`)
@@ -41,11 +42,21 @@ const findStorieByDate = async ({
           storieId: stories[i]._id,
           userId: loggedUserId,
         })
-        // TODO: view counter too
+
+        const viewCounter = await StorieViews.countDocuments({
+          storieId: stories[i]._id,
+        })
+        const hasViewed = await StorieViews.exists({
+          storieId: stories[i]._id,
+          userId: loggedUserId,
+        })
+
         newStories[i] = {
           ...newStories[i]._doc,
           likes: likeCounter,
           hasLiked: hasLiked ? true : false,
+          views: viewCounter,
+          hasViewed: hasViewed ? true : false,
         }
       }
     }

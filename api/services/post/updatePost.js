@@ -7,6 +7,7 @@ const {
 } = require("../../../constants/index")
 
 const updatePost = async (props) => {
+  // TODO: review this
   const {
     newData, // req.body
     title, // req.params
@@ -63,14 +64,11 @@ const updatePost = async (props) => {
       { title: title, user: loggedUser._id },
       {
         $set: {
-          ...newData,
-          title: title,
+          keep_files: newData?.keep_files,
+          data: newData?.data || post.data,
           files,
-          user: loggedUser._id,
-          created_at: post.created_at,
+
           edited_at: Date.now(),
-          comments: post.comments,
-          _id: post._id,
         },
       },
       { new: true }

@@ -3,7 +3,7 @@ const StorieViews = require("../../../models/StorieViews")
 const deleteStorieViews = async (id) => {
   try {
     const response = await StorieViews.deleteMany({
-      $or: [{ storieId: id }, { userId: id }],
+      $and: [{ $or: [{ storieId: id }, { userId: id }] }, { storieUserId: id }],
     })
 
     return response.nModified

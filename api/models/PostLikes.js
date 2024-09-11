@@ -5,9 +5,13 @@ const postLikesSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  postId: {
+  userPostId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+  },
+  postId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
   },
 })
 

@@ -64,6 +64,7 @@ const commentPost = async (props) => {
 
     const newComment = new PostComments({
       userId: loggedUser._id,
+      postUserId: post.user._id,
       postId: post._id,
       comment,
       gif,

@@ -55,6 +55,7 @@ const likeComment = async (props) => {
     const newLikeRelation = new CommentLikes({
       userId: loggedUser._id,
       postId: post._id,
+      postUserId: post.user._id,
       commentId: comment._id,
     })
     await newLikeRelation.save()
