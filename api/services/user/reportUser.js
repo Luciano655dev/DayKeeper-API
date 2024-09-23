@@ -31,7 +31,7 @@ const reportUser = async (props) => {
       type: "user",
     })
 
-    return custom(`${name} Reported Successfully`, {
+    return custom(`${name} Reported Successfully`, 200, {
       reason,
     })
   } catch (error) {

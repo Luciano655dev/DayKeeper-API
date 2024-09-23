@@ -3,7 +3,10 @@ const searchUserPipeline = require(`./pipelines/search/searchUserPipeline`)
 const userPostsPipeline = require(`./pipelines/user/userPostsPipeline`)
 const userStoriesPipeline = require("./pipelines/user/userStoriesPipeline")
 const reportedElementPipeline = require(`./pipelines/general/reportedElementPipeline`)
+
 const bannedElementPipeline = require(`./pipelines/admin/bannedElementPipeline`)
+const banHistoryMadeByAdmin = require("./pipelines/admin/bansHistoryMadeByAdminPipeline")
+const elementBanHistoryPipeline = require("./pipelines/admin/elementBanHistoryPipeline")
 
 const getFollowersPipeline = require("./pipelines/user/getFollowersPipeline")
 const getFollowingPipeline = require("./pipelines/user/getFollowingPipeline")
@@ -36,7 +39,11 @@ module.exports = {
   searchUserPipeline,
   userPostsPipeline,
   reportedElementPipeline,
+
   bannedElementPipeline,
+  banHistoryMadeByAdmin,
+  elementBanHistoryPipeline,
+
   getFollowersPipeline,
   getFollowingPipeline,
   getFollowRequestsPipeline,

@@ -3,25 +3,23 @@ const {
 } = require("../../constants/index")
 
 const deleteReport = require("../services/admin/deleteReport")
+const getReportedElements = require("../services/admin/getReportedElements")
+const getBannedElements = require("../services/admin/getBannedElements")
+const getBanHistoryMadeByAdmin = require("../services/admin/getBanHistoryMadeByAdmin")
+const getElementBanHistory = require("../services/admin/getElementBanHistory")
 
 const banOrUnbanUser = require("../services/admin/user/banOrUnbanUser")
 const deleteBannedUser = require("../services/admin/user/deleteBannedUser")
-const getReportedUsers = require("../services/admin/user/getReportedUsers")
-const getBannedUsers = require(`../services/admin/user/getBannedUsers`)
 
 const banOrUnbanPost = require(`../services/admin/post/banOrUnbanPost`)
 const deleteBannedPosts = require(`../services/admin/post/deleteBannedPost`)
-const getReportedPosts = require(`../services/admin/post/getReportedPosts`)
-const getBannedPosts = require(`../services/admin/post/getBannedPosts`)
 
 const banOrUnbanStorie = require(`../services/admin/storie/banOrUnbanStorie`)
 const deleteBannedStorie = require(`../services/admin/storie/deleteBannedStorie`)
-const getReportedStories = require(`../services/admin/storie/getReportedStories`)
-const getBannedStories = require(`../services/admin/storie/getBannedStories`)
 
 const deleteReportController = async (req, res) => {
   try {
-    const { code, message } = deleteReport({
+    const { code, message } = await deleteReport({
       ...req.params,
     })
 
@@ -31,16 +29,122 @@ const deleteReportController = async (req, res) => {
   }
 }
 
+const getReportedElementsController = async (req, res) => {
+  const entity_type =
+    req.query?.type == "user"
+      ? req.query?.type
+      : req.query?.type == "post"
+      ? req.query?.type
+      : "storie"
+  const page = Number(req.query.page) || 1
+  const maxPageSize = req.query.maxPageSize
+    ? Number(req.query.maxPageSize) <= 100
+      ? Number(req.query.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getReportedElements({
+      page,
+      maxPageSize,
+      entity_type,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: serverError(error.toString()) })
+  }
+}
+
+const getBannedElementsController = async (req, res) => {
+  const entity_type =
+    req.query?.type == "user"
+      ? req.query?.type
+      : req.query?.type == "post"
+      ? req.query?.type
+      : "storie"
+  const page = Number(req.query.page) || 1
+  const maxPageSize = req.query.pageSize
+    ? Number(req.query.pageSize) <= 100
+      ? Number(req.query.pageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getBannedElements({
+      page,
+      maxPageSize,
+      loggedUser: req.user,
+      entity_type,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: serverError(error.toString()) })
+  }
+}
+
+const getElementBanHistoryController = async (req, res) => {
+  const page = Number(req.query.page) || 1
+  const maxPageSize = req.query.pageSize
+    ? Number(req.query.pageSize) <= 100
+      ? Number(req.query.pageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getElementBanHistory({
+      page,
+      maxPageSize,
+      elementId: req.params.elementId,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: serverError(error.toString()) })
+  }
+}
+
+// ========== GET BAN HISOTRY ============
+const getBanHistoryMadeByAdminController = async (req, res) => {
+  const entity_type =
+    req.query?.type == "user"
+      ? req.query?.type
+      : req.query?.type == "post"
+      ? req.query?.type
+      : "storie"
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getBanHistoryMadeByAdmin({
+      page,
+      maxPageSize,
+      name: req.params?.name,
+      entity_type,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ message: serverError(error.toString()) })
+  }
+}
+
 // ========== USERS ==========
 const banOrUnbanUserController = async (req, res) => {
   try {
-    const { code, message, user } = banOrUnbanUser({
+    const { code, message, reason, user } = await banOrUnbanUser({
       ...req.params,
       message: req.body.message || "",
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, user })
+    return res.status(code).json({ message, reason, user })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
   }
@@ -55,47 +159,6 @@ const deleteBannedUserController = async (req, res) => {
     })
 
     return res.status(code).json({ message, ban_info, user })
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.toString()) })
-  }
-}
-
-const getReportedUsersController = async (req, res) => {
-  const page = Number(req.query.page) || 1
-  const maxPageSize = req.query.maxPageSize
-    ? Number(req.query.maxPageSize) <= 100
-      ? Number(req.query.maxPageSize)
-      : 100
-    : 1
-
-  try {
-    const { code, response } = await getReportedUsers({
-      page,
-      maxPageSize,
-    })
-
-    return res.status(code).json(response)
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.toString()) })
-  }
-}
-
-const getBannedUsersController = async (req, res) => {
-  const page = Number(req.query.page) || 1
-  const maxPageSize = req.query.pageSize
-    ? Number(req.query.pageSize) <= 100
-      ? Number(req.query.pageSize)
-      : 100
-    : 1
-
-  try {
-    const { code, response } = await getBannedUsers({
-      page,
-      maxPageSize,
-      loggedUser: req.user,
-    })
-
-    return res.status(code).json(response)
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
   }
@@ -121,54 +184,13 @@ const banOrUnbanPostController = async (req, res) => {
 
 const deleteBannedPostController = async (req, res) => {
   try {
-    const { code, message, post } = deleteBannedPosts({
+    const { code, message, post } = await deleteBannedPosts({
       ...req.params,
       message: req.body.message || "",
       loggedUser: req.user,
     })
 
     return res.status(code).json({ message, post })
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.toString()) })
-  }
-}
-
-const getReportedPostsController = async (req, res) => {
-  const page = Number(req.query.page) || 1
-  const maxPageSize = req.query.maxPageSize
-    ? Number(req.query.maxPageSize) <= 100
-      ? Number(req.query.maxPageSize)
-      : 100
-    : 1
-
-  try {
-    const { response, code } = await getReportedPosts({
-      page,
-      maxPageSize,
-    })
-
-    return res.status(code).json(response)
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.toString()) })
-  }
-}
-
-const getBannedPostsController = async (req, res) => {
-  const page = Number(req.query.page) || 1
-  const maxPageSize = req.query.maxPageSize
-    ? Number(req.query.maxPageSize) <= 100
-      ? Number(req.query.maxPageSize)
-      : 100
-    : 1
-
-  try {
-    const { response, code } = await getBannedPosts({
-      loggedUser: req.user,
-      page,
-      maxPageSize,
-    })
-
-    return res.status(code).json(response)
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
   }
@@ -191,7 +213,7 @@ const banOrUnbanStorieController = async (req, res) => {
 
 const deleteBannedStorieController = async (req, res) => {
   try {
-    const { code, message, post } = deleteBannedStorie({
+    const { code, message, post } = await deleteBannedStorie({
       ...req.params,
       message: req.body.message || "",
       loggedUser: req.user,
@@ -203,62 +225,19 @@ const deleteBannedStorieController = async (req, res) => {
   }
 }
 
-const getReportedStoriesController = async (req, res) => {
-  const page = Number(req.query.page) || 1
-  const maxPageSize = req.query.maxPageSize
-    ? Number(req.query.maxPageSize) <= 100
-      ? Number(req.query.maxPageSize)
-      : 100
-    : 1
-
-  try {
-    const { response, code } = await getReportedStories({
-      page,
-      maxPageSize,
-    })
-
-    return res.status(code).json(response)
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.toString()) })
-  }
-}
-
-const getBannedStoriesController = async (req, res) => {
-  const page = Number(req.query.page) || 1
-  const maxPageSize = req.query.maxPageSize
-    ? Number(req.query.maxPageSize) <= 100
-      ? Number(req.query.maxPageSize)
-      : 100
-    : 1
-
-  try {
-    const { response, code } = await getBannedStories({
-      loggedUser: req.user,
-      page,
-      maxPageSize,
-    })
-
-    return res.status(code).json(response)
-  } catch (error) {
-    return res.status(500).json({ message: serverError(error.toString()) })
-  }
-}
-
 module.exports = {
   deleteReport: deleteReportController,
+  getReportedElements: getReportedElementsController,
+  getBannedElements: getBannedElementsController,
+  getBanHistoryMadeByAdmin: getBanHistoryMadeByAdminController,
+  getElementBanHistory: getElementBanHistoryController,
 
-  getReportedUsers: getReportedUsersController,
-  getBannedUsers: getBannedUsersController,
   banOrUnbanUser: banOrUnbanUserController,
   deleteBannedUser: deleteBannedUserController,
 
-  getReportedPosts: getReportedPostsController,
-  getBannedPosts: getBannedPostsController,
   banOrUnbanPost: banOrUnbanPostController,
   deleteBannedPost: deleteBannedPostController,
 
   banOrUnbanStorie: banOrUnbanStorieController,
   deleteBannedStorie: deleteBannedStorieController,
-  getReportedStories: getReportedStoriesController,
-  getBannedStories: getBannedStoriesController,
 }

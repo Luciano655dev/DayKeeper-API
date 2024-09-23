@@ -23,7 +23,6 @@ const postValidation = require("../middlewares/validations/post/postValidation")
 const postEditValidation = require("../middlewares/validations/post/postEditValidation")
 
 const checkTokenMW = require("../middlewares/checkTokenMW")
-const verifyPostOwnershipMW = require("../middlewares/verifyPostOwnershipMW")
 const checkPrivateUserMW = require("../middlewares/checkPrivateUserMW")
 const checkBlockedUserMW = require("../middlewares/checkBlockedUserMW")
 const checkBannedUserMW = require("../middlewares/checkBannedUserMW")

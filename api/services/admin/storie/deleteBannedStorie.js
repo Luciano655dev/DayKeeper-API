@@ -25,7 +25,7 @@ const deleteBannedStorie = async (props) => {
     const storie = await Storie.findById(storieId)
     if (!storie) return notFound(`Storie`)
 
-    if (storie.banned != "true")
+    if (!storie.banned)
       return unauthorized(`delete this Storie`, `this Storie isn't banned`)
 
     const latestBan = await BanHistory.findOne({
@@ -34,6 +34,7 @@ const deleteBannedStorie = async (props) => {
       entity_id: post._id,
       ban_date: { $exists: true },
     }).sort({ ban_date: -1 })
+    if (!latestBan) return notFound("Ban History")
 
     if (!latestBan.banned_by.equals(loggedUser._id))
       return unauthorized(
@@ -41,7 +42,7 @@ const deleteBannedStorie = async (props) => {
         "Only the admin who banned this Storie can delete it"
       )
 
-    const diffInDays = differenceInDays(latestBan.ban_date, new Date())
+    const diffInDays = differenceInDays(new Date(), latestBan.ban_date)
     if (diffInDays < daysToDeleteBannedStorie)
       return unauthorized(
         `delete this Storie`,
@@ -59,7 +60,7 @@ const deleteBannedStorie = async (props) => {
       username: userFromStorie.name,
       email: userFromStorie.email,
       id: storie._id,
-      adminUsername: loggedUser.name,
+      adminUsername: adminUser.name,
       reason: latestBan.ban_message,
       message,
     })

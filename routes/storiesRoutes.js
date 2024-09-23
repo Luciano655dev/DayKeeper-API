@@ -6,11 +6,11 @@ const {
   getTodayStories,
   getStorie,
   createStorie,
+  deleteStorie,
   likeStorie,
   getStorieLikes,
-  deleteStorie,
-  reportStorie,
   getStorieViews,
+  reportStorie,
 } = require("../api/controllers/storiesController")
 
 // Middlewares
@@ -18,6 +18,7 @@ const checkTokenMW = require("../middlewares/checkTokenMW")
 const checkBannedUserMW = require(`../middlewares/checkBannedUserMW`)
 const checkPrivateUserMW = require(`../middlewares/checkPrivateUserMW`)
 const verifyStoriesOwnershipMW = require("../middlewares/verifyStoriesOwnership")
+const verifyStorieNameIdRelation = require("../middlewares/verifyStorieNameIdRelation")
 
 // Multer
 const multer = require("multer")
@@ -41,23 +42,12 @@ router.get(
   checkPrivateUserMW,
   getUserStories
 ) // get All User Stories
-router.get(
-  "/:storieId/likes",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getStorieLikes
-) // Get Storie Likes
-router.get(
-  "/:storieId/views",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getStorieViews
-) // Get Storie Views
+router.get("/:storieId/likes", checkTokenMW, getStorieLikes) // Get Storie Likes
+router.get("/:storieId/views", checkTokenMW, getStorieViews) // Get Storie Views
 router.get(
   "/:name/:title",
   checkTokenMW,
+  verifyStorieNameIdRelation,
   checkBannedUserMW,
   checkPrivateUserMW,
   getStorie
@@ -72,12 +62,13 @@ router.post(
   createStorie
 ) // createStories
 router.post(
-  "/:name/:title",
+  "/:name/:storieId/like",
+  verifyStorieNameIdRelation,
   checkTokenMW,
   checkBannedUserMW,
   checkPrivateUserMW,
   likeStorie
-) // react to a storie
+) // like a storie
 router.delete(
   "/:storieId",
   checkTokenMW,

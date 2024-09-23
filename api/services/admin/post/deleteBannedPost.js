@@ -26,6 +26,7 @@ const deleteBannedPosts = async (props) => {
   try {
     const user = await findUser({ userInput })
     if (!user) return notFound(`User`)
+
     const post = await findPost({
       userInput,
       title,
@@ -43,6 +44,7 @@ const deleteBannedPosts = async (props) => {
       entity_id: post._id,
       ban_date: { $exists: true },
     }).sort({ ban_date: -1 })
+    if (!latestBan) return notFound("Ban History")
 
     // VALIDATIONS
     if (!latestBan.banned_by.equals(loggedUser._id) && adminUser)
@@ -51,7 +53,7 @@ const deleteBannedPosts = async (props) => {
         "Only the admin who banned this post can delete it"
       )
 
-    const diffInDays = differenceInDays(latestBan.ban_date, new Date())
+    const diffInDays = differenceInDays(new Date(), latestBan.ban_date)
     if (diffInDays < daysToDeleteBannedPost)
       return unauthorized(
         `delete this post`,
@@ -74,7 +76,7 @@ const deleteBannedPosts = async (props) => {
       title: userPost.title,
       username: userPost.name,
       email: userPost.email,
-      id: deletedPost._id,
+      id: post._id,
       adminUsername: loggedUser.name,
       reason: latestBan.ban_message,
       message,

@@ -1,4 +1,3 @@
-const User = require("../../models/User")
 const getDataWithPages = require("../getDataWithPages")
 const { userPostsPipeline } = require("../../repositories")
 
@@ -16,7 +15,7 @@ const getUserPosts = async ({ page, maxPageSize, order, name, user }) => {
       maxPageSize,
     })
 
-    return fetched(`user's posts`, { ...response })
+    return fetched(`user's posts`, { response })
   } catch (error) {
     throw new Error(`${error}`)
   }

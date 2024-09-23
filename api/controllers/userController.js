@@ -41,7 +41,7 @@ const getUserPostsController = async (req, res) => {
   const { name } = req.params
 
   try {
-    const { code, message, data } = await getUserPosts({
+    const { code, response } = await getUserPosts({
       name,
       order,
       maxPageSize,
@@ -49,7 +49,7 @@ const getUserPostsController = async (req, res) => {
       user: req.user,
     })
 
-    return res.status(code).json({ message, data })
+    return res.status(code).json({ ...response })
   } catch (error) {
     return res.status(500).json({ message: serverError(String(error)) })
   }
@@ -114,13 +114,13 @@ const followUserController = async (req, res) => {
 // respondFollowRequest (private users only)
 const respondFollowRequestController = async (req, res) => {
   try {
-    const { code, message } = await respondFollowRequest({
+    const { code, message, reason } = await respondFollowRequest({
       ...req.params,
       ...req.body,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message })
+    return res.status(code).json({ message, reason })
   } catch (error) {
     return res.status(500).json({ message: `${error}` })
   }

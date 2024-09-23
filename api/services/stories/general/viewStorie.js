@@ -12,7 +12,11 @@ const viewStorie = async (storieId, userId) => {
       userId,
     })
     if (!viewRelation)
-      await StorieViews.create({ storieId: storie._id, userId })
+      await StorieViews.create({
+        storieId: storie._id,
+        storieUserId: storie.user._id,
+        userId,
+      })
 
     return
   } catch (error) {

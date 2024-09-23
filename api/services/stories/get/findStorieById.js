@@ -1,5 +1,6 @@
 const Storie = require(`../../../models/Storie`)
 const StorieLikes = require(`../../../models/StorieLikes`)
+const StorieViews = require(`../../../models/StorieViews`)
 const viewStorie = require("../general/viewStorie")
 const populateOptions = require(`../../../utils/populateOptions`)
 const { hideGeneralData } = require(`../../../repositories/index`)
@@ -44,7 +45,6 @@ const findStorieById = async ({
         storieId: storie._id,
         userId: loggedUserId,
       })
-
       newStorie = {
         ...newStorie._doc,
         likes: likeCounter,

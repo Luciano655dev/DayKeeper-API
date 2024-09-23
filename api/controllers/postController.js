@@ -90,13 +90,13 @@ const reportPostController = async (req, res) => {
   const reason = req.body.reason || ""
 
   try {
-    const { code, message, post } = await reportPost({
+    const { code, message } = await reportPost({
       ...req.params,
       reason,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, reason, post })
+    return res.status(code).json({ message, reason })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
   }
@@ -141,13 +141,13 @@ const getPostLikesController = async (req, res) => {
 //commentPost
 const commentPostController = async (req, res) => {
   try {
-    const { code, message, post } = await commentPost({
+    const { code, message, response } = await commentPost({
       ...req.params,
       ...req.body,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, post })
+    return res.status(code).json({ message, ...response })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
   }
@@ -214,12 +214,12 @@ const getCommentLikesController = async (req, res) => {
 // deleteComment
 const deleteCommentController = async (req, res) => {
   try {
-    const { code, message, post } = await deleteComment({
+    const { code, message, response } = await deleteComment({
       ...req.params,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, post })
+    return res.status(code).json({ message, ...response })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
   }

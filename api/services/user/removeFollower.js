@@ -24,14 +24,14 @@ const removeFollower = async (props) => {
         `remove follower`,
         "Only private accounts can remove followers"
       )
-    if (!followRelation) return customErr(404, "This user does not follow you")
+    if (!followRelation) return customErr("This user does not follow you")
 
     await Followers.deleteOne({
       followerId: followUser._id,
       followingId: loggedUser._id,
     })
 
-    return custom(`${followUser.name} was removed from his followers`)
+    return custom(`${followUser.name}'s follow removed successfully`)
   } catch (error) {
     throw new Error(error.message)
   }

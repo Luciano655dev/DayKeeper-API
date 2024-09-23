@@ -4,21 +4,21 @@ const findPost = require("./get/findPost")
 const convertTimeZone = require(`../../utils/convertTimeZone`)
 
 const {
+  user: { defaultTimeZone },
+} = require("../../../constants/index")
+
+const {
   errors: { notFound },
   success: { fetched },
 } = require("../../../constants/index")
 
 const getPost = async (props) => {
-  const { title, name: username, queryParams, loggedUserId } = props
-
-  let populateFields = queryParams ? queryParams.split(",") : []
+  const { title, name: username, loggedUserId } = props
 
   try {
     const post = await findPost({
       userInput: username,
       title,
-      type: "username",
-      fieldsToPopulate: ["user", ...populateFields],
     })
 
     if (!post) return notFound("Post")
@@ -40,7 +40,10 @@ const getPost = async (props) => {
     return fetched(`post`, {
       post: {
         ...post._doc,
-        created_at: convertTimeZone(post.created_at, post.user.timeZone),
+        created_at: convertTimeZone(
+          post.created_at,
+          post.user?.timeZone || defaultTimeZone
+        ),
         likes: likeCounter,
         hasLiked,
         comments: commentCounter,
@@ -48,6 +51,7 @@ const getPost = async (props) => {
       },
     })
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }

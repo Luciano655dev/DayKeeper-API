@@ -1,5 +1,5 @@
 const Followers = require("../api/models/Followers")
-const findUser = require("../api/services/user/get/findUser")
+
 const {
   errors: { serverError },
 } = require("../constants/index")

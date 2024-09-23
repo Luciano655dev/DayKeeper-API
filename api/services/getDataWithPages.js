@@ -9,6 +9,7 @@ const CommentLikes = require("../models/CommentLikes")
 const StorieLikes = require("../models/StorieLikes")
 const StorieViews = require("../models/StorieViews")
 const Report = require("../models/Report")
+const BanHistory = require("../models/BanHistory")
 
 const { maxPageSize: defaultMaxPageSie } = require("../../constants/index")
 
@@ -112,11 +113,8 @@ const getDataWithPages = async (
         $sort: { created_at: -1, relevance: -1, timeZoneMatch: -1, _id: 1 },
       }
       break
-    case "most_reports":
-      sortPipeline = { $sort: { numReports: -1, timeZoneMatch: -1, _id: 1 } }
-      break
     case "recent_ban":
-      sortPipeline = { $sort: { "latestBan.ban_date": 1, _id: 1 } }
+      sortPipeline = { $sort: { ban_date: 1, _id: 1 } }
       break
     case "recent":
     default: // default is 'recent'
@@ -175,6 +173,9 @@ const getDataWithPages = async (
         break
       case "Report":
         Model = Report
+        break
+      case "BanHistory":
+        Model = BanHistory
         break
       default:
         throw new Error(`Invalid type: ${type}`)

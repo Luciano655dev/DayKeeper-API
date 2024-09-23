@@ -39,7 +39,7 @@ const commentPost = async (props) => {
       await deleteCommentLikes(commentRelation._id)
       await PostComments.deleteOne({ userId: loggedUser._id, postId: post._id })
 
-      return deleted("Comment")
+      return deleted("Comment", { response: { post, comment: newComment } })
     }
 
     /* Get Gif */
@@ -71,7 +71,7 @@ const commentPost = async (props) => {
     })
     await newComment.save()
 
-    return created(`Comment`, { post })
+    return created(`Comment`, { response: { post, comment: newComment } })
   } catch (error) {
     throw new Error(error.message)
   }

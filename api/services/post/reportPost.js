@@ -22,7 +22,6 @@ const reportPost = async (props) => {
     const reportRelation = await Report.exists({
       referenceId: post._id,
       userId: loggedUser._id,
-      type: "post",
     })
     if (reportRelation) return doubleAction()
 
@@ -34,7 +33,8 @@ const reportPost = async (props) => {
       type: "post",
     })
 
-    return custom("Post reported successfully", { reason })
+    console.log("here")
+    return custom("Post reported successfully", 200, { reason })
   } catch (error) {
     throw new Error(error.message)
   }

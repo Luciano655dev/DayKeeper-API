@@ -2,13 +2,16 @@ const hideUserData = require("../../hideProject/hideUserData")
 const hidePostData = require("../../hideProject/hidePostData")
 const hideStorieData = require("../../hideProject/hideStorieData")
 
-const reportedElementPipeline = (type = "user") => [
+const banHistoryMadeByAdmin = (userId, type = "user") => [
   {
     // type == "user", "post" or "storie"
     $match: {
       $and: [
         {
           entity_type: type,
+        },
+        {
+          banned_by: userId,
         },
       ],
     },
@@ -22,9 +25,9 @@ const reportedElementPipeline = (type = "user") => [
       pipeline: [
         {
           $project:
-            type == "user"
+            type == "users"
               ? hideUserData
-              : type == "post"
+              : type == "posts"
               ? hidePostData
               : hideStorieData,
         },
@@ -43,4 +46,4 @@ const reportedElementPipeline = (type = "user") => [
   },
 ]
 
-module.exports = reportedElementPipeline
+module.exports = banHistoryMadeByAdmin

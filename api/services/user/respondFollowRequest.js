@@ -25,7 +25,7 @@ const respondeFollowRequest = async (props) => {
         "Only private accounts can respond to requests"
       )
     if (!followRelation)
-      return customErr(404, "This user did not send you any requests")
+      return customErr("This user did not send you any requests", 404)
 
     /* DENIED */
     if (!response || response == "false") {

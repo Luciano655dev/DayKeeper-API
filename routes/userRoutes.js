@@ -29,6 +29,9 @@ const checkPrivateUserMW = require("../middlewares/checkPrivateUserMW")
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
 // Routes
+router.get("/blocks", checkTokenMW, getBlockedUsers)
+router.get("/follow_requests", checkTokenMW, getFollowRequests)
+
 router.get("/:name", checkTokenMW, checkBannedUserMW, getUser)
 router.put(
   "/user",
@@ -57,15 +60,6 @@ router.get(
   checkPrivateUserMW,
   getFollowing
 )
-router.get(
-  /*
-    the 'name' here does not make any fucking difference
-    since you're the only one who can see your follow requests
-  */
-  "/:name/follow_requests",
-  checkTokenMW,
-  getFollowRequests
-)
 router.post("/:name/follow", checkTokenMW, checkBannedUserMW, followUser)
 router.post(
   "/:name/respond_follow",
@@ -74,7 +68,7 @@ router.post(
   respondFollowRequest
 )
 router.delete(
-  "/:name/remove_follower",
+  "/:name/follower",
   checkTokenMW,
   checkBannedUserMW,
   removeFollower
@@ -82,15 +76,6 @@ router.delete(
 
 // Interactions
 router.post("/:name/block", checkTokenMW, checkBannedUserMW, blockUser)
-router.get(
-  "/:name/get_blocks",
-  /*
-    the 'name' here does not make any fucking difference
-    since you're the only one who can see your follow requests
-  */
-  checkTokenMW,
-  getBlockedUsers
-)
 router.post("/:name/report", checkTokenMW, checkBannedUserMW, reportUser)
 
 // posts

@@ -33,7 +33,7 @@ const getPostComments = async (props) => {
           ...post._doc,
           created_at: convertTimeZone(post.created_at, post.user.timeZone),
         },
-        comments,
+        ...comments,
       },
     })
   } catch (error) {

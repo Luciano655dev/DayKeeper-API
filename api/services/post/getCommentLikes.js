@@ -49,7 +49,7 @@ const getCommentLikes = async (props) => {
           ...post._doc,
           created_at: convertTimeZone(post.created_at, post.user.timeZone),
         },
-        users: usersThatLiked,
+        ...usersThatLiked,
       },
     })
   } catch (error) {

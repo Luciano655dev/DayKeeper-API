@@ -53,7 +53,7 @@ const deleteComment = async (props) => {
       userId: userThatCommented._id,
     })
 
-    return deleted(`Comment`, { post })
+    return deleted(`Comment`, { response: { post, comment } })
   } catch (error) {
     console.log(error)
     throw new Error(error.message)

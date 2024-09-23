@@ -1,4 +1,5 @@
 const BanHistory = require("../../../models/BanHistory")
+const User = require("../../../models/User")
 const findUser = require("../../user/get/findUser")
 const { sendBanEmail, sendUnbanEmail } = require("../../../utils/emailHandler")
 
@@ -9,7 +10,7 @@ const {
 } = require("../../../../constants/index")
 
 const banOrUnbanUser = async (props) => {
-  const { name: userInput, reason, loggedUser } = props
+  const { name: userInput, message: reason, loggedUser } = props
 
   if (reason.length > maxReportMessageLength) return inputTooLong("Reason")
 
@@ -17,10 +18,10 @@ const banOrUnbanUser = async (props) => {
     const user = await findUser({ userInput })
     if (!user) return notFound("User")
 
-    if (bannedUser.roles.find("admin"))
+    if (loggedUser.roles.indexOf("admin") == -1)
       return unauthorized(`ban user`, `you can not ban an admin`)
 
-    if (bannedUser.banned == "true") {
+    if (user.banned == "true") {
       const newBanHistoryRelation = new BanHistory({
         entity_type: "user",
         action_type: "unban",
@@ -32,16 +33,19 @@ const banOrUnbanUser = async (props) => {
       })
       newBanHistoryRelation.save()
 
+      // unban user
+      await User.updateOne({ _id: user._id }, { banned: false })
+
       /*
       await sendUnbanEmail({
-        username: bannedUser.name,
-        email: bannedUser.email,
+        username: user.name,
+        email: user.email,
         adminUsername: loggedUser.name,
         reason,
     })
         */
 
-      return custom(`${bannedUser.name} unbanned successfully`)
+      return custom(`${user.name} unbanned successfully`, 200)
     }
 
     // Ban user
@@ -56,6 +60,9 @@ const banOrUnbanUser = async (props) => {
     })
     await newBanHistoryRelation.save()
 
+    // ban user
+    await User.updateOne({ _id: user._id }, { banned: true })
+
     /*
     await sendBanEmail({
       username: bannedUser.name,
@@ -64,9 +71,10 @@ const banOrUnbanUser = async (props) => {
       reason,
     })
       */
-
-    return custom(`${bannedUser.name} banned successfully`)
+    console.log("aqui")
+    return custom(`${user.name} banned successfully`, 200)
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }

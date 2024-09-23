@@ -37,7 +37,7 @@ const reportPost = async (props) => {
       type: "storie",
     })
 
-    return custom("Storie reported successfully", { storie })
+    return custom("Storie reported successfully", 200, { storie })
   } catch (error) {
     throw new Error(error.message)
   }

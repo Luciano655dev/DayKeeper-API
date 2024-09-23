@@ -28,7 +28,7 @@ const banOrUnbanPost = async (props) => {
     })
     if (!post) return notFound(`Post`)
 
-    if (post.banned == "true") {
+    if (post.banned) {
       // Create unban relation
       const newBanHistoryRelation = new BanHistory({
         entity_type: "post",
@@ -41,7 +41,7 @@ const banOrUnbanPost = async (props) => {
       })
       await newBanHistoryRelation.save()
 
-      await Post.updateOne({ _id: post._id }, { banned: false })
+      await Post.updateOne({ _id: post._id }, { $set: { banned: false } })
 
       /*
       await sendPostUnbanEmail({
@@ -70,7 +70,7 @@ const banOrUnbanPost = async (props) => {
     })
     await newBanHistoryRelation.save()
 
-    await Post.updateOne({ _id: post._id }, { banned: true })
+    await Post.updateOne({ _id: post._id }, { $set: { banned: false } })
 
     /*
     await sendPostBanEmail({

@@ -6,16 +6,10 @@ async function findPost({
   userInput = "",
   title = "",
   type = "username",
-  fieldsToPopulate = [],
+  populateUser = true,
 }) {
   try {
     let post = {}
-
-    const populateOptions = fieldsToPopulate.map((field) => ({
-      path: field,
-      match: { banned: { $ne: true } },
-      select: hideUserData,
-    }))
 
     const query = { title: title }
     if (type === "username") {
@@ -28,11 +22,17 @@ async function findPost({
 
     post = await Post.findOne(query)
       .select(hidePostData)
-      .populate(populateOptions)
+      .populate(
+        populateUser
+          ? {
+              path: "user",
+              select: hideUserData,
+            }
+          : {}
+      )
 
     return post
   } catch (err) {
-    console.log("Error:" + err)
     return null
   }
 }

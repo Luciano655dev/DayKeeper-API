@@ -12,7 +12,7 @@ async function checkSameDayMW(req, res, next) {
     const todayDate = parse(getTodayDate(), "dd-MM-yyyy", new Date())
 
     if (isAfter(postDate, todayDate))
-      return custom(400, `you can no longer interact with it`, {
+      return custom(`you can no longer interact with it`, 400, {
         reason: "You could only interact on the day it was created",
       })
 

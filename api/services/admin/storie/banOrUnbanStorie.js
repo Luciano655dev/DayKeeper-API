@@ -1,4 +1,3 @@
-const User = require(`../../../models/User`)
 const BanHistory = require(`../../../models/BanHistory`)
 const Storie = require(`../../../models/Storie`)
 
@@ -8,7 +7,7 @@ const {
 } = require(`../../../utils/emailHandler`)
 const {
   admin: { maxReportMessageLength },
-  errors: { inputTooLong, notFound, invalidValue },
+  errors: { inputTooLong, notFound },
   success: { custom },
 } = require(`../../../../constants/index`)
 
@@ -21,7 +20,7 @@ const banOrUnbanStorie = async (props) => {
     const storie = await Storie.findById(storieId).populate(`user`)
     if (!storie) return notFound(`Storie`)
 
-    if (storie.banned == "true") {
+    if (storie.banned) {
       // UNBAN STORIE
       const newBanHistoryRelation = new BanHistory({
         entity_type: "storie",
@@ -35,10 +34,10 @@ const banOrUnbanStorie = async (props) => {
       await newBanHistoryRelation.save()
 
       await sendStorieUnbanEmail({
-        username: deletedStorie.user.name,
-        email: deletedStorie.user.email,
-        title: deletedStorie.title,
-        id: deletedStorie._id,
+        username: storie.user.name,
+        email: storie.user.email,
+        title: storie.title,
+        id: storie._id,
         adminUsername: loggedUser.name,
         reason,
       })
@@ -62,16 +61,16 @@ const banOrUnbanStorie = async (props) => {
     await newBanHistoryRelation.save()
 
     await sendStorieBanEmail({
-      username: deletedStorie.user.name,
-      email: deletedStorie.user.email,
-      title: deletedStorie.title,
-      id: deletedStorie._id,
+      username: storie.user.name,
+      email: storie.user.email,
+      title: storie.title,
+      id: storie._id,
       adminUsername: loggedUser.name,
       reason,
     })
 
     return custom(
-      `${deletedStorie.user.name}'s Storie from ${deletedStorie.title} banned successfully`
+      `${storie.user.name}'s Storie from ${storie.title} banned successfully`
     )
   } catch (error) {
     throw new Error(error.message)

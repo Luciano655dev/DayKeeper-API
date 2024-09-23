@@ -7,12 +7,11 @@ const {
 } = require("../../../constants/index")
 
 const likeStorie = async (props) => {
-  const { name: username, title, loggedUser } = props
+  const { storieId, loggedUser } = props
 
   try {
     let storie = await findStorieById({
-      userInput: username,
-      title,
+      storieId,
       hideLikes: false,
       fieldsToPopulate: [`user`],
       loggedUserId: loggedUser._id,

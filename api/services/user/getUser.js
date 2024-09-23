@@ -1,4 +1,5 @@
 const Followers = require("../../models/Followers")
+const Blocks = require("../../models/Blocks")
 const findUser = require("./get/findUser")
 const convertTimeZone = require(`../../utils/convertTimeZone`)
 const {
@@ -22,10 +23,15 @@ const getUser = async (props) => {
       followerId: loggedUser._id,
       followingId: user._id,
     })
+
+    const isBlocked = await Blocks.findOne({
+      blockId: user._id,
+      blockedId: loggedUser._id,
+    })
+
     if (isFollowing) status = `following`
-    else if (loggedUser.blocked_users.includes(user._id.toString()))
-      status = `blocked`
-    else if (user._doc._id == loggedUser._id.toString()) status = `logged`
+    else if (isBlocked) status = `blocked`
+    else if (user._doc._id.equals(loggedUser._id)) status = `logged`
     else status = `default`
 
     return fetched(`user`, {
@@ -37,6 +43,7 @@ const getUser = async (props) => {
       },
     })
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }
