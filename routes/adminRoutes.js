@@ -38,21 +38,16 @@ router.get(
 )
 
 // User
-router.post("/:name/banOrUnban", checkTokenMW, checkAdminMW, banOrUnbanUser)
+router.post("/:name", checkTokenMW, checkAdminMW, banOrUnbanUser)
 router.delete("/:name", checkTokenMW, checkAdminMW, deleteBannedUser)
 
 // Post
-router.post(
-  "/:name/:title/banOrUnban",
-  checkTokenMW,
-  checkAdminMW,
-  banOrUnbanPost
-)
-router.delete("/:name/:title/", checkTokenMW, checkAdminMW, deleteBannedPost)
+router.post("/:name/:title", checkTokenMW, checkAdminMW, banOrUnbanPost)
+router.delete("/:name/:title", checkTokenMW, checkAdminMW, deleteBannedPost)
 
 // Storie
 router.post(
-  "/storie/:name/:storieId/banOrUnban",
+  "/storie/:name/:storieId",
   checkTokenMW,
   checkAdminMW,
   banOrUnbanStorie

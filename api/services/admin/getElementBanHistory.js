@@ -1,7 +1,10 @@
 const getDataWithPages = require(`../getDataWithPages`)
+const User = require("../../models/User")
+const Post = require("../../models/Post")
+const Storie = require("../../models/Storie")
 const { elementBanHistoryPipeline } = require(`../../repositories`)
 const mongoose = require("mongoose")
-
+// TODO reotrnar o objeto do elemento
 const {
   success: { fetched },
   errors: { invalidValue },
@@ -22,7 +25,18 @@ const getElementBanHistory = async (props) => {
       maxPageSize,
     })
 
-    return fetched(`${elementId} Ban History`, { response })
+    let element
+    if (response?.data?.length > 0) {
+      if (response?.data[0].type === "user")
+        element = await User.findById(elementId)
+      else if (response?.data[0].type === "post")
+        element = await Post.findById(elementId)
+      else element = await Storie.findById(elementId)
+    }
+
+    return fetched(`${elementId} Ban History`, {
+      response: { ...response, element },
+    })
   } catch (error) {
     throw new Error(error.message)
   }

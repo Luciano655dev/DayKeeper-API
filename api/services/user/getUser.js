@@ -19,6 +19,9 @@ const getUser = async (props) => {
     const followerCounter = await Followers.countDocuments({
       followingId: user._id,
     })
+    const followingCounter = await Followers.countDocuments({
+      followerId: user._id,
+    })
     const isFollowing = await Followers.findOne({
       followerId: loggedUser._id,
       followingId: user._id,
@@ -38,6 +41,7 @@ const getUser = async (props) => {
       user: {
         ...user._doc,
         followers: followerCounter,
+        following: followingCounter,
         created_at: convertTimeZone(user.created_at, loggedUser.timeZone),
         status,
       },
