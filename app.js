@@ -34,12 +34,12 @@ app.use(
 // Session middleware
 app.use(
   session({
-    secret: "your-secret-key", // Use a strong secret
+    secret: "secret", // TODO change that
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: false, // Set to true if using HTTPS
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      secure: false, // True in prod (https)
+      maxAge: 1000 * 60 * 60 * 24, // 1 day (example)
     },
   })
 )

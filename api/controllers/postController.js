@@ -37,7 +37,7 @@ const createPostController = async (req, res) => {
           name: file.originalname,
           key: file.key,
           mimetype: file.mimetype,
-          url: file.location,
+          url: file.url,
         }
       })
     : []

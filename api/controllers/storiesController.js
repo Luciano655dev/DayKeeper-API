@@ -21,7 +21,7 @@ const createStorieController = async (req, res) => {
     name: req.file.originalname,
     key: req.file.key,
     mimetype: req.file.mimetype,
-    url: req.file.location,
+    url: req.file.url,
   }
 
   try {

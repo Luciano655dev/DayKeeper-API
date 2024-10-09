@@ -1,21 +1,17 @@
 const {
-  aws: {
-    defaultRegion,
-    accessKeyId,
-    secretAccessKey
-  }
+  aws: { defaultRegion, accessKeyId, secretAccessKey },
 } = require(`../../config`)
-const aws = require('aws-sdk')
+const aws = require("aws-sdk")
 
 let awsS3Config = new aws.S3({
-  region: `us-east-1`,
+  region: defaultRegion,
   credentials: {
     accessKeyId,
     secretAccessKey,
   },
   sslEnabled: false,
   s3ForcePathStyle: true,
-  signatureVersion: 'v4',
+  signatureVersion: "v4",
 })
 
 module.exports = awsS3Config

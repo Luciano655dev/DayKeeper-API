@@ -47,7 +47,7 @@ const updateUser = async (params) => {
             ? {
                 name: file.originalname,
                 key: file.key,
-                url: file.location,
+                url: file.url,
               }
             : loggedUser.profile_picture,
           verified_email: !email

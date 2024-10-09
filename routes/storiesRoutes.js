@@ -57,8 +57,8 @@ router.post(
   "/create",
   checkTokenMW,
   multer(multerConfig("both")).single(`file`),
-  detectInappropriateFileMW,
   handleMulterError,
+  detectInappropriateFileMW,
   createStorie
 ) // createStories
 router.post(

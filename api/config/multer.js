@@ -25,10 +25,14 @@ const storageTypes = {
     contentType: multerS3.AUTO_CONTENT_TYPE,
     acl: "public-read",
     key: (req, file, cb) => {
+      // Generate random bytes once
       crypto.randomBytes(16, (err, hash) => {
-        if (err) cb(err)
+        if (err) return cb(err)
 
         const fileName = `${hash.toString("hex")}-${file.originalname}`
+        const fileUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${fileName}`
+
+        file.url = fileUrl
 
         cb(null, fileName)
       })
