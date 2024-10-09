@@ -6,16 +6,13 @@ const {
 } = require("../../../constants/index")
 
 const getUserData = async (props) => {
-  const { user: fetchedUser } = props
+  const { user: fetchedUser, cookies } = props
 
   try {
-    const user = await User.findById(fetchedUser._id)
-      .select("-password")
-      .select("-reports")
-      .select("-ban_history")
+    const user = await User.findById(fetchedUser._id).select(hideUserData)
     if (!user) return notFound("User")
 
-    return fetched(`user`, { user, token: fetchedUser.token })
+    return fetched(`user`, { user, token: cookies?.["connect.sid"] })
   } catch (error) {
     throw new Error(error.message)
   }

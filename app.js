@@ -1,6 +1,7 @@
 const express = require("express")
 const session = require("express-session")
 const mongoose = require("mongoose")
+const cookieParser = require("cookie-parser")
 const firebaseAdmin = require("firebase-admin")
 const serviceAccountKey = require("./firebase-admin-sdk.json")
 const passport = require("passport")
@@ -19,6 +20,7 @@ firebaseAdmin.initializeApp({
 })
 
 const app = express()
+app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
@@ -32,13 +34,12 @@ app.use(
 // Session middleware
 app.use(
   session({
-    secret: "secret",
+    secret: "your-secret-key", // Use a strong secret
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
-      httpOnly: true,
-      secure: false, // set to true when prod
-      sameSite: "None",
+      secure: false, // Set to true if using HTTPS
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
 )
