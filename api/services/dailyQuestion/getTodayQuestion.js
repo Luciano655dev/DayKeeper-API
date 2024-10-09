@@ -1,5 +1,4 @@
 const DailyQuestion = require(`../../models/DailyQuestion`)
-const { format } = require("date-fns")
 const getTodayDate = require("../../utils/getTodayDate")
 
 const {
@@ -7,7 +6,7 @@ const {
   success: { fetched },
 } = require(`../../../constants/index`)
 
-const getQuestion = async () => {
+const getTodayQuestion = async () => {
   try {
     const todayDate = getTodayDate()
 
@@ -24,4 +23,4 @@ const getQuestion = async () => {
   }
 }
 
-module.exports = getQuestion
+module.exports = getTodayQuestion

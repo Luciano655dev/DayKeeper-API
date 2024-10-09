@@ -21,13 +21,25 @@ firebaseAdmin.initializeApp({
 const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(cors())
 
+app.use(
+  cors({
+    origin: "http://localhost:19006", // React Native App URL
+    credentials: true,
+  })
+)
+
+// Session middleware
 app.use(
   session({
     secret: "secret",
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: false, // set to true when prod
+      sameSite: "None",
+    },
   })
 )
 
