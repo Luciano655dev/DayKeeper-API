@@ -35,6 +35,14 @@ module.exports = {
     maxEmailLength: 320,
     maxPasswordLength: 50,
   },
+  location: {
+    maxSearchLength: 50,
+    defaultRadius: 1000, // 1km
+    defaultLat: 28.4535498,
+    defaultLng: -81.4645661,
+    // Universal Cords :)
+    defaultType: "point_of_interest",
+  },
 
   inappropriateLabels: [
     // for rekognition

@@ -19,6 +19,7 @@ firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccountKey),
 })
 
+// App config
 const app = express()
 app.use(cookieParser())
 app.use(express.json())
@@ -31,7 +32,6 @@ app.use(
   })
 )
 
-// Session middleware
 app.use(
   session({
     secret: "secret", // TODO change that
@@ -56,11 +56,13 @@ const postRoutes = require("./routes/postRoutes")
 const storiesRoutes = require(`./routes/storiesRoutes`)
 const adminRoutes = require("./routes/adminRoutes")
 const searchRoutes = require("./routes/searchRoutes")
+const locationRoutes = require("./routes/locationRoutes")
 
 app.use("/auth", authRoutes)
 app.use("/question", dailyQuestionRoutes)
 app.use("/admin", adminRoutes)
-app.use(`/stories`, storiesRoutes)
+app.use("/stories", storiesRoutes)
+app.use("/location", locationRoutes)
 app.use("/", searchRoutes)
 app.use("/", userRoutes)
 app.use("/", postRoutes)

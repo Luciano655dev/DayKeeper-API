@@ -59,7 +59,7 @@ const createPostController = async (req, res) => {
 const updatePostController = async (req, res) => {
   try {
     const { code, message, post } = await updatePost({
-      newData: req.body,
+      ...req.body,
       ...req.params,
       loggedUser: req.user,
       reqFiles: req.files,

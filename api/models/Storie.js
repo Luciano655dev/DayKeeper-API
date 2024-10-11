@@ -11,6 +11,10 @@ const storieSchema = mongoose.Schema({
     key: String,
     mimetype: String,
     url: String,
+    placeId: {
+      required: false,
+      type: String,
+    },
   },
   text: {
     type: String,
