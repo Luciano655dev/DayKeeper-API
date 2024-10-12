@@ -1,11 +1,31 @@
 const hideUserData = require("../../hideProject/hideUserData")
 const { format, parse } = require("date-fns")
 
-const searchEventPipeline = (searchQuery, userId) => {
+const searchEventPipeline = (searchQuery, userId, filter) => {
   const searchDate = format(
     parse(`${searchQuery}`, "dd-MM-yyyy", new Date()),
     "dd-MM-yyyy"
   )
+
+  let filterPipe = {}
+  switch (filter) {
+    case "upcoming":
+      filterPipe = { timeStart: { $gt: new Date() } }
+      break
+    case "past":
+      filterPipe = { timeStart: { $lt: new Date() } }
+      break
+    case "ongoing":
+      filterPipe = {
+        $and: [
+          { timeStart: { $lt: new Date() } },
+          { timeEnd: { $gt: new Date() } },
+        ],
+      }
+      break
+    default:
+      break
+  }
 
   return [
     {
@@ -87,8 +107,9 @@ const searchEventPipeline = (searchQuery, userId) => {
               },
             ],
           },
+
+          filterPipe,
           { "user_info._id": userId },
-          // Compare the date field directly to the searchDate
           {
             date: {
               $regex: new RegExp(searchDate, "i"),

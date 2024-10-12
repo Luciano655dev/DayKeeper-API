@@ -14,7 +14,10 @@ const {
 const searchEvent = async (props) => {
   const { userId, page, maxPageSize } = props
   const searchQuery = props.q || ""
+  const filter = props?.filter || "upcoming"
   const loggedUser = props.user
+
+  console.log(searchEventPipeline)
 
   try {
     if (!mongoose.Types.ObjectId.isValid(userId)) return invalidValue("User ID")
@@ -23,7 +26,7 @@ const searchEvent = async (props) => {
     const response = await getDataWithPages(
       {
         type: "DayEvent",
-        pipeline: searchEventPipeline(searchQuery, userIdObjId),
+        pipeline: searchEventPipeline(searchQuery, userIdObjId, filter),
         order: "recent",
         page,
         maxPageSize,
