@@ -17,7 +17,7 @@ module.exports = {
       url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg",
       mimetype: "image/jpeg",
     },
-    defaultTimeZone: "America/Sao_Paulo", // BRASILLLLLLLL
+    defaultTimeZone: "America/New_York",
     maxReportReasonLength: 1000,
     maxFollowingCount: 100,
   },
@@ -42,6 +42,12 @@ module.exports = {
     defaultLng: -81.4645661,
     // Universal Cords :)
     defaultType: "point_of_interest",
+  },
+  day: {
+    event: {
+      maxEventTitleLength: 50,
+      maxEventDescriptionLength: 100,
+    },
   },
 
   inappropriateLabels: [

@@ -10,6 +10,9 @@ const StorieLikes = require("../models/StorieLikes")
 const StorieViews = require("../models/StorieViews")
 const Report = require("../models/Report")
 const BanHistory = require("../models/BanHistory")
+const DayEvent = require("../models/DayEvent")
+const DayNote = require("../models/DayNote")
+const DayTask = require("../models/DayTask")
 
 const { maxPageSize: defaultMaxPageSie } = require("../../constants/index")
 
@@ -176,6 +179,15 @@ const getDataWithPages = async (
         break
       case "BanHistory":
         Model = BanHistory
+        break
+      case "DayNote":
+        Model = DayNote
+        break
+      case "DayTask":
+        Model = DayTask
+        break
+      case "DayEvent":
+        Model = DayEvent
         break
       default:
         throw new Error(`Invalid type: ${type}`)

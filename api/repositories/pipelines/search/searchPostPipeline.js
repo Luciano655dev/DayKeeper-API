@@ -133,7 +133,7 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
     $match: {
       $and: [
         { "block_info.0": { $exists: false } },
-        { "user_info.banned": { $ne: "true" } },
+        { "user_info.banned": { $ne: true } },
         {
           $or: [
             { title: { $regex: new RegExp(searchQuery, "i") } },

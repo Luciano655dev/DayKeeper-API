@@ -20,13 +20,13 @@ const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipelin
 const getStorieLikesPipeline = require("./pipelines/storie/getStorieLikesPipeline")
 const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipeline")
 
+const searchEventPipeline = require("./pipelines/search/searchEventPipeline")
+
 // Hide Projects
 const hideUserData = require(`./hideProject/hideUserData`)
 const hidePostData = require(`./hideProject/hidePostData`)
 const hideStorieData = require("./hideProject/hideStorieData")
 const hideGeneralData = require(`./hideProject/hideGeneralData`)
-
-// Admin Pipelines
 
 module.exports = {
   hideUserData,
@@ -39,6 +39,8 @@ module.exports = {
   searchUserPipeline,
   userPostsPipeline,
   reportedElementPipeline,
+
+  searchEventPipeline,
 
   bannedElementPipeline,
   banHistoryMadeByAdmin,
