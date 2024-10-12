@@ -51,6 +51,9 @@ module.exports = {
     note: {
       maxNoteLength: 200,
     },
+    task: {
+      maxTitleLength: 50,
+    },
   },
 
   inappropriateLabels: [

@@ -10,7 +10,7 @@ const {
   success: { fetched },
 } = require("../../../../constants/index")
 
-const SearchNotes = async (props) => {
+const searchNotes = async (props) => {
   const { userId, page, maxPageSize } = props
   const searchQuery = props.q || ""
   const filter = props?.filter || "upcoming" // `upcoming` or `past`
@@ -33,9 +33,9 @@ const SearchNotes = async (props) => {
 
     // Convert to TZ
     const timeZone = loggedUser?.timeZone || defaultTimeZone
-    response.data = response.data.map((event) => ({
-      ...event,
-      created_at: convertTimeZone(event.created_at, timeZone),
+    response.data = response.data.map((note) => ({
+      ...note,
+      created_at: convertTimeZone(note.created_at, timeZone),
     }))
 
     return fetched(`Notes`, { response })
@@ -44,4 +44,4 @@ const SearchNotes = async (props) => {
   }
 }
 
-module.exports = SearchNotes
+module.exports = searchNotes

@@ -1,9 +1,9 @@
 const mongoose = require("mongoose")
 
 const dayTaskSchema = mongoose.Schema({
-  day: String,
   title: String,
-  marked: Boolean,
+  value: Boolean,
+  date: String,
   created_at: {
     type: Date,
     default: Date.now,
