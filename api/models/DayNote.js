@@ -1,9 +1,9 @@
 const mongoose = require("mongoose")
 
 const dayNoteSchema = mongoose.Schema({
-  day: String,
-  data: String,
-  createdAt: {
+  text: String,
+  date: String,
+  created_at: {
     type: Date,
     default: Date.now,
   },

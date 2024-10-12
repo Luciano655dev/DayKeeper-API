@@ -21,6 +21,7 @@ const getStorieLikesPipeline = require("./pipelines/storie/getStorieLikesPipelin
 const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipeline")
 
 const searchEventPipeline = require("./pipelines/search/searchEventPipeline")
+const searchNotePipeline = require("./pipelines/search/searchNotePipeline")
 
 // Hide Projects
 const hideUserData = require(`./hideProject/hideUserData`)
@@ -41,6 +42,7 @@ module.exports = {
   reportedElementPipeline,
 
   searchEventPipeline,
+  searchNotePipeline,
 
   bannedElementPipeline,
   banHistoryMadeByAdmin,

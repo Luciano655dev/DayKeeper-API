@@ -1,4 +1,3 @@
-// TODO search by title, by date, upcoming, past and ongoing events
 const { searchEventPipeline } = require("../../../repositories/index")
 const convertTimeZone = require(`../../../utils/convertTimeZone`)
 const getDataWithPages = require("../../getDataWithPages")
@@ -16,8 +15,6 @@ const searchEvent = async (props) => {
   const searchQuery = props.q || ""
   const filter = props?.filter || "upcoming"
   const loggedUser = props.user
-
-  console.log(searchEventPipeline)
 
   try {
     if (!mongoose.Types.ObjectId.isValid(userId)) return invalidValue("User ID")
@@ -41,6 +38,7 @@ const searchEvent = async (props) => {
       date: format(convertTimeZone(event.timeStart, timeZone), "dd-MM-yyyy"),
       timeStart: convertTimeZone(event.timeStart, timeZone),
       timeEnd: convertTimeZone(event.timeEnd, timeZone),
+      created_at: convertTimeZone(event.created_at, timeZone),
     }))
 
     return fetched(`Events`, { response })

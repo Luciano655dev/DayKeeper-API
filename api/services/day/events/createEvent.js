@@ -21,6 +21,7 @@ const createEvent = async (props) => {
   try {
     const timeZone = loggedUser?.timeZone || defaultTimeZone
 
+    // Format dates to convert Later
     const startDateTime = parse(
       `${date} ${timeStart}`,
       "dd-MM-yyyy HH:mm:ss",
@@ -31,10 +32,6 @@ const createEvent = async (props) => {
       "dd-MM-yyyy HH:mm:ss",
       new Date()
     )
-
-    // Convert to TZ
-    const zonedStartDateTime = convertTimeZone(startDateTime, timeZone)
-    const zonedEndDateTime = convertTimeZone(endDateTime, timeZone)
 
     const newEvent = new DayEvent({
       title,
@@ -51,8 +48,9 @@ const createEvent = async (props) => {
     return created(`Day Event`, {
       event: {
         ...newEvent._doc,
-        timeStart: zonedStartDateTime,
-        timeEnd: zonedEndDateTime,
+        timeStart: convertTimeZone(startDateTime, timeZone),
+        timeEnd: convertTimeZone(endDateTime, timeZone),
+        created_at: convertTimeZone(new Date(), timeZone),
       },
     })
   } catch (error) {

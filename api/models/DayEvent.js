@@ -7,7 +7,7 @@ const dayEventSchema = mongoose.Schema({
   timeStart: Date,
   timeEnd: Date,
   location: String,
-  createdAt: {
+  created_at: {
     type: Date,
     default: Date.now,
   },

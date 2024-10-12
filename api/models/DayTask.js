@@ -4,7 +4,7 @@ const dayTaskSchema = mongoose.Schema({
   day: String,
   title: String,
   marked: Boolean,
-  createdAt: {
+  created_at: {
     type: Date,
     default: Date.now,
   },

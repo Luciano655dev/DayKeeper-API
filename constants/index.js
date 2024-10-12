@@ -48,6 +48,9 @@ module.exports = {
       maxEventTitleLength: 50,
       maxEventDescriptionLength: 100,
     },
+    note: {
+      maxNoteLength: 200,
+    },
   },
 
   inappropriateLabels: [
