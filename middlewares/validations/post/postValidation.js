@@ -1,13 +1,9 @@
 const Post = require("../../../api/models/Post")
 const deleteFile = require("../../../api/utils/deleteFile")
-const {
-  serverError,
-  inputTooLong,
-  fieldsNotFilledIn,
-} = require("../../../constants/index")
+const { serverError } = require("../../../constants/index")
 
 const postValidation = async (req, res, next) => {
-  const { data } = req.body
+  const { data, privacy } = req.body
   const loggedUser = req.user
   const maxDataLength = 1000
 
@@ -40,6 +36,17 @@ const postValidation = async (req, res, next) => {
 
     if (lastPostToday)
       return handleBadRequest(400, "You can only make one post per day")
+
+    // Privacy
+    switch (privacy) {
+      case "public":
+      case "private":
+      case "close friends":
+      case undefined:
+        break
+      default:
+        return handleBadRequest(400, "Invalid privacy value")
+    }
 
     return next()
   } catch (error) {

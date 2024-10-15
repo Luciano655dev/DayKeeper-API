@@ -24,7 +24,46 @@ const userStoriesPipeline = (mainUser, name) => [
     },
   },
   {
+    $lookup: {
+      from: "users",
+      localField: "closeFriendId",
+      foreignField: "_id",
+      as: "closeFriendInfo",
+      pipeline: [
+        {
+          $project: hideUserData,
+        },
+      ],
+    },
+  },
+  {
+    $addFields: {
+      closeFriendInfo: { $arrayElemAt: ["$closeFriendInfo", 0] },
+    },
+  },
+  {
     $match: {
+      $or: [
+        { privacy: undefined },
+        { privacy: "public" },
+        {
+          $and: [
+            { privacy: "private" },
+            {
+              "user_info._id": mainUser._id,
+            },
+          ],
+        },
+        {
+          $and: [
+            { privacy: "close friends" },
+            {
+              $expr: { $eq: ["$closeFriendId", mainUser._id] },
+            },
+          ],
+        },
+      ],
+
       $and: [
         { user: { $ne: mainUser.blocked_users } }, // cant be blocked
         {

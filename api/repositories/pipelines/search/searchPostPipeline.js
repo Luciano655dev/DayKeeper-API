@@ -130,14 +130,48 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
     },
   },
   {
+    $lookup: {
+      from: "users",
+      localField: "closeFriendId",
+      foreignField: "_id",
+      as: "closeFriendInfo",
+      pipeline: [
+        {
+          $project: hideUserData,
+        },
+      ],
+    },
+  },
+  {
+    $addFields: {
+      closeFriendInfo: { $arrayElemAt: ["$closeFriendInfo", 0] },
+    },
+  },
+  {
     $match: {
       $and: [
         { "block_info.0": { $exists: false } },
         { "user_info.banned": { $ne: true } },
         {
           $or: [
-            { title: { $regex: new RegExp(searchQuery, "i") } },
-            { "user_info.name": { $regex: new RegExp(searchQuery, "i") } },
+            { privacy: undefined },
+            { privacy: "public" },
+            {
+              $and: [
+                { privacy: "private" },
+                {
+                  "user_info._id": mainUser._id,
+                },
+              ],
+            },
+            {
+              $and: [
+                { privacy: "close friends" },
+                {
+                  $expr: { $eq: ["$closeFriendId", mainUser._id] },
+                },
+              ],
+            },
           ],
         },
         {
@@ -149,6 +183,13 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
                 { "following_info.0": { $exists: true } },
               ],
             },
+          ],
+        },
+
+        {
+          $or: [
+            { title: { $regex: new RegExp(searchQuery, "i") } },
+            { "user_info.name": { $regex: new RegExp(searchQuery, "i") } },
           ],
         },
       ],

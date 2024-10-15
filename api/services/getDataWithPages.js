@@ -3,6 +3,7 @@ const User = require("../models/User")
 const Storie = require("../models/Storie")
 const Followers = require("../models/Followers")
 const Blocks = require("../models/Blocks")
+const CloseFriend = require("../models/CloseFriends")
 const PostLikes = require("../models/PostLikes")
 const PostComments = require("../models/PostComments")
 const CommentLikes = require("../models/CommentLikes")
@@ -155,6 +156,9 @@ const getDataWithPages = async (
         break
       case "Follower":
         Model = Followers
+        break
+      case "CloseFriend":
+        Model = CloseFriend
         break
       case "Block":
         Model = Blocks

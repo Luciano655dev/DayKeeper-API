@@ -1,11 +1,6 @@
 const DayTask = require("../../../models/DayTask")
-const mongoose = require("mongoose")
 
 const {
-  day: {
-    task: { maxTitleLength },
-  },
-  errors: { invalidValue, inputTooLong },
   success: { updated },
 } = require("../../../../constants/index")
 
@@ -16,18 +11,16 @@ const editTask = async (props) => {
     value,
     title,
     date,
+    privacy,
     loggedUser,
   } = props
 
-  if (title && title?.length > maxTitleLength) inputTooLong("Task Title")
-
   try {
-    if (!mongoose.Types.ObjectId.isValid(taskId)) return invalidValue("Task ID")
-
     const updateData = {
       ...(title && { title }),
       ...(value && { value }),
       ...(date && { date }),
+      ...(privacy && { privacy }),
       user: loggedUser._id,
     }
 

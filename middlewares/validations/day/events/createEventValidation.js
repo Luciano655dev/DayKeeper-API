@@ -14,6 +14,7 @@ const createEvent = async (req, res, next) => {
     date, // dd-mm-yyyy
     timeStart, // HH:mm:ss
     timeEnd, // HH:mm:ss
+    privacy,
     placeId, // location
   } = req.body
 
@@ -29,14 +30,15 @@ const createEvent = async (req, res, next) => {
 
   const parsedTimeStart = parse(
     `${date} ${timeStart}`,
-    "dd-MM-yyyy HH-mm-ssXXX",
+    "dd-MM-yyyy HH:mm:ss",
     new Date()
   )
   const parsedTimeEnd = parse(
     `${date} ${timeEnd}`,
-    "dd-MM-yyyy HH-mm-ssXXX",
+    "dd-MM-yyyy HH:mm:ss",
     new Date()
   )
+
   if (
     !/^\d{2}:\d{2}:\d{2}$/.test(timeStart) ||
     !isValid(parsedTimeStart) ||
@@ -44,6 +46,17 @@ const createEvent = async (req, res, next) => {
     !isValid(parsedTimeEnd)
   )
     return res.status(413).json({ message: "The Start/End Date is Invalid" })
+
+  // Privacy
+  switch (privacy) {
+    case "public":
+    case "private":
+    case "close friends":
+    case undefined:
+      break
+    default:
+      return res.status(404).json({ message: "Invalid privacy value" })
+  }
 
   try {
     if (placeId) {

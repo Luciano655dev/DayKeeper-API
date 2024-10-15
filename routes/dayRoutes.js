@@ -22,6 +22,7 @@ const {
 
 // Middlewares
 const checkTokenMW = require("../middlewares/checkTokenMW")
+const checkElementPrivacy = require("../middlewares/checkElementPrivacyMW")
 const createEventValidation = require("../middlewares/validations/day/events/createEventValidation")
 const editEventValidation = require("../middlewares/validations/day/events/editEventValidation")
 const createNoteValidation = require("../middlewares/validations/day/notes/createNoteValidation")
@@ -30,9 +31,7 @@ const createTaskValidation = require("../middlewares/validations/day/tasks/creat
 const editTaskValidation = require("../middlewares/validations/day/tasks/editTaskValidation")
 
 // Get Validations
-const checkBannedUser = require("../middlewares/checkBannedUserMW")
-const checkBlockedUser = require("../middlewares/checkBlockedUserMW")
-const checkPrivateUserMW = require("../middlewares/checkPrivateUserMW")
+const checkValidUserMW = require("../middlewares/checkValidUserMW")
 
 // Routes (/day)
 
@@ -44,9 +43,8 @@ router.get("/event/search/:userId", checkTokenMW, searchEvents)
 router.get(
   "/event/:name/:eventId",
   checkTokenMW,
-  checkBannedUser,
-  checkBlockedUser,
-  checkPrivateUserMW,
+  checkValidUserMW,
+  checkElementPrivacy("event"),
   getEventById
 )
 
@@ -58,9 +56,8 @@ router.get("/note/search/:userId", checkTokenMW, searchNotes)
 router.get(
   "/note/:name/:noteId",
   checkTokenMW,
-  checkBannedUser,
-  checkBlockedUser,
-  checkPrivateUserMW,
+  checkValidUserMW,
+  checkElementPrivacy("note"),
   getNoteById
 )
 
@@ -72,9 +69,8 @@ router.get("/task/search/:userId", checkTokenMW, searchTasks)
 router.get(
   "/task/:name/:taskId",
   checkTokenMW,
-  checkBannedUser,
-  checkBlockedUser,
-  checkPrivateUserMW,
+  checkValidUserMW,
+  checkElementPrivacy("task"),
   getTaskById
 )
 

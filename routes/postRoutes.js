@@ -23,9 +23,9 @@ const postValidation = require("../middlewares/validations/post/postValidation")
 const postEditValidation = require("../middlewares/validations/post/postEditValidation")
 
 const checkTokenMW = require("../middlewares/checkTokenMW")
-const checkPrivateUserMW = require("../middlewares/checkPrivateUserMW")
-const checkBlockedUserMW = require("../middlewares/checkBlockedUserMW")
+const checkValidUserMW = require("../middlewares/checkValidUserMW")
 const checkBannedUserMW = require("../middlewares/checkBannedUserMW")
+const checkElementPrivacy = require("../middlewares/checkElementPrivacyMW")
 const checkSameDayMW = require("../middlewares/checkSameDayMW")
 
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
@@ -34,9 +34,8 @@ const detectInappropriateFileMW = require("../middlewares/detectInappropriateFil
 router.get(
   "/:name/:title",
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  checkBlockedUserMW,
+  checkValidUserMW,
+  checkElementPrivacy("post"),
   getPostByName
 ) // One Post
 router.post(
@@ -61,44 +60,27 @@ router.put(
 router.delete("/:title", checkTokenMW, deletePost) // Delete Post
 
 // ========== interaction ==========
-router.post(
-  "/:name/:title/report",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  reportPost
-) // Report a post
-router.post(
-  "/:name/:title/like",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  checkBlockedUserMW,
-  likePost
-) // Like a Post
+router.post("/:name/:title/report", checkTokenMW, checkBannedUserMW, reportPost) // Report a post
+router.post("/:name/:title/like", checkTokenMW, checkValidUserMW, likePost) // Like a Post
 router.get(
   "/:name/:title/likes",
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  checkBlockedUserMW,
+  checkValidUserMW,
+  checkElementPrivacy("post"),
   getPostLikes
 ) // get post likes
 router.post(
   "/:name/:title/comment",
   checkTokenMW,
   checkSameDayMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  checkBlockedUserMW,
+  checkValidUserMW,
   commentPost
 ) // Comment in a post
 router.get(
   "/:name/:title/comments",
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  checkBlockedUserMW,
+  checkValidUserMW,
+  checkElementPrivacy("post"),
   getPostComments
 ) // Get Post COmments
 router.delete("/:name/:title/comment/:usercomment", checkTokenMW, deleteComment) // Delete a comment
@@ -106,24 +88,15 @@ router.post(
   "/:name/:title/like/:usercomment",
   checkTokenMW,
   checkSameDayMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  checkBlockedUserMW,
+  checkValidUserMW,
   likeComment
 ) // Like a comment
 router.get(
   "/:name/:title/:usercomment/likes",
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  checkBlockedUserMW,
+  checkValidUserMW,
+  checkElementPrivacy("post"),
   getCommentLikes
 )
-
-/*
-  GET /:name/:title/likes
-  GET /:name/:title/comments
-  GET /:name/:title/:userComment/likes
-*/
 
 module.exports = router

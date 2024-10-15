@@ -11,6 +11,7 @@ const createEvent = async (props) => {
   const {
     title,
     description,
+    privacy,
     date, // dd-mm-yyyy
     timeStart, // HH:mm:ss
     timeEnd, // HH:mm:ss
@@ -40,6 +41,7 @@ const createEvent = async (props) => {
       timeStart: startDateTime,
       timeEnd: endDateTime,
       placeId,
+      privacy,
       user: loggedUser._id,
     })
 

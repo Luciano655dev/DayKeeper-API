@@ -4,6 +4,11 @@ const dayTaskSchema = mongoose.Schema({
   title: String,
   value: Boolean,
   date: String,
+  privacy: {
+    type: String,
+    enum: ["public", "private", "close friends"],
+    default: "public",
+  },
   created_at: {
     type: Date,
     default: Date.now,

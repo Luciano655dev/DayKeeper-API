@@ -12,6 +12,8 @@ const {
   getFollowRequests,
   respondFollowRequest,
   removeFollower,
+  addOrRemoveFromCloseFriends,
+  getCloseFriends,
   blockUser,
   getBlockedUsers,
   reportUser,
@@ -23,16 +25,14 @@ const multerConfig = require("../api/config/multer")
 const handleMulterError = require("../middlewares/handleMulterError")
 const userEditValidation = require("../middlewares/validations/user/userEditValidation")
 const checkTokenMW = require("../middlewares/checkTokenMW")
+const checkValidUserMW = require("../middlewares/checkValidUserMW")
 const checkBannedUserMW = require("../middlewares/checkBannedUserMW")
-const checkPrivateUserMW = require("../middlewares/checkPrivateUserMW")
 
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
 // Routes
 router.get("/blocks", checkTokenMW, getBlockedUsers)
 router.get("/follow_requests", checkTokenMW, getFollowRequests)
-
-router.get("/:name", checkTokenMW, checkBannedUserMW, getUser)
 router.put(
   "/user",
   checkTokenMW,
@@ -46,25 +46,13 @@ router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
 router.delete("/user", checkTokenMW, deleteUser)
 
 // Follows
-router.get(
-  "/:name/followers",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getFollowers
-)
-router.get(
-  "/:name/following",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getFollowing
-)
-router.post("/:name/follow", checkTokenMW, checkBannedUserMW, followUser)
+router.get("/:name/followers", checkTokenMW, checkValidUserMW, getFollowers)
+router.get("/:name/following", checkTokenMW, checkValidUserMW, getFollowing)
+router.post("/:name/follow", checkTokenMW, checkValidUserMW, followUser)
 router.post(
   "/:name/respond_follow",
   checkTokenMW,
-  checkBannedUserMW,
+  checkValidUserMW,
   respondFollowRequest
 )
 router.delete(
@@ -74,17 +62,23 @@ router.delete(
   removeFollower
 )
 
+// Close Friends
+router.post(
+  "/closeFriends/:name",
+  checkTokenMW,
+  checkValidUserMW,
+  addOrRemoveFromCloseFriends
+)
+router.get("/closeFriends", checkTokenMW, getCloseFriends)
+
 // Interactions
 router.post("/:name/block", checkTokenMW, checkBannedUserMW, blockUser)
 router.post("/:name/report", checkTokenMW, checkBannedUserMW, reportUser)
 
 // posts
-router.get(
-  "/:name/posts",
-  checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getUserPosts
-)
+router.get("/:name/posts", checkTokenMW, checkValidUserMW, getUserPosts)
+
+// GET USER
+router.get("/:name", checkTokenMW, checkBannedUserMW, getUser)
 
 module.exports = router

@@ -15,8 +15,9 @@ const {
 
 // Middlewares
 const checkTokenMW = require("../middlewares/checkTokenMW")
-const checkBannedUserMW = require(`../middlewares/checkBannedUserMW`)
-const checkPrivateUserMW = require(`../middlewares/checkPrivateUserMW`)
+const checkValidUserMW = require("../middlewares/checkValidUserMW")
+const checkBannedUserMW = require("../middlewares/checkBannedUserMW")
+const checkElementPrivacy = require("../middlewares/checkElementPrivacyMW")
 const verifyStoriesOwnershipMW = require("../middlewares/verifyStoriesOwnership")
 const verifyStorieNameIdRelation = require("../middlewares/verifyStorieNameIdRelation")
 
@@ -26,30 +27,28 @@ const multerConfig = require("../api/config/multer")
 const handleMulterError = require("../middlewares/handleMulterError")
 
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
+const verifyStorieOwnership = require("../middlewares/verifyStoriesOwnership")
 
 // Routes
+router.get("/:name", checkTokenMW, checkValidUserMW, getTodayStories) // get today user stories
+router.get("/:name/all", checkTokenMW, checkValidUserMW, getUserStories) // get All User Stories
 router.get(
-  "/:name",
+  "/:storieId/likes",
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getTodayStories
-) // get today user stories
+  verifyStorieOwnership,
+  getStorieLikes
+) // Get Storie Likes
 router.get(
-  "/:name/all",
+  "/:storieId/views",
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
-  getUserStories
-) // get All User Stories
-router.get("/:storieId/likes", checkTokenMW, getStorieLikes) // Get Storie Likes
-router.get("/:storieId/views", checkTokenMW, getStorieViews) // Get Storie Views
+  verifyStorieOwnership,
+  getStorieViews
+) // Get Storie Views
 router.get(
   "/:name/:title",
   checkTokenMW,
   verifyStorieNameIdRelation,
-  checkBannedUserMW,
-  checkPrivateUserMW,
+  checkValidUserMW,
   getStorie
 ) // get Storie
 
@@ -65,8 +64,8 @@ router.post(
   "/:name/:storieId/like",
   verifyStorieNameIdRelation,
   checkTokenMW,
-  checkBannedUserMW,
-  checkPrivateUserMW,
+  checkValidUserMW,
+  checkElementPrivacy,
   likeStorie
 ) // like a storie
 router.delete(
@@ -79,7 +78,6 @@ router.post(
   `/:name/:title/report`,
   checkTokenMW,
   checkBannedUserMW,
-  checkPrivateUserMW,
   reportStorie
 ) // report storie
 

@@ -87,6 +87,7 @@ const searchEventsController = async (req, res) => {
 
     return res.status(code).json({ message, ...response })
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: `${error}` })
   }
 }
@@ -173,6 +174,7 @@ const createTaskController = async (req, res) => {
 
     return res.status(code).json({ message, task })
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ error })
   }
 }

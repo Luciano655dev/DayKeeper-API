@@ -2,6 +2,11 @@ const mongoose = require("mongoose")
 
 const storieSchema = mongoose.Schema({
   title: String,
+  privacy: {
+    type: String,
+    enum: ["public", "private", "close friends"],
+    default: "public",
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

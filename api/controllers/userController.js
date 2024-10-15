@@ -15,6 +15,8 @@ const reportUser = require("../services/user/reportUser")
 const getFollowing = require("../services/user/getFollowing")
 const getFollowers = require("../services/user/getFollowers")
 const getFollowRequests = require("../services/user/getFollowRequests")
+const addOrRemoveFromCloseFriends = require("../services/user/addOrRemoveFromCloseFriends")
+const getCloseFriends = require("../services/user/getCloseFriends")
 
 // getUserByName
 const getUserController = async (req, res) => {
@@ -46,7 +48,7 @@ const getUserPostsController = async (req, res) => {
       order,
       maxPageSize,
       page,
-      user: req.user,
+      loggedUser: req.user,
     })
 
     return res.status(code).json({ ...response })
@@ -221,6 +223,42 @@ const getFollowRequestsController = async (req, res) => {
   }
 }
 
+// add Or Remove From Close Friends
+const addOrRemoveFromCloseFriendsController = async (req, res) => {
+  try {
+    const { code, message } = await addOrRemoveFromCloseFriends({
+      loggedUser: req.user,
+      ...req.params,
+    })
+
+    return res.status(code).json({ message })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
+  }
+}
+
+// getCloseFriends
+const getCloseFriendsController = async (req, res) => {
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getCloseFriends({
+      loggedUser: req.user,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
+  }
+}
+
 // blockUser
 const blockUserController = async (req, res) => {
   try {
@@ -269,6 +307,8 @@ module.exports = {
   getFollowRequests: getFollowRequestsController,
   respondFollowRequest: respondFollowRequestController,
   removeFollower: removeFollowerController,
+  addOrRemoveFromCloseFriends: addOrRemoveFromCloseFriendsController,
+  getCloseFriends: getCloseFriendsController,
   blockUser: blockUserController,
   getBlockedUsers: getBlockedUsersController,
   reportUser: reportUserController,

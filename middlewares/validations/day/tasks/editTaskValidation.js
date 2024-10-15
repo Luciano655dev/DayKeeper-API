@@ -1,4 +1,5 @@
 const getTaskById = require("../../../../api/services/day/tasks/getTaskById")
+const mongoose = require("mongoose")
 const { parse, isValid } = require("date-fns")
 const {
   day: {
@@ -8,7 +9,7 @@ const {
 
 const editTaskValidation = async (req, res, next) => {
   const { taskId } = req.params
-  const { title, value, date } = req.body
+  const { title, value, date, privacy } = req.body
 
   // Validations
   if (title && title?.length > maxTitleLength)
@@ -19,6 +20,21 @@ const editTaskValidation = async (req, res, next) => {
   const parsedDate = parse(date, "dd-MM-yyyy", new Date())
   if (date && (!/^\d{2}-\d{2}-\d{4}$/.test(date) || !isValid(parsedDate)))
     return res.status(400).json({ message: "The Date is Invalid" })
+
+  if (!mongoose.Types.ObjectId.isValid(taskId))
+    return res.status(400).json({ message: "The Task ID is Invalid" })
+
+  // Privacy
+  if (privacy)
+    switch (privacy) {
+      case "public":
+      case "private":
+      case "close friends":
+      case undefined:
+        break
+      default:
+        return res.status(404).json({ message: "Invalid privacy value" })
+    }
 
   try {
     const task = await getTaskById({ taskId })

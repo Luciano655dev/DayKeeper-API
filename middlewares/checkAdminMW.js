@@ -1,6 +1,6 @@
 const { serverError } = require("../constants/index")
 
-async function checkBannedUserMW(req, res, next) {
+async function checkAdminMW(req, res, next) {
   const loggedUser = req.user
 
   try {
@@ -14,4 +14,4 @@ async function checkBannedUserMW(req, res, next) {
   }
 }
 
-module.exports = checkBannedUserMW
+module.exports = checkAdminMW

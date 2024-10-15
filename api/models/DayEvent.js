@@ -7,6 +7,11 @@ const dayEventSchema = mongoose.Schema({
   timeStart: Date,
   timeEnd: Date,
   location: String,
+  privacy: {
+    type: String,
+    enum: ["public", "private", "close friends"],
+    default: "public",
+  },
   created_at: {
     type: Date,
     default: Date.now,

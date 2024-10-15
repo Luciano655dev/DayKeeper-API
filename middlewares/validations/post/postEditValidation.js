@@ -2,7 +2,7 @@ const deleteFile = require("../../../api/utils/deleteFile")
 const { serverError } = require("../../../constants/index")
 
 const postEditValidation = async (req, res, next) => {
-  const { data } = req.body
+  const { data, privacy } = req.body
   const maxDataLength = 1000
 
   function handleBadRequest(errorCode, message) {
@@ -15,6 +15,19 @@ const postEditValidation = async (req, res, next) => {
   try {
     if (data && data.length > maxDataLength)
       return handleBadRequest(413, `Text is too long`)
+
+    // Privacy
+    if (privacy) {
+      switch (privacy) {
+        case "public":
+        case "private":
+        case "close friends":
+        case undefined:
+          break
+        default:
+          return handleBadRequest(400, "Invalid privacy value")
+      }
+    }
 
     return next()
   } catch (error) {

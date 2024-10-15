@@ -12,6 +12,7 @@ const editNote = async (props) => {
 
     text,
     date,
+    privacy,
     loggedUser,
   } = props
 
@@ -21,6 +22,7 @@ const editNote = async (props) => {
     const updateData = {
       ...(text && { text }),
       ...(date && { date }),
+      ...(privacy && { privacy }),
       user: loggedUser._id,
     }
 

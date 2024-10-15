@@ -5,11 +5,13 @@ const {
   success: { fetched },
 } = require("../../../constants/index")
 
-const getUserPosts = async ({ page, maxPageSize, order, name, user }) => {
+const getUserPosts = async (props) => {
+  const { page, maxPageSize, order, name, loggedUser } = props
+
   try {
     const response = await getDataWithPages({
       type: "Post",
-      pipeline: userPostsPipeline(user, name),
+      pipeline: userPostsPipeline(loggedUser, name),
       order,
       page,
       maxPageSize,

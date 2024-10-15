@@ -8,7 +8,8 @@ const {
 } = require("../../../constants/index")
 
 const createPost = async (props) => {
-  const { data, loggedUser, files } = props
+  // privacy = undefined, public, private or close friends
+  const { data, loggedUser, files, privacy } = props
   const placesIds = props?.placesIds?.split(",") || []
   const title = getTodayDate()
 
@@ -30,7 +31,7 @@ const createPost = async (props) => {
       title,
       data,
       files,
-      placeId: hasValidPlaceId ? placeId : undefined,
+      privacy,
       user: loggedUser._id,
       created_at: Date.now(),
     })

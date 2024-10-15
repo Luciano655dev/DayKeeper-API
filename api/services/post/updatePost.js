@@ -2,21 +2,26 @@ const Post = require("../../models/Post")
 const deleteFile = require("../../utils/deleteFile")
 const findPost = require("./get/findPost")
 const getPlaceById = require("../location/getPlaceById")
+
+const deletePostLikes = require("./delete/deletePostLikes")
+const deletePostComments = require("./delete/deletePostComments")
+const deleteCommentLikes = require("./delete/deleteCommentLikes")
+
 const {
   errors: { notFound, inputTooLong },
   success: { updated },
 } = require("../../../constants/index")
 
 const updatePost = async (props) => {
-  // TODO: review this
   const placesIds = props?.placesIds?.split(",") || []
   const {
     data,
-    keep_files: keepFilesFromProps,
+    privacy,
     title, // req.params
     loggedUser, // req.user
     reqFiles, // req.files
   } = props
+  const keepFilesFromProps = props?.keep_files || ""
 
   try {
     // find Post
@@ -44,6 +49,21 @@ const updatePost = async (props) => {
       if (keep_files.includes(i)) continue
 
       deleteFile(post.files[i].key)
+    }
+
+    /* Verify Privacy */
+    if (privacy && post?.privacy != privacy) {
+      switch (privacy) {
+        case "private":
+        case "close_friends":
+          deletePostLikes(post._id)
+          deletePostComments(post._id)
+          deleteCommentLikes(post._id)
+          break
+        case "public":
+        default:
+          break
+      }
     }
 
     const newPostfiles = files.filter((el, index) => keep_files.includes(index))
@@ -75,6 +95,7 @@ const updatePost = async (props) => {
       {
         $set: {
           data: data || post.data,
+          privacy: privacy || post?.privacy,
           files,
 
           edited_at: Date.now(),
@@ -91,6 +112,7 @@ const updatePost = async (props) => {
 
     return updated(`post`)
   } catch (error) {
+    console.log(error)
     for (let i in newFiles) deleteFile(newFiles[i].key)
 
     throw new Error(error.message)

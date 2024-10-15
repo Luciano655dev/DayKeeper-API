@@ -3,6 +3,11 @@ const mongoose = require("mongoose")
 const dayNoteSchema = mongoose.Schema({
   text: String,
   date: String,
+  privacy: {
+    type: String,
+    enum: ["public", "private", "close friends"],
+    default: "public",
+  },
   created_at: {
     type: Date,
     default: Date.now,

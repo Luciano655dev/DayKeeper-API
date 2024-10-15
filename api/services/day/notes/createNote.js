@@ -7,7 +7,7 @@ const {
 } = require("../../../../constants/index")
 
 const createNote = async (props) => {
-  const { date, text, loggedUser } = props
+  const { date, text, privacy, loggedUser } = props
 
   try {
     const timeZone = loggedUser?.timeZone || defaultTimeZone
@@ -15,6 +15,7 @@ const createNote = async (props) => {
     const newNote = new DayNote({
       text,
       date,
+      privacy,
       user: loggedUser._id,
     })
 

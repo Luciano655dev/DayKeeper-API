@@ -1,3 +1,4 @@
+const CloseFriends = require(`../../../models/CloseFriends`)
 const Storie = require(`../../../models/Storie`)
 const StorieLikes = require(`../../../models/StorieLikes`)
 const StorieViews = require(`../../../models/StorieViews`)
@@ -14,54 +15,77 @@ const findStorieByDate = async ({
   view = false,
 }) => {
   try {
-    // find user
-    let storieUser = await findUser({ userInput, hideData: true })
+    const storieUser = await findUser({ userInput, hideData: true })
     if (!storieUser) return null
 
-    // populate
     const pO = populateOptions(fieldsToPopulate)
 
-    // find storie
-    let stories = await Storie.find(
-      { title: storieInput, user: storieUser._id.toString() },
+    const stories = await Storie.find(
+      { title: storieInput, user: storieUser._id },
       hideGeneralData
     ).populate(pO)
 
-    // view storie or not
+    const isInCF = await CloseFriends.exists({
+      userId: storieUser.user,
+      closeFriendId: loggedUserId,
+    })
+    stories = stories.filter(async (storie) => {
+      return (
+        storie.privacy === "public" ||
+        storie.privacy == undefined ||
+        (storie.privacy === "private" &&
+          storie.user_info._id.equals(loggedUserId)) ||
+        (storie.privacy === "close friends" && isInCF)
+      )
+    })
+
     if (view)
-      for (let i in stories) await viewStorie(stories[i]._id, loggedUserId)
+      await Promise.all(
+        stories.map((story) => viewStorie(story._id, loggedUserId))
+      )
 
-    // get storie info
-    const newStories = [...stories]
-    if (storieUser._id.toString() == loggedUserId.toString()) {
-      for (let i in stories) {
-        const likeCounter = await StorieLikes.countDocuments({
-          storieId: stories[i]._id,
-        })
-        const hasLiked = await StorieLikes.exists({
-          storieId: stories[i]._id,
-          userId: loggedUserId,
-        })
+    // If the storie user is the loggeduser, aggregate likes and views
+    if (storieUser._id.toString() === loggedUserId.toString()) {
+      const storieIds = stories.map((story) => story._id)
 
-        const viewCounter = await StorieViews.countDocuments({
-          storieId: stories[i]._id,
-        })
-        const hasViewed = await StorieViews.exists({
-          storieId: stories[i]._id,
-          userId: loggedUserId,
-        })
+      const [likeCounts, viewCounts] = await Promise.all([
+        StorieLikes.aggregate([
+          { $match: { storieId: { $in: storieIds }, userId: loggedUserId } },
+          { $group: { _id: "$storieId", count: { $sum: 1 } } },
+        ]),
+        StorieViews.aggregate([
+          { $match: { storieId: { $in: storieIds }, userId: loggedUserId } },
+          { $group: { _id: "$storieId", count: { $sum: 1 } } },
+        ]),
+      ])
 
-        newStories[i] = {
-          ...newStories[i]._doc,
-          likes: likeCounter,
-          hasLiked: hasLiked ? true : false,
-          views: viewCounter,
-          hasViewed: hasViewed ? true : false,
+      const likeMap = likeCounts.reduce((acc, { _id, count }) => {
+        acc[_id] = count
+        return acc
+      }, {})
+
+      const viewMap = viewCounts.reduce((acc, { _id, count }) => {
+        acc[_id] = count
+        return acc
+      }, {})
+
+      const newStories = stories.map((story) => {
+        const likes = likeMap[story._id] || 0
+        const views = viewMap[story._id] || 0
+
+        return {
+          ...story._doc,
+          likes,
+          hasLiked: likeMap[story._id] ? true : false,
+          views,
+          hasViewed: viewMap[story._id] ? true : false,
         }
-      }
+      })
+
+      return newStories
     }
 
-    return newStories
+    return stories
   } catch (error) {
     throw new Error(error.message)
   }

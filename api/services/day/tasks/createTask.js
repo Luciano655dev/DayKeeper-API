@@ -2,22 +2,12 @@ const DayTask = require("../../../models/DayTask")
 const convertTimeZone = require(`../../../utils/convertTimeZone`)
 
 const {
-  day: {
-    task: { maxTitleLength },
-  },
   user: { defaultTimeZone },
-  errors: { inputTooLong },
   success: { created },
 } = require("../../../../constants/index")
 
 const createTask = async (props) => {
-  const { date, title, value, loggedUser } = props
-
-  if (title?.length > maxTitleLength) return inputTooLong("Task Title")
-  const parsedDate = parse(date, "dd-MM-yyyy", new Date())
-  if (!isValid(parsedDate)) {
-    throw new Error("Invalid date format. Please use 'dd-MM-yyyy'.")
-  }
+  const { date, title, value, privacy, loggedUser } = props
 
   try {
     const timeZone = loggedUser?.timeZone || defaultTimeZone
@@ -26,6 +16,7 @@ const createTask = async (props) => {
       date,
       value,
       title,
+      privacy,
       user: loggedUser._id,
     })
 
@@ -38,7 +29,6 @@ const createTask = async (props) => {
       },
     })
   } catch (error) {
-    console.log(error)
     throw new Error(error.message)
   }
 }

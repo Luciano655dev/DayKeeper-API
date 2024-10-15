@@ -27,6 +27,8 @@ const searchEventPipeline = (searchQuery, userId, filter) => {
       break
   }
 
+  // mainUser
+
   return [
     {
       $lookup: {
@@ -87,7 +89,46 @@ const searchEventPipeline = (searchQuery, userId, filter) => {
       },
     },
     {
+      $lookup: {
+        from: "users",
+        localField: "closeFriendId",
+        foreignField: "_id",
+        as: "closeFriendInfo",
+        pipeline: [
+          {
+            $project: hideUserData,
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        closeFriendInfo: { $arrayElemAt: ["$closeFriendInfo", 0] },
+      },
+    },
+    {
       $match: {
+        $or: [
+          { privacy: undefined },
+          { privacy: "public" },
+          {
+            $and: [
+              { privacy: "private" },
+              {
+                "user_info._id": userId,
+              },
+            ],
+          },
+          {
+            $and: [
+              { privacy: "close friends" },
+              {
+                $expr: { $eq: ["$closeFriendId", userId] },
+              },
+            ],
+          },
+        ],
+
         $and: [
           { "block_info.0": { $exists: false } },
           { "user_info.banned": { $ne: true } },

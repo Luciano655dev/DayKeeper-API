@@ -11,6 +11,7 @@ const elementBanHistoryPipeline = require("./pipelines/admin/elementBanHistoryPi
 const getFollowersPipeline = require("./pipelines/user/getFollowersPipeline")
 const getFollowingPipeline = require("./pipelines/user/getFollowingPipeline")
 const getFollowRequestsPipeline = require("./pipelines/user/getFollowRequestsPipeline")
+const getCloseFriendsPipeline = require("./pipelines/user/getCloseFriendsPipeline")
 const getBlockedUsersPipeline = require("./pipelines/user/getBlockedUsersPipeline")
 
 const getPostLikesPipeline = require("./pipelines/post/getPostLikesPipeline")
@@ -53,6 +54,7 @@ module.exports = {
   getFollowersPipeline,
   getFollowingPipeline,
   getFollowRequestsPipeline,
+  getCloseFriendsPipeline,
   getBlockedUsersPipeline,
   getPostLikesPipeline,
   getPostCommentsPipeline,

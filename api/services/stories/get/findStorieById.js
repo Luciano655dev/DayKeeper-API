@@ -4,6 +4,7 @@ const StorieViews = require(`../../../models/StorieViews`)
 const viewStorie = require("../general/viewStorie")
 const populateOptions = require(`../../../utils/populateOptions`)
 const { hideGeneralData } = require(`../../../repositories/index`)
+const CloseFriends = require("../../../models/CloseFriends")
 
 const findStorieById = async ({
   storieId,
@@ -12,49 +13,51 @@ const findStorieById = async ({
   view = false,
 }) => {
   try {
-    // populate and view
     const pO = populateOptions(fieldsToPopulate)
+    const storie = await Storie.findOne({ _id: storieId }, hideGeneralData)
+      .populate(pO)
+      .lean()
 
-    // find storie
-    let storie = await Storie.findOneAndUpdate(
-      { _id: storieId },
-      {
-        new: true,
-        fields: hideGeneralData,
-      }
-    ).populate(pO)
+    if (!storie) throw new Error("Storie not found")
 
-    // view Storie
+    // privacy
+    if (storie.privacy != "public" && storie.privacy != undefined) {
+      const isInCF = await CloseFriends.exists({
+        userId: storieUser.user,
+        closeFriendId: loggedUserId,
+      })
+
+      if (
+        (storie.privacy === "private" &&
+          storie.user_info._id.equals(loggedUserId)) ||
+        (storie.privacy === "close friends" && isInCF)
+      )
+        return
+    }
+
+    // View Storie if required
     if (view) await viewStorie(storie._id, loggedUserId)
 
-    // get storie Info
-    let newStorie = storie
-    if (loggedUserId.toString() == storie.user._id.toString()) {
-      const likeCounter = await StorieLikes.countDocuments({
-        storieId: storie._id,
-      })
-      const hasLiked = await StorieLikes.exists({
-        storieId: storie._id,
-        userId: loggedUserId,
-      })
+    if (loggedUserId.equals(storie.user)) {
+      const [likeCounter, hasLiked, viewCounter, hasViewed] = await Promise.all(
+        [
+          StorieLikes.countDocuments({ storieId: storie._id }),
+          StorieLikes.exists({ storieId: storie._id, userId: loggedUserId }),
+          StorieViews.countDocuments({ storieId: storie._id }),
+          StorieViews.exists({ storieId: storie._id, userId: loggedUserId }),
+        ]
+      )
 
-      const viewCounter = await StorieViews.countDocuments({
-        storieId: storie._id,
-      })
-      const hasViewed = await StorieViews.exists({
-        storieId: storie._id,
-        userId: loggedUserId,
-      })
-      newStorie = {
-        ...newStorie._doc,
+      return {
+        ...storie,
         likes: likeCounter,
-        hasLiked: hasLiked ? true : false,
+        hasLiked: Boolean(hasLiked),
         views: viewCounter,
-        hasViewed: hasViewed ? true : false,
+        hasViewed: Boolean(hasViewed),
       }
     }
 
-    return newStorie
+    return storie
   } catch (error) {
     throw new Error(error.message)
   }
