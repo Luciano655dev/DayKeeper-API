@@ -9,7 +9,7 @@ const {
 
 const createPost = async (props) => {
   // privacy = undefined, public, private or close friends
-  const { data, loggedUser, files, privacy } = props
+  const { data, loggedUser, files, emotion, privacy } = props
   const placesIds = props?.placesIds?.split(",") || []
   const title = getTodayDate()
 
@@ -32,6 +32,7 @@ const createPost = async (props) => {
       data,
       files,
       privacy,
+      emotion,
       user: loggedUser._id,
       created_at: Date.now(),
     })

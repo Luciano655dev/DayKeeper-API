@@ -17,6 +17,7 @@ const updatePost = async (props) => {
   const {
     data,
     privacy,
+    emotion,
     title, // req.params
     loggedUser, // req.user
     reqFiles, // req.files
@@ -96,6 +97,7 @@ const updatePost = async (props) => {
         $set: {
           data: data || post.data,
           privacy: privacy || post?.privacy,
+          emotion: emotion || post?.emotion,
           files,
 
           edited_at: Date.now(),

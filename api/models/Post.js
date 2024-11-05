@@ -3,6 +3,7 @@ const mongoose = require("mongoose")
 const postSchema = mongoose.Schema({
   title: String,
   data: String,
+  emotion: Number,
   privacy: {
     type: String,
     enum: ["public", "private", "close friends"],

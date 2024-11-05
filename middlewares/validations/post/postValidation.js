@@ -3,7 +3,7 @@ const deleteFile = require("../../../api/utils/deleteFile")
 const { serverError } = require("../../../constants/index")
 
 const postValidation = async (req, res, next) => {
-  const { data, privacy } = req.body
+  const { data, privacy, emotion } = req.body
   const loggedUser = req.user
   const maxDataLength = 1000
 
@@ -47,6 +47,15 @@ const postValidation = async (req, res, next) => {
       default:
         return handleBadRequest(400, "Invalid privacy value")
     }
+
+    /* Emotions */
+    if (
+      !emotion ||
+      emotion > 100 ||
+      emotion < 0 ||
+      !Number(emotion).isInteger()
+    )
+      return handleBadRequest(400, "Invalid emotion value")
 
     return next()
   } catch (error) {
