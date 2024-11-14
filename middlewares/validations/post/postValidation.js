@@ -1,6 +1,8 @@
 const Post = require("../../../api/models/Post")
 const deleteFile = require("../../../api/utils/deleteFile")
-const { serverError } = require("../../../constants/index")
+const {
+  errors: { serverError },
+} = require("../../../constants/index")
 
 const postValidation = async (req, res, next) => {
   const { data, privacy, emotion } = req.body
@@ -49,17 +51,15 @@ const postValidation = async (req, res, next) => {
     }
 
     /* Emotions */
-    if (
-      !emotion ||
-      emotion > 100 ||
-      emotion < 0 ||
-      !Number(emotion).isInteger()
-    )
+    if (!emotion || emotion > 100 || emotion < 0 || isNaN(emotion))
       return handleBadRequest(400, "Invalid emotion value")
+
+    console.log("next")
 
     return next()
   } catch (error) {
-    return handleBadRequest(500, serverError(error.message))
+    console.log(error)
+    return res.status(500).json({ message: serverError(error.message) })
   }
 }
 

@@ -1,5 +1,7 @@
 const deleteFile = require("../../../api/utils/deleteFile")
-const { serverError } = require("../../../constants/index")
+const {
+  errors: { serverError },
+} = require("../../../constants/index")
 
 const postEditValidation = async (req, res, next) => {
   const { data, privacy, emotion } = req.body
@@ -38,7 +40,7 @@ const postEditValidation = async (req, res, next) => {
 
     return next()
   } catch (error) {
-    return handleBadRequest(500, serverError(error.message).message)
+    return res.status(500).json({ message: serverError(error.message).message })
   }
 }
 
