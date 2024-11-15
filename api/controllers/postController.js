@@ -20,7 +20,7 @@ const getPostController = async (req, res) => {
     const { code, message, post } = await getPost({
       ...req.params,
       queryParams: req.query.populate,
-      loggedUserId: req.user.id,
+      loggedUser: req.user,
     })
 
     return res.status(code).json({ message, post })
@@ -128,6 +128,7 @@ const getPostLikesController = async (req, res) => {
   try {
     const { code, message, response } = await getPostLikes({
       ...req.params,
+      loggedUser: req.user,
       page,
       maxPageSize,
     })
@@ -165,6 +166,7 @@ const getPostCommentsController = async (req, res) => {
   try {
     const { code, message, response } = await getPostComments({
       ...req.params,
+      loggedUser: req.user,
       page,
       maxPageSize,
     })
@@ -201,6 +203,7 @@ const getCommentLikesController = async (req, res) => {
   try {
     const { code, message, response } = await getCommentLikes({
       ...req.params,
+      loggedUser: req.user,
       page,
       maxPageSize,
     })

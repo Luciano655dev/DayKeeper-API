@@ -1,9 +1,11 @@
-const PostComments = require("../../models/PostComments")
-const findPost = require("./get/findPost")
+const Post = require("../../models/Post")
 const findUser = require("../user/get/findUser")
 const getDataWithPages = require("../getDataWithPages")
 const convertTimeZone = require(`../../utils/convertTimeZone`)
-const { getCommentLikesPipeline } = require("../../repositories/index")
+const {
+  getCommentLikesPipeline,
+  getPostPipeline,
+} = require("../../repositories/index")
 
 const {
   errors: { notFound },
@@ -11,33 +13,14 @@ const {
 } = require("../../../constants/index")
 
 const getCommentLikes = async (props) => {
-  const {
-    title,
-    name: postUsername,
-    usercomment: commentUsername,
-    page,
-    maxPageSize,
-  } = props
+  const { title, name, usercomment, loggedUser, page, maxPageSize } = props
 
   try {
-    const userComment = await findUser({ userInput: commentUsername })
-    if (!userComment) return notFound("User")
-
-    const post = await findPost({
-      userInput: postUsername,
-      title,
-      type: "username",
-    })
+    const post = await Post.aggregate(getPostPipeline(name, title, loggedUser))
     if (!post) return notFound("Post")
 
-    const comment = await PostComments.findOne({
-      postId: post._id,
-      userId: userComment._id,
-    })
-    if (!comment) return notFound("Comment")
-
     const usersThatLiked = await getDataWithPages({
-      pipeline: getCommentLikesPipeline(comment._id),
+      pipeline: getCommentLikesPipeline(usercomment),
       type: "CommentLikes",
       page,
       maxPageSize,
@@ -45,10 +28,7 @@ const getCommentLikes = async (props) => {
 
     return fetched(`Comment Likes`, {
       response: {
-        post: {
-          ...post._doc,
-          created_at: convertTimeZone(post.created_at, post.user.timeZone),
-        },
+        post,
         ...usersThatLiked,
       },
     })

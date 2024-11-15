@@ -1,9 +1,10 @@
-const hideUserData = require("../../hideProject/hideUserData")
+const postValidationPipeline = require("../../common/postValidationPipeline")
 
-const getPostLikesPipeline = (postId) => [
+const getPostLikesPipeline = (username, posttitle, mainUser) => [
+  ...postValidationPipeline(mainUser),
   {
     $match: {
-      postId,
+      $and: [{ title: posttitle }, { "user_info.name": username }],
     },
   },
   {
@@ -12,11 +13,6 @@ const getPostLikesPipeline = (postId) => [
       localField: "userId",
       foreignField: "_id",
       as: "likesInfo",
-      pipeline: [
-        {
-          $project: hideUserData,
-        },
-      ],
     },
   },
   {

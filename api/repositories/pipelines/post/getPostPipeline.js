@@ -1,14 +1,10 @@
-const postValidationPipeline = require("../../common/postInfoPipeline")
 const postInfoPipeline = require("../../common/postInfoPipeline")
 
-const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
+const getPostPipeline = (username, posttitle, mainUser, todayDate) => [
   ...postInfoPipeline(mainUser, todayDate),
   {
     $match: {
-      $or: [
-        { title: { $regex: new RegExp(searchQuery, "i") } },
-        { "user_info.name": { $regex: new RegExp(searchQuery, "i") } },
-      ],
+      $and: [{ title: posttitle }, { "user_info.name": username }],
     },
   },
   {
@@ -28,4 +24,4 @@ const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
   },
 ]
 
-module.exports = searchPostPipeline
+module.exports = getPostPipeline

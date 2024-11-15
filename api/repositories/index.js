@@ -14,6 +14,7 @@ const getFollowRequestsPipeline = require("./pipelines/user/getFollowRequestsPip
 const getCloseFriendsPipeline = require("./pipelines/user/getCloseFriendsPipeline")
 const getBlockedUsersPipeline = require("./pipelines/user/getBlockedUsersPipeline")
 
+const getPostPipeline = require("./pipelines/post/getPostPipeline")
 const getPostLikesPipeline = require("./pipelines/post/getPostLikesPipeline")
 const getPostCommentsPipeline = require("./pipelines/post/getPostCommentsPipeline")
 const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipeline")
@@ -56,6 +57,7 @@ module.exports = {
   getFollowRequestsPipeline,
   getCloseFriendsPipeline,
   getBlockedUsersPipeline,
+  getPostPipeline,
   getPostLikesPipeline,
   getPostCommentsPipeline,
   getCommentLikesPipeline,

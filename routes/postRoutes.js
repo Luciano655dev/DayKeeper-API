@@ -31,13 +31,7 @@ const checkSameDayMW = require("../middlewares/checkSameDayMW")
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
 // Routes
-router.get(
-  "/:name/:title",
-  checkTokenMW,
-  checkValidUserMW,
-  checkElementPrivacy("post"),
-  getPostByName
-) // One Post
+router.get("/:name/:title", checkTokenMW, getPostByName) // One Post
 router.post(
   "/create",
   checkTokenMW,
@@ -62,13 +56,7 @@ router.delete("/:title", checkTokenMW, deletePost) // Delete Post
 // ========== interaction ==========
 router.post("/:name/:title/report", checkTokenMW, checkBannedUserMW, reportPost) // Report a post
 router.post("/:name/:title/like", checkTokenMW, checkValidUserMW, likePost) // Like a Post
-router.get(
-  "/:name/:title/likes",
-  checkTokenMW,
-  checkValidUserMW,
-  checkElementPrivacy("post"),
-  getPostLikes
-) // get post likes
+router.get("/:name/:title/likes", checkTokenMW, getPostLikes) // get post likes
 router.post(
   "/:name/:title/comment",
   checkTokenMW,
@@ -76,13 +64,7 @@ router.post(
   checkValidUserMW,
   commentPost
 ) // Comment in a post
-router.get(
-  "/:name/:title/comments",
-  checkTokenMW,
-  checkValidUserMW,
-  checkElementPrivacy("post"),
-  getPostComments
-) // Get Post COmments
+router.get("/:name/:title/comments", checkTokenMW, getPostComments) // Get Post Comments
 router.delete("/:name/:title/comment/:usercomment", checkTokenMW, deleteComment) // Delete a comment
 router.post(
   "/:name/:title/like/:usercomment",
@@ -91,12 +73,6 @@ router.post(
   checkValidUserMW,
   likeComment
 ) // Like a comment
-router.get(
-  "/:name/:title/:usercomment/likes",
-  checkTokenMW,
-  checkValidUserMW,
-  checkElementPrivacy("post"),
-  getCommentLikes
-)
+router.get("/:name/:title/:usercomment/likes", checkTokenMW, getCommentLikes) // get comment likes
 
 module.exports = router

@@ -15,9 +15,8 @@ async function checkValidUserMW(req, res, next) {
 
     req.fetchedUser = user
 
-    if (user.banned && !loggedUser?.roles?.includes("admin")) {
+    if (user.banned && !loggedUser?.roles?.includes("admin"))
       return res.status(409).json({ message: "This user is banned" })
-    }
 
     const [isBlocked, isFollowing] = await Promise.all([
       Blocks.exists({
