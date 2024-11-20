@@ -56,15 +56,21 @@ const postValidationPipeline = (mainUser) => [
   },
   {
     $lookup: {
-      from: "users",
-      localField: "closeFriendId",
-      foreignField: "_id",
-      as: "closeFriendInfo",
-    },
-  },
-  {
-    $addFields: {
-      closeFriendInfo: { $arrayElemAt: ["$closeFriendInfo", 0] },
+      from: "closeFriends",
+      let: { postUserId: "$user_info._id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ["$userId", "$$postUserId"] },
+                { $eq: ["$closeFriendId", mainUser._id] },
+              ],
+            },
+          },
+        },
+      ],
+      as: "isInCloseFriends",
     },
   },
   {
@@ -72,24 +78,17 @@ const postValidationPipeline = (mainUser) => [
       $and: [
         { "block_info.0": { $exists: false } },
         { "user_info.banned": { $ne: true } },
+
         {
           $or: [
-            { privacy: undefined },
-            { privacy: "public" },
+            { $or: [{ privacy: "public" }, { privacy: { $exists: false } }] },
             {
-              $and: [
-                { privacy: "private" },
-                {
-                  "user_info._id": mainUser._id,
-                },
-              ],
+              $and: [{ privacy: "private" }, { "user_info._id": mainUser._id }],
             },
             {
               $and: [
                 { privacy: "close friends" },
-                {
-                  $expr: { $eq: ["$closeFriendId", mainUser._id] },
-                },
+                { "isInCloseFriends.0": { $exists: true } },
               ],
             },
           ],
@@ -97,12 +96,7 @@ const postValidationPipeline = (mainUser) => [
         {
           $or: [
             { "user_info.private": false },
-            {
-              $and: [
-                { "user_info.private": true },
-                { "following_info.0": { $exists: true } },
-              ],
-            },
+            { "following_info.0": { $exists: true } },
           ],
         },
       ],

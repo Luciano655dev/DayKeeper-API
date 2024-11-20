@@ -1,12 +1,12 @@
 const postInfoPipeline = require("../../common/postInfoPipeline")
 
-const getPostPipeline = (username, posttitle, mainUser, todayDate) => [
-  ...postInfoPipeline(mainUser, todayDate),
+const getPostPipeline = (username, posttitle, mainUser) => [
   {
     $match: {
       $and: [{ title: posttitle }, { "user_info.name": username }],
     },
   },
+  ...postInfoPipeline(mainUser),
   {
     $project: {
       _id: 1,

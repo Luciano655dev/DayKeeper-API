@@ -1,7 +1,5 @@
-const Followers = require("../../models/Followers")
-const Blocks = require("../../models/Blocks")
-const findUser = require("./get/findUser")
-const convertTimeZone = require(`../../utils/convertTimeZone`)
+const User = require("../../models/User")
+const getUserPipeline = require("../../repositories/pipelines/user/getUserPipeline")
 const {
   errors: { notFound },
   success: { fetched },
@@ -11,40 +9,11 @@ const getUser = async (props) => {
   const { name: userInput, loggedUser } = props
 
   try {
-    /* Search by name or id */
-    let user = await findUser({ userInput, hideData: true })
-    if (!user) return notFound("User")
-
-    let status = ``
-    const followerCounter = await Followers.countDocuments({
-      followingId: user._id,
-    })
-    const followingCounter = await Followers.countDocuments({
-      followerId: user._id,
-    })
-    const isFollowing = await Followers.findOne({
-      followerId: loggedUser._id,
-      followingId: user._id,
-    })
-
-    const isBlocked = await Blocks.findOne({
-      blockId: user._id,
-      blockedId: loggedUser._id,
-    })
-
-    if (isFollowing) status = `following`
-    else if (isBlocked) status = `blocked`
-    else if (user._doc._id.equals(loggedUser._id)) status = `logged`
-    else status = `default`
+    const user = await User.aggregate(getUserPipeline(userInput, loggedUser))
+    if (!user[0]) return notFound("User")
 
     return fetched(`user`, {
-      user: {
-        ...user._doc,
-        followers: followerCounter,
-        following: followingCounter,
-        created_at: convertTimeZone(user.created_at, loggedUser.timeZone),
-        status,
-      },
+      user: user[0],
     })
   } catch (error) {
     console.log(error)

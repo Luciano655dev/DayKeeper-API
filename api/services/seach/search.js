@@ -1,10 +1,8 @@
-const User = require("../../models/User")
 const Followers = require("../../models/Followers")
 const getDataWithPages = require("../getDataWithPages")
 const { searchPostPipeline, searchUserPipeline } = require("../../repositories")
 
 const {
-  errors: { notFound },
   success: { fetched },
 } = require("../../../constants/index")
 

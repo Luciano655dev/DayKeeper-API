@@ -46,8 +46,8 @@ router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
 router.delete("/user", checkTokenMW, deleteUser)
 
 // Follows
-router.get("/:name/followers", checkTokenMW, checkValidUserMW, getFollowers)
-router.get("/:name/following", checkTokenMW, checkValidUserMW, getFollowing)
+router.get("/:name/followers", checkTokenMW, getFollowers)
+router.get("/:name/following", checkTokenMW, getFollowing)
 router.post("/:name/follow", checkTokenMW, checkValidUserMW, followUser)
 router.post(
   "/:name/respond_follow",
@@ -79,6 +79,6 @@ router.post("/:name/report", checkTokenMW, checkBannedUserMW, reportUser)
 router.get("/:name/posts", checkTokenMW, checkValidUserMW, getUserPosts)
 
 // GET USER
-router.get("/:name", checkTokenMW, checkBannedUserMW, getUser)
+router.get("/:name", checkTokenMW, getUser)
 
 module.exports = router

@@ -84,9 +84,6 @@ Luciano Menezes - [Instagram: @luciano.hmenezes](https://instagram.com/luciano.h
 
 Project Link: [https://github.com/luciano655dev/daykeeper-api](https://github.com/luciano655dev/daykeeper-api)
 
-##
-
-<p>This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.</p>
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->

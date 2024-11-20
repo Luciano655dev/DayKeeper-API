@@ -1,67 +1,11 @@
-const hideUserData = require("../hideProject/hideUserData")
+const postValidationPipeline = require("./postValidationPipeline")
+const getTodayDate = require("../../utils/getTodayDate")
 const {
   user: { defaultTimeZone },
 } = require("../../../constants/index")
 
-const postInfoPipeline = (mainUser, todayDate, userTimeZone) => [
-  {
-    $lookup: {
-      from: "users",
-      let: { userId: { $toObjectId: "$user" } },
-      pipeline: [
-        {
-          $match: {
-            $expr: { $eq: ["$_id", "$$userId"] },
-          },
-        },
-        {
-          $project: hideUserData,
-        },
-      ],
-      as: "user_info",
-    },
-  },
-  {
-    $unwind: "$user_info",
-  },
-  {
-    $lookup: {
-      from: "followers",
-      let: { followingId: "$user_info._id" },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $and: [
-                { $eq: ["$followerId", mainUser._id] },
-                { $eq: ["$followingId", "$$followingId"] },
-              ],
-            },
-          },
-        },
-      ],
-      as: "following_info",
-    },
-  },
-  {
-    $lookup: {
-      from: "blocks",
-      let: { blockedId: "$user_info._id" },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $and: [
-                { $eq: ["$blockId", mainUser._id] },
-                { $eq: ["$blockedId", "$$blockedId"] },
-              ],
-            },
-          },
-        },
-      ],
-      as: "block_info",
-    },
-  },
+const postInfoPipeline = (mainUser) => [
+  ...postValidationPipeline(mainUser),
   {
     $lookup: {
       from: "postLikes",
@@ -133,70 +77,11 @@ const postInfoPipeline = (mainUser, todayDate, userTimeZone) => [
     },
   },
   {
-    $lookup: {
-      from: "users",
-      localField: "closeFriendId",
-      foreignField: "_id",
-      as: "closeFriendInfo",
-      pipeline: [
-        {
-          $project: hideUserData,
-        },
-      ],
-    },
-  },
-  {
-    $addFields: {
-      closeFriendInfo: { $arrayElemAt: ["$closeFriendInfo", 0] },
-    },
-  },
-  {
-    $match: {
-      $and: [
-        { "block_info.0": { $exists: false } },
-        { "user_info.banned": { $ne: true } },
-        {
-          $or: [
-            { privacy: undefined },
-            { privacy: "public" },
-            {
-              $and: [
-                { privacy: "private" },
-                {
-                  "user_info._id": mainUser._id,
-                },
-              ],
-            },
-            {
-              $and: [
-                { privacy: "close friends" },
-                {
-                  $expr: { $eq: ["$closeFriendId", mainUser._id] },
-                },
-              ],
-            },
-          ],
-        },
-        {
-          $or: [
-            { "user_info.private": false },
-            {
-              $and: [
-                { "user_info.private": true },
-                { "following_info.0": { $exists: true } },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
     $addFields: {
       relevance: {
         $sum: ["$like_info.totalLikes", "$comment_info.totalComments"],
       },
-      isToday: { $eq: ["$title", todayDate] },
+      isToday: { $eq: ["$title", getTodayDate()] },
       likes: { $ifNull: ["$like_info.totalLikes", 0] },
       userLiked: { $gt: ["$like_info.userLiked", 0] },
       comments: { $ifNull: ["$comment_info.totalComments", 0] },
@@ -205,7 +90,7 @@ const postInfoPipeline = (mainUser, todayDate, userTimeZone) => [
         $dateToString: {
           format: "%Y-%m-%d %H:%M:%S",
           date: "$created_at",
-          timezone: userTimeZone || defaultTimeZone,
+          timezone: mainUser.timeZone || defaultTimeZone,
         },
       },
     },

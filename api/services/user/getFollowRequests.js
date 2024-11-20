@@ -2,7 +2,6 @@ const getDataWithPages = require("../getDataWithPages")
 const { getFollowRequestsPipeline } = require("../../repositories/index")
 
 const {
-  errors: { notFound },
   success: { fetched },
 } = require("../../../constants/index")
 
@@ -11,7 +10,7 @@ const getFollowRequests = async (props) => {
 
   try {
     const response = await getDataWithPages({
-      pipeline: getFollowRequestsPipeline(loggedUser._id),
+      pipeline: getFollowRequestsPipeline(loggedUser),
       type: "Follower",
       page,
       maxPageSize,

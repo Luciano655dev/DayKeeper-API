@@ -10,7 +10,7 @@ const getBlockedUsers = async (props) => {
 
   try {
     const response = await getDataWithPages({
-      pipeline: getBlockedUsersPipeline(loggedUser._id),
+      pipeline: getBlockedUsersPipeline(loggedUser),
       type: "Block",
       page,
       maxPageSize,

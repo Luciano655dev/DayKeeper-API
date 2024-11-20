@@ -1,9 +1,9 @@
-const hideUserData = require("../../hideProject/hideUserData")
+const userInfoPipeline = require("../../common/userInfoPipeline")
 
-const getBlockedUsersPipeline = (userId) => [
+const getBlockedUsersPipeline = (mainUser) => [
   {
     $match: {
-      blockId: userId,
+      blockId: mainUser._id,
     },
   },
   {
@@ -12,11 +12,6 @@ const getBlockedUsersPipeline = (userId) => [
       localField: "blockedId",
       foreignField: "_id",
       as: "blockedInfo",
-      pipeline: [
-        {
-          $project: hideUserData,
-        },
-      ],
     },
   },
   {
@@ -29,6 +24,7 @@ const getBlockedUsersPipeline = (userId) => [
       },
     },
   },
+  ...userInfoPipeline(mainUser),
 ]
 
 module.exports = getBlockedUsersPipeline

@@ -1,6 +1,6 @@
-const hideUserData = require("../../hideProject/hideUserData")
+const userInfoPipeline = require("../../common/userInfoPipeline")
 
-const getFollowersPipeline = (userId) => [
+const getFollowersPipeline = (userId, mainUser) => [
   {
     $match: {
       $and: [
@@ -19,11 +19,6 @@ const getFollowersPipeline = (userId) => [
       localField: "followerId",
       foreignField: "_id",
       as: "followerInfo",
-      pipeline: [
-        {
-          $project: hideUserData,
-        },
-      ],
     },
   },
   {
@@ -36,6 +31,7 @@ const getFollowersPipeline = (userId) => [
       },
     },
   },
+  ...userInfoPipeline(mainUser),
 ]
 
 module.exports = getFollowersPipeline

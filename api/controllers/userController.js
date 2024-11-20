@@ -171,6 +171,7 @@ const getFollowingController = async (req, res) => {
       ...req.params,
       page,
       maxPageSize,
+      loggedUser: req.user,
     })
 
     return res.status(code).json({ message, ...response })
@@ -193,6 +194,7 @@ const getFollowersController = async (req, res) => {
       ...req.params,
       page,
       maxPageSize,
+      loggedUser: req.user,
     })
 
     return res.status(code).json({ message, ...response })

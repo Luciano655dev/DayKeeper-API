@@ -1,8 +1,7 @@
-const postValidationPipeline = require("../../common/postInfoPipeline")
 const postInfoPipeline = require("../../common/postInfoPipeline")
 
-const searchPostPipeline = (searchQuery, mainUser, todayDate) => [
-  ...postInfoPipeline(mainUser, todayDate),
+const searchPostPipeline = (searchQuery, mainUser) => [
+  ...postInfoPipeline(mainUser),
   {
     $match: {
       $or: [

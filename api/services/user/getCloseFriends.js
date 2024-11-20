@@ -3,7 +3,6 @@ const getDataWithPages = require("../getDataWithPages")
 const { getCloseFriendsPipeline } = require("../../repositories/index")
 
 const {
-  errors: { notFound },
   success: { fetched },
 } = require("../../../constants/index")
 
@@ -12,7 +11,7 @@ const getCloseFriends = async (props) => {
 
   try {
     const response = await getDataWithPages({
-      pipeline: getCloseFriendsPipeline(loggedUser._id),
+      pipeline: getCloseFriendsPipeline(loggedUser),
       type: "CloseFriend",
       page,
       maxPageSize,

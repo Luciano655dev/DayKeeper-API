@@ -1,5 +1,4 @@
 const Post = require("../../models/Post")
-const getTodayDate = require("../../utils/getTodayDate")
 const getPostPipeline = require("../../repositories/pipelines/post/getPostPipeline")
 
 const {
@@ -9,9 +8,8 @@ const {
 
 const getPost = async ({ title, name: username, loggedUser }) => {
   try {
-    const todayDate = getTodayDate()
     const post = await Post.aggregate(
-      getPostPipeline(username, title, loggedUser, todayDate)
+      getPostPipeline(username, title, loggedUser)
     )
     if (!post || post?.length == 0) return notFound("Post")
 
