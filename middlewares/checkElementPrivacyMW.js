@@ -1,4 +1,4 @@
-const findStorie = require("../api/services/stories/get/findStorieById")
+const getStorie = require("../api/services/stories/getStorie")
 const findPost = require("../api/services/post/get/findPost")
 const CloseFriends = require("../api/models/CloseFriends")
 const DayEvent = require("../api/models/DayEvent")
@@ -18,7 +18,7 @@ function checkElementPrivacy(elementType) {
       const element = await (async () => {
         switch (elementType) {
           case "storie":
-            return findStorie({ userInput: name, storieId })
+            return getStorie({ name, title: storieId, loggedUser: req.user })
           case "post":
             return findPost({ userInput: name, title })
           case "event":

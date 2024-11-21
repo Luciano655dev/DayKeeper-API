@@ -1,25 +1,35 @@
+const User = require("../../models/User")
+const Storie = require("../../models/Storie")
 const getTodayDate = require(`../../utils/getTodayDate`)
-const findStorieByDate = require(`./get/findStorieByDate`)
+const viewStories = require("./general/viewStories")
+const {
+  getStoriePipeline,
+  getUserPipeline,
+} = require("../../repositories/index")
+
 const {
   success: { fetched },
 } = require("../../../constants/index")
 
 const getStorie = async (props) => {
-  const { name: userInput, populate, loggedUser } = props
-
-  let populateFields = populate ? populate.split(",") : []
-
+  const { name: username, loggedUser } = props
   try {
-    const today = getTodayDate()
-    const response = await findStorieByDate({
-      userInput,
-      title: today,
-      fieldsToPopulate: populateFields,
-      loggedUserId: loggedUser._id,
-      view: true,
-    })
+    // Get User
+    let user = await User.aggregate(getUserPipeline(username, loggedUser))
+    if (!user[0]) return notFound("User")
+    else user = user[0]
 
-    return fetched("Stories", { data: response })
+    // Get Stories
+    const todayDate = getTodayDate()
+
+    const stories = await Storie.aggregate(
+      getStoriePipeline(user._id, todayDate, loggedUser)
+    )
+
+    // View Stories
+    await viewStories(stories, loggedUser)
+
+    return fetched("Stories", { data: stories })
   } catch (error) {
     throw new Error(error.message)
   }

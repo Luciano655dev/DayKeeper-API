@@ -1,9 +1,10 @@
-const hideUserData = require("../../hideProject/hideUserData")
+const userValidationPipeline = require("../../common/userValidationPipeline")
 
-const getStorieViewsPipeline = (storieId) => [
+const getStorieViews = (storieId, mainUser) => [
   {
     $match: {
       storieId,
+      storieUserId: mainUser._id,
     },
   },
   {
@@ -12,11 +13,6 @@ const getStorieViewsPipeline = (storieId) => [
       localField: "userId",
       foreignField: "_id",
       as: "viewsInfo",
-      pipeline: [
-        {
-          $project: hideUserData,
-        },
-      ],
     },
   },
   {
@@ -29,6 +25,7 @@ const getStorieViewsPipeline = (storieId) => [
       },
     },
   },
+  ...userValidationPipeline(mainUser),
 ]
 
-module.exports = getStorieViewsPipeline
+module.exports = getStorieViews

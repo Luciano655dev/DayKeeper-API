@@ -117,7 +117,6 @@ const getTodayStoriesController = async (req, res) => {
   try {
     const { code, message, data } = await getTodayStories({
       ...req.params,
-      populate: req.query.populate,
       loggedUser: req.user,
     })
 

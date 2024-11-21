@@ -1,7 +1,6 @@
 const searchPostPipeline = require("./pipelines/search/searchPostPipeline")
 const searchUserPipeline = require(`./pipelines/search/searchUserPipeline`)
 const userPostsPipeline = require(`./pipelines/user/userPostsPipeline`)
-const userStoriesPipeline = require("./pipelines/user/userStoriesPipeline")
 const reportedElementPipeline = require(`./pipelines/general/reportedElementPipeline`)
 
 const bannedElementPipeline = require(`./pipelines/admin/bannedElementPipeline`)
@@ -20,8 +19,10 @@ const getPostLikesPipeline = require("./pipelines/post/getPostLikesPipeline")
 const getPostCommentsPipeline = require("./pipelines/post/getPostCommentsPipeline")
 const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipeline")
 
+const getStoriePipeline = require("./pipelines/storie/getStoriePipeline")
 const getStorieLikesPipeline = require("./pipelines/storie/getStorieLikesPipeline")
 const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipeline")
+const userStoriesPipeline = require("./pipelines/storie/userStoriesPipeline")
 
 const searchEventPipeline = require("./pipelines/search/searchEventPipeline")
 const searchNotePipeline = require("./pipelines/search/searchNotePipeline")
@@ -63,6 +64,7 @@ module.exports = {
   getPostLikesPipeline,
   getPostCommentsPipeline,
   getCommentLikesPipeline,
+  getStoriePipeline,
   getStorieLikesPipeline,
   getStorieViewsPipeline,
 }
