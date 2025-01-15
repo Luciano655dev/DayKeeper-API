@@ -29,5 +29,3 @@ const deleteEvent = async (props) => {
 }
 
 module.exports = deleteEvent
-// TODO lembrar de ver sobre eventos privados e publicos e lidar com contas privadas e publicas
-// TODO tambem lidr com contas bloqueadas, banidas, etc...

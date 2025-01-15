@@ -1,6 +1,6 @@
 const Post = require("../../models/Post")
 const deleteFile = require("../../utils/deleteFile")
-const findPost = require("./get/findPost")
+const getPost = require("./getPost")
 const getPlaceById = require("../location/getPlaceById")
 
 const deletePostLikes = require("./delete/deletePostLikes")
@@ -18,7 +18,7 @@ const updatePost = async (props) => {
     data,
     privacy,
     emotion,
-    title, // req.params
+    postId, // req.params
     loggedUser, // req.user
     reqFiles, // req.files
   } = props
@@ -26,13 +26,12 @@ const updatePost = async (props) => {
 
   try {
     // find Post
-    const post = await findPost({
-      userInput: loggedUser._id,
-      title,
-      type: "userId",
-      fieldsToPopulate: ["user"],
-    })
-    if (!post) throw new Error(notFound("Post").message)
+    let post
+    const postResponse = await getPost({ postId, loggedUser })
+
+    if (postResponse.code == 200) {
+      post = postResponse.data
+    } else return notFound("Post")
 
     /* Verify File Limit */
     const keep_files = keepFilesFromProps.split("").map(Number) || []
@@ -90,9 +89,9 @@ const updatePost = async (props) => {
       }
     }
 
-    /* Create Post */
+    /* Update Post */
     const updatedPost = await Post.findOneAndUpdate(
-      { title: title, user: loggedUser._id },
+      { title: post.title, user: loggedUser._id },
       {
         $set: {
           data: data || post.data,

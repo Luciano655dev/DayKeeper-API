@@ -13,14 +13,14 @@ const {
 } = require("../../../constants/index")
 
 const getCommentLikes = async (props) => {
-  const { title, name, usercomment, loggedUser, page, maxPageSize } = props
+  const { postId, userId, loggedUser, page, maxPageSize } = props
 
   try {
-    const post = await Post.aggregate(getPostPipeline(name, title, loggedUser))
+    const post = await Post.aggregate(getPostPipeline(postId, loggedUser))
     if (!post) return notFound("Post")
 
     const usersThatLiked = await getDataWithPages({
-      pipeline: getCommentLikesPipeline(usercomment),
+      pipeline: getCommentLikesPipeline(userId, postId),
       type: "CommentLikes",
       page,
       maxPageSize,
@@ -28,7 +28,7 @@ const getCommentLikes = async (props) => {
 
     return fetched(`Comment Likes`, {
       response: {
-        post,
+        post: post[0],
         ...usersThatLiked,
       },
     })

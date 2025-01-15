@@ -13,7 +13,7 @@ const getUser = async (props) => {
     if (!user[0]) return notFound("User")
 
     return fetched(`user`, {
-      user: user[0],
+      data: user[0],
     })
   } catch (error) {
     console.log(error)

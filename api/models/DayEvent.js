@@ -26,4 +26,7 @@ const DayEvent = mongoose.model("DayEvent", dayEventSchema, "dayEvent")
 
 module.exports = DayEvent
 
-// TODO: faer o location com id, name, lat e lng
+/*
+  TODO: Make the location with name, id, lat and lng.
+  Can't do it now because the account on google cloud console is suspended.
+*/

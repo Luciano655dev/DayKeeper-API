@@ -1,5 +1,5 @@
 const PostComments = require("../../models/PostComments")
-const findPost = require("./get/findPost")
+const getPost = require("./getPost")
 const deleteCommentLikes = require("./delete/deleteCommentLikes")
 const axios = require("axios")
 const {
@@ -14,21 +14,22 @@ const {
 } = require("../../../constants/index")
 
 const commentPost = async (props) => {
-  let { loggedUser, name: username, title, comment, gif } = props
+  let { postId, loggedUser, comment, gif } = props
 
   /* Validations */
   if (!comment) return fieldsNotFilledIn(`comment`)
   if (comment.length > maxCommentLength) return inputTooLong("Comment")
 
   try {
-    const post = await findPost({
-      userInput: username,
-      title,
-      type: "username",
-      fieldsToPopulate: [],
-    })
-    if (!post) return notFound("Post")
+    /* Get Post */
+    let post
+    const postResponse = await getPost({ postId, loggedUser })
 
+    if (postResponse.code == 200) {
+      post = postResponse.data
+    } else return notFound("Post")
+
+    /* Create Comment Relation */
     const commentRelation = await PostComments.findOne({
       userId: loggedUser._id,
       postId: post._id,
@@ -64,7 +65,7 @@ const commentPost = async (props) => {
 
     const newComment = new PostComments({
       userId: loggedUser._id,
-      postUserId: post.user._id,
+      postUserId: post.user_info._id,
       postId: post._id,
       comment,
       gif,

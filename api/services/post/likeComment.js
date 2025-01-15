@@ -1,7 +1,8 @@
+const User = require("../../models/User")
 const PostComments = require("../../models/PostComments")
 const CommentLikes = require("../../models/CommentLikes")
-const findUser = require("../user/get/findUser")
-const findPost = require("./get/findPost")
+const getUser = require("../user/getUser")
+const getPost = require("./getPost")
 
 const {
   errors: { notFound },
@@ -9,28 +10,33 @@ const {
 } = require("../../../constants/index")
 
 const likeComment = async (props) => {
-  const {
-    name: postUsername,
-    title,
-    usercomment: commentUsername,
-    loggedUser,
-  } = props
+  console.log("hewo")
+  const { postId, userId, loggedUser } = props
 
   try {
-    const userComment = await findUser({ userInput: commentUsername })
-    if (!userComment) return notFound("User")
-
-    const post = await findPost({
-      userInput: postUsername,
-      title,
-      type: "username",
+    /* Find User */
+    const fetchedUser = await User.findById(userId)
+    if (!fetchedUser) return notFound("User")
+    const userThatCommented = await getUser({
+      name: fetchedUser.name,
+      loggedUser,
     })
-    if (!post) return notFound("Post")
+    if (!userThatCommented) return notFound("User")
 
+    /* Find Post */
+    let post
+    const postResponse = await getPost({ postId, loggedUser })
+
+    if (postResponse.code == 200) {
+      post = postResponse.data
+    } else return notFound("Post")
+
+    /* Create Comment Like Relation */
     const comment = await PostComments.exists({
-      userId: userComment._id,
+      userId,
       postId: post._id,
     })
+    console.log(userThatCommented)
 
     if (!comment) return notFound("Comment")
 
@@ -55,7 +61,7 @@ const likeComment = async (props) => {
     const newLikeRelation = new CommentLikes({
       userId: loggedUser._id,
       postId: post._id,
-      postUserId: post.user._id,
+      postUserId: post.user_info._id,
       commentId: comment._id,
     })
     await newLikeRelation.save()
@@ -64,6 +70,7 @@ const likeComment = async (props) => {
       post,
     })
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }

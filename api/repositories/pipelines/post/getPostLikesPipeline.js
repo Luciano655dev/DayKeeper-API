@@ -1,10 +1,9 @@
-const postValidationPipeline = require("../../common/postValidationPipeline")
+const mongoose = require("mongoose")
 
-const getPostLikesPipeline = (username, posttitle, mainUser) => [
-  ...postValidationPipeline(mainUser),
+const getPostLikesPipeline = (postId) => [
   {
     $match: {
-      $and: [{ title: posttitle }, { "user_info.name": username }],
+      postId: new mongoose.Types.ObjectId(postId),
     },
   },
   {

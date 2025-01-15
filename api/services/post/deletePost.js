@@ -11,11 +11,11 @@ const {
 } = require("../../../constants/index")
 
 const deletePost = async (props) => {
-  const { title, loggedUser } = props
+  const { postId, loggedUser } = props
 
   try {
     const deletedPost = await Post.findOneAndDelete({
-      title: title,
+      _id: postId,
       user: loggedUser._id,
     })
 

@@ -17,13 +17,12 @@ const deleteComment = require("../services/post/deleteComment")
 // getPostByName
 const getPostController = async (req, res) => {
   try {
-    const { code, message, post } = await getPost({
+    const { code, message, data } = await getPost({
       ...req.params,
-      queryParams: req.query.populate,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, post })
+    return res.status(code).json({ message, data })
   } catch (error) {
     return res.status(500).json({ message: serverError(error.toString()) })
   }
@@ -229,7 +228,7 @@ const deleteCommentController = async (req, res) => {
 }
 
 module.exports = {
-  getPostByName: getPostController,
+  getPostById: getPostController,
   createPost: createPostController,
   updatePost: updatePostController,
   deletePost: deletePostController,

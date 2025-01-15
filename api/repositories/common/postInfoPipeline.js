@@ -82,6 +82,7 @@ const postInfoPipeline = (mainUser) => [
         $sum: ["$like_info.totalLikes", "$comment_info.totalComments"],
       },
       isToday: { $eq: ["$title", getTodayDate()] },
+      timeZoneMatch: { $eq: ["user_info.timeZone", mainUser.timeZone] },
       likes: { $ifNull: ["$like_info.totalLikes", 0] },
       userLiked: { $gt: ["$like_info.userLiked", 0] },
       comments: { $ifNull: ["$comment_info.totalComments", 0] },

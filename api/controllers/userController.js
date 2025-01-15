@@ -21,12 +21,12 @@ const getCloseFriends = require("../services/user/getCloseFriends")
 // getUserByName
 const getUserController = async (req, res) => {
   try {
-    const { code, message, user } = await getUser({
+    const { code, message, data } = await getUser({
       ...req.params,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, user })
+    return res.status(code).json({ message, data })
   } catch (error) {
     return res.status(500).json({ message: serverError(String(error)) })
   }

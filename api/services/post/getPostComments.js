@@ -1,22 +1,24 @@
+const getPost = require("./getPost")
 const getDataWithPages = require("../getDataWithPages")
 const { getPostCommentsPipeline } = require("../../repositories/index")
+const mongoose = require("mongoose")
 
 const {
   success: { fetched },
 } = require("../../../constants/index")
 
 const getPostComments = async (props) => {
-  const {
-    title: posttitle,
-    name: username,
-    loggedUser,
-    page,
-    maxPageSize,
-  } = props
+  const { postId, loggedUser, page, maxPageSize } = props
 
   try {
+    /* Validate Post */
+    if (!mongoose.Types.ObjectId.isValid(postId)) return invalidValue("Post ID")
+    const postResponse = await getPost({ postId, loggedUser })
+    if (postResponse.code != 200) return notFound("Post")
+
+    // get comments
     const comments = await getDataWithPages({
-      pipeline: getPostCommentsPipeline(username, posttitle, loggedUser),
+      pipeline: getPostCommentsPipeline(postId, loggedUser),
       type: "PostComments",
       page,
       maxPageSize,

@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const {
-  getPostByName,
+  getPostById,
   createPost,
   updatePost,
   deletePost,
@@ -23,15 +23,12 @@ const postValidation = require("../middlewares/validations/post/postValidation")
 const postEditValidation = require("../middlewares/validations/post/postEditValidation")
 
 const checkTokenMW = require("../middlewares/checkTokenMW")
-const checkValidUserMW = require("../middlewares/checkValidUserMW")
-const checkBannedUserMW = require("../middlewares/checkBannedUserMW")
-const checkElementPrivacy = require("../middlewares/checkElementPrivacyMW")
 const checkSameDayMW = require("../middlewares/checkSameDayMW")
 
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
 // Routes
-router.get("/:name/:title", checkTokenMW, getPostByName) // One Post
+router.get("/:postId", checkTokenMW, getPostById) // One Post
 router.post(
   "/create",
   checkTokenMW,
@@ -42,7 +39,7 @@ router.post(
   createPost
 ) // Create Post
 router.put(
-  "/:title",
+  "/:postId",
   checkTokenMW,
   checkSameDayMW,
   multer(multerConfig("both")).array("files", 5),
@@ -51,28 +48,17 @@ router.put(
   postEditValidation,
   updatePost
 ) // Edit Post
-router.delete("/:title", checkTokenMW, deletePost) // Delete Post
+router.delete("/:postId", checkTokenMW, deletePost) // Delete Post
 
 // ========== interaction ==========
-router.post("/:name/:title/report", checkTokenMW, checkBannedUserMW, reportPost) // Report a post
-router.post("/:name/:title/like", checkTokenMW, checkValidUserMW, likePost) // Like a Post
-router.get("/:name/:title/likes", checkTokenMW, getPostLikes) // get post likes
-router.post(
-  "/:name/:title/comment",
-  checkTokenMW,
-  checkSameDayMW,
-  checkValidUserMW,
-  commentPost
-) // Comment in a post
-router.get("/:name/:title/comments", checkTokenMW, getPostComments) // Get Post Comments
-router.delete("/:name/:title/comment/:usercomment", checkTokenMW, deleteComment) // Delete a comment
-router.post(
-  "/:name/:title/like/:usercomment",
-  checkTokenMW,
-  checkSameDayMW,
-  checkValidUserMW,
-  likeComment
-) // Like a comment
-router.get("/:name/:title/:usercomment/likes", checkTokenMW, getCommentLikes) // get comment likes
+router.post("/:postId/report", checkTokenMW, reportPost) // Report a post
+router.post("/:postId/like", checkTokenMW, likePost) // Like a Post
+router.get("/:postId/likes", checkTokenMW, getPostLikes) // get post likes
+router.post("/:postId/comment", checkTokenMW, checkSameDayMW, commentPost) // Comment in a post
+router.get("/:postId/comments", checkTokenMW, getPostComments) // Get Post Comments
+router.delete("/:postId/comment/:userId", checkTokenMW, deleteComment) // Delete a comment
+router.post("/:postId/like/:userId", checkTokenMW, likeComment) // Like a comment
+router.get("/:postId/likes/:userId", checkTokenMW, getCommentLikes) // get comment likes
+// TODO do the last shit :)
 
 module.exports = router

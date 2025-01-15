@@ -4,7 +4,7 @@ const Post = require("../../models/Post")
 const Storie = require("../../models/Storie")
 const { elementBanHistoryPipeline } = require(`../../repositories`)
 const mongoose = require("mongoose")
-// TODO reotrnar o objeto do elemento
+
 const {
   success: { fetched },
   errors: { invalidValue },

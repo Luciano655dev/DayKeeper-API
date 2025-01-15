@@ -1,6 +1,5 @@
 const postInfoPipeline = require("../../common/postInfoPipeline")
 
-// TODO make a sort by relevance or recent (at least duhhh)
 const userPostsPipeline = (mainUser, name) => [
   ...postInfoPipeline(mainUser),
   {

@@ -1,4 +1,4 @@
-const findPost = require("./get/findPost")
+const getPost = require("./getPost")
 const Report = require("../../models/Report")
 const {
   user: { maxReportReasonLength },
@@ -7,18 +7,19 @@ const {
 } = require("../../../constants/index")
 
 const reportPost = async (props) => {
-  const { name: username, title, reason, loggedUser } = props
+  const { postId, reason, loggedUser } = props
 
   if (reason.length > maxReportReasonLength) return inputTooLong("Reason")
 
   try {
-    const post = await findPost({
-      userInput: username,
-      title: title,
-      type: "username",
-    })
-    if (!post) return notFound("Post")
+    let post
+    const postResponse = await getPost({ postId, loggedUser })
 
+    if (postResponse.code == 200) {
+      post = postResponse.data
+    } else return notFound("Post")
+
+    /* Create Report Relation */
     const reportRelation = await Report.exists({
       referenceId: post._id,
       userId: loggedUser._id,

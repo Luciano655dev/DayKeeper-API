@@ -34,7 +34,7 @@ app.use(
 
 app.use(
   session({
-    secret: "secret", // TODO change that
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -60,14 +60,14 @@ const locationRoutes = require("./routes/locationRoutes")
 const dayRoutes = require("./routes/dayRoutes")
 
 app.use("/auth", authRoutes)
+app.use("/post", postRoutes)
+app.use("/stories", storiesRoutes)
+app.use("/day", dayRoutes)
 app.use("/question", dailyQuestionRoutes)
 app.use("/admin", adminRoutes)
-app.use("/stories", storiesRoutes)
 app.use("/location", locationRoutes)
-app.use("/day", dayRoutes)
 app.use("/", searchRoutes)
 app.use("/", userRoutes)
-app.use("/", postRoutes)
 
 // ==================== MongoDB Connection ====================
 const DBuser = process.env.DB_USER

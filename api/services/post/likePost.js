@@ -1,21 +1,23 @@
 const PostLikes = require("../../models/PostLikes")
-const findPost = require("./get/findPost")
+const getPost = require("./getPost")
 
 const {
   success: { custom },
 } = require("../../../constants/index")
 
 const likePost = async (props) => {
-  const { name: username, title, loggedUser } = props
+  const { postId, loggedUser } = props
 
   try {
-    let post = await findPost({
-      userInput: username,
-      title,
-      type: "username",
-      fieldsToPopulate: ["user"],
-    })
+    /* Get Post */
+    let post
+    const postResponse = await getPost({ postId, loggedUser })
 
+    if (postResponse.code == 200) {
+      post = postResponse.data
+    } else return notFound("Post")
+
+    /* Creatse Like Relastion */
     const likeRelation = await PostLikes.findOne({
       userId: loggedUser._id,
       postId: post._id,
@@ -31,10 +33,10 @@ const likePost = async (props) => {
     const newPostLikeRelation = new PostLikes({
       userId: loggedUser._id,
       postId: post._id,
-      postUserId: post.user._id,
+      postUserId: post.user_info._id,
     })
     await newPostLikeRelation.save()
-    return custom("Post liked siccessfully", 200, { post })
+    return custom("Post liked successfully", 200, { post })
   } catch (error) {
     console.log(error)
     throw new Error(error.message)
