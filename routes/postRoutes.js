@@ -23,7 +23,6 @@ const postValidation = require("../middlewares/validations/post/postValidation")
 const postEditValidation = require("../middlewares/validations/post/postEditValidation")
 
 const checkTokenMW = require("../middlewares/checkTokenMW")
-const checkSameDayMW = require("../middlewares/checkSameDayMW")
 
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
@@ -41,7 +40,6 @@ router.post(
 router.put(
   "/:postId",
   checkTokenMW,
-  checkSameDayMW,
   multer(multerConfig("both")).array("files", 5),
   detectInappropriateFileMW,
   handleMulterError,
@@ -54,11 +52,10 @@ router.delete("/:postId", checkTokenMW, deletePost) // Delete Post
 router.post("/:postId/report", checkTokenMW, reportPost) // Report a post
 router.post("/:postId/like", checkTokenMW, likePost) // Like a Post
 router.get("/:postId/likes", checkTokenMW, getPostLikes) // get post likes
-router.post("/:postId/comment", checkTokenMW, checkSameDayMW, commentPost) // Comment in a post
+router.post("/:postId/comment", checkTokenMW, commentPost) // Comment in a post
 router.get("/:postId/comments", checkTokenMW, getPostComments) // Get Post Comments
 router.delete("/:postId/comment/:userId", checkTokenMW, deleteComment) // Delete a comment
 router.post("/:postId/like/:userId", checkTokenMW, likeComment) // Like a comment
 router.get("/:postId/likes/:userId", checkTokenMW, getCommentLikes) // get comment likes
-// TODO do the last shit :)
 
 module.exports = router

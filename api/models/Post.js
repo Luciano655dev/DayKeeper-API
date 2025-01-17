@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const postSchema = mongoose.Schema({
-  title: String,
+  date: Date,
   data: String,
   emotion: Number,
   privacy: {

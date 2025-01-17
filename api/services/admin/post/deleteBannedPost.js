@@ -1,7 +1,7 @@
 const BanHistory = require(`../../../models/BanHistory`)
 const Post = require("../../../models/Post")
-const findPost = require("../../post/get/findPost")
-const findUser = require("../../user/get/findUser")
+const User = require("../../../models/User")
+const getPost = require("../../post/getPost")
 
 const deleteFile = require(`../../../utils/deleteFile`)
 const deletePostLikes = require("../../post/delete/deletePostLikes")
@@ -19,21 +19,19 @@ const {
 } = require(`../../../../constants/index`)
 
 const deleteBannedPosts = async (props) => {
-  const { name: userInput, title, message, loggedUser } = props
+  const { postId, message, loggedUser } = props
 
   if (message.length > maxReportMessageLength) return inputTooLong(`Message`)
 
   try {
-    const user = await findUser({ userInput })
-    if (!user) return notFound(`User`)
+    // Get Post and User
+    let post
+    const postResponse = await getPost({ postId, loggedUser })
 
-    const post = await findPost({
-      userInput,
-      title,
-      populate: ["user"],
-    })
-    if (!post) return notFound(`Post`)
-    const adminUser = await findUser({ userInput: latestBan.banned_by })
+    if (postResponse.code == 200) {
+      post = postResponse.data
+    } else return notFound("Post")
+    const adminUser = await User.findById(latestBan.banned_by)
 
     if (post.banned != "true")
       return unauthorized(`delete this post`, `this post isn't banned`)
@@ -73,11 +71,11 @@ const deleteBannedPosts = async (props) => {
     if (!adminUser) adminUser = loggedUser
 
     sendPostDeletionEmail({
-      title: userPost.title,
-      username: userPost.name,
-      email: userPost.email,
+      date: post.date,
+      username: post.user_info.name,
+      email: post.user_info.email,
       id: post._id,
-      adminUsername: loggedUser.name,
+      adminUsername: adminUser.name,
       reason: latestBan.ban_message,
       message,
     })

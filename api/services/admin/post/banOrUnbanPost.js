@@ -1,6 +1,5 @@
 const Post = require("../../../models/Post")
-const findPost = require("../../post/get/findPost")
-const findUser = require("../../user/get/findUser")
+const getPost = require("../../post/getPost")
 const BanHistory = require("../../../models/BanHistory")
 
 const {
@@ -14,19 +13,17 @@ const {
 } = require(`../../../../constants/index`)
 
 const banOrUnbanPost = async (props) => {
-  const { name: userInput, title, reason, loggedUser } = props
+  const { postId, reason, loggedUser } = props
 
   if (reason.length > maxReportMessageLength) return inputTooLong(`Reason`)
 
   try {
-    const user = await findUser({ userInput })
-    if (!user) return notFound(`User`)
-    const post = await findPost({
-      userInput,
-      title,
-      populate: ["user"],
-    })
-    if (!post) return notFound(`Post`)
+    let post
+    const postResponse = await getPost({ postId, loggedUser })
+
+    if (postResponse.code == 200) {
+      post = postResponse.data
+    } else return notFound("Post")
 
     if (post.banned) {
       // Create unban relation
@@ -45,17 +42,17 @@ const banOrUnbanPost = async (props) => {
 
       /*
       await sendPostUnbanEmail({
-        username: post.username,
-        email: post.email,
-        title: post.title,
-        id: post.id,
+        username: post.user_info.name,
+        email: post.user_info.email,
+        date: post.date,
+        id: post._id,
         adminUsername: loggedUser.name,
         reason,
       })
         */
 
       return custom(
-        `${user.name}'s post from ${post.title} unbanned successfully`
+        `${post.user_info.name}'s post from ${post.date} unbanned successfully`
       )
     }
 
@@ -74,16 +71,18 @@ const banOrUnbanPost = async (props) => {
 
     /*
     await sendPostBanEmail({
-      username: post.username,
-      email: post.email,
-      title: post.title,
-      id: post.id,
+      username: post.user_info.name,
+      email: post.user_info.email,
+      date: post.date,
+      id: post._id,
       adminUsername: loggedUser.name,
       reason,
     })
     */
 
-    return custom(`${user.name}'s post from ${post.title} banned successfully`)
+    return custom(
+      `${post.user_info.name}'s post from ${post.date} banned successfully`
+    )
   } catch (error) {
     console.log(error)
     throw new Error(error.message)

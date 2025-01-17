@@ -42,8 +42,8 @@ router.post("/:name", checkTokenMW, checkAdminMW, banOrUnbanUser)
 router.delete("/:name", checkTokenMW, checkAdminMW, deleteBannedUser)
 
 // Post
-router.post("/:name/:title", checkTokenMW, checkAdminMW, banOrUnbanPost)
-router.delete("/:name/:title", checkTokenMW, checkAdminMW, deleteBannedPost)
+router.post("/post/:postId", checkTokenMW, checkAdminMW, banOrUnbanPost)
+router.delete("/post/:postId", checkTokenMW, checkAdminMW, deleteBannedPost)
 
 // Storie
 router.post(

@@ -11,7 +11,6 @@ const createPost = async (props) => {
   // privacy = undefined, public, private or close friends
   const { data, loggedUser, files, emotion, privacy } = props
   const placesIds = props?.placesIds?.split(",") || []
-  const title = getTodayDate()
 
   try {
     // check Place
@@ -28,7 +27,7 @@ const createPost = async (props) => {
 
     /* Create post */
     const post = new Post({
-      title,
+      date: new Date(), // change for multiple posts in the future
       data,
       files,
       privacy,

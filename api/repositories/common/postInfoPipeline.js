@@ -81,12 +81,19 @@ const postInfoPipeline = (mainUser) => [
       relevance: {
         $sum: ["$like_info.totalLikes", "$comment_info.totalComments"],
       },
-      isToday: { $eq: ["$title", getTodayDate()] },
+      isToday: { $eq: ["$date", new Date()] },
       timeZoneMatch: { $eq: ["user_info.timeZone", mainUser.timeZone] },
       likes: { $ifNull: ["$like_info.totalLikes", 0] },
       userLiked: { $gt: ["$like_info.userLiked", 0] },
       comments: { $ifNull: ["$comment_info.totalComments", 0] },
       userCommented: { $ifNull: ["$comment_info.userCommented", false] },
+      date: {
+        $dateToString: {
+          format: "%Y-%m-%d %H:%M:%S",
+          date: "$date",
+          timezone: mainUser.timeZone || defaultTimeZone,
+        },
+      },
       created_at: {
         $dateToString: {
           format: "%Y-%m-%d %H:%M:%S",
@@ -99,7 +106,7 @@ const postInfoPipeline = (mainUser) => [
   {
     $project: {
       _id: 1,
-      title: 1,
+      date: 1,
       data: 1,
       user: 1,
       files: 1,

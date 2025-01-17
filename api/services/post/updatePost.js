@@ -91,7 +91,7 @@ const updatePost = async (props) => {
 
     /* Update Post */
     const updatedPost = await Post.findOneAndUpdate(
-      { title: post.title, user: loggedUser._id },
+      { _id: post._id },
       {
         $set: {
           data: data || post.data,
