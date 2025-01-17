@@ -11,7 +11,7 @@ const {
 } = require("../../../constants/index")
 
 const reportPost = async (props) => {
-  const { title: storieId, reason, loggedUser } = props
+  const { storieId, reason, loggedUser } = props
 
   if (reason.length > maxReportReasonLength) return inputTooLong("Reason")
 

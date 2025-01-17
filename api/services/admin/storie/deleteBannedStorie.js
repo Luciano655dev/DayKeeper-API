@@ -56,9 +56,9 @@ const deleteBannedStorie = async (props) => {
     if (!adminUser) adminUser = loggedUser
 
     sendStorieDeletionEmail({
-      title: userFromStorie.title,
-      username: userFromStorie.name,
-      email: userFromStorie.email,
+      date: storie.date,
+      username: storie.user_info.name,
+      email: storie.user_info.email,
       id: storie._id,
       adminUsername: adminUser.name,
       reason: latestBan.ban_message,

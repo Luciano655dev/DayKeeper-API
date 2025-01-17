@@ -1,5 +1,4 @@
 const Storie = require(`../../models/Storie`)
-const getTodayDate = require(`../../utils/getTodayDate`)
 const getPlaceById = require("../location/getPlaceById")
 
 const {
@@ -12,8 +11,18 @@ const createStorie = async (props) => {
   const { text, file, placeId, privacy, loggedUser } = props
 
   try {
-    const todayDate = getTodayDate()
-    const todayStoriesCount = await Storie.countDocuments({ title: todayDate })
+    const startOfDay = new Date()
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const endOfDay = new Date()
+    endOfDay.setHours(23, 59, 59, 999)
+
+    const todayStoriesCount = await Storie.countDocuments({
+      date: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    })
 
     if (todayStoriesCount >= maxStoriesPerDay)
       return maxQuantityToday(`Stories`)
@@ -39,7 +48,7 @@ const createStorie = async (props) => {
     }
 
     const newStorie = new Storie({
-      title: `${todayDate}`,
+      date: new Date(),
       file,
       text,
       privacy,

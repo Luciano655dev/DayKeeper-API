@@ -1,17 +1,9 @@
 const storieInfoPipeline = require("../../common/storieInfoPipeline")
 
-const getStoriePipeline = (userId, storieInput, mainUser) => [
+const getStoriePipeline = (storieId, mainUser) => [
   {
     $match: {
-      $or: [
-        {
-          user: userId,
-          title: storieInput,
-        },
-        {
-          _id: { $eq: storieInput },
-        },
-      ],
+      _id: new mongoose.Types.ObjectId(storieId),
     },
   },
   ...storieInfoPipeline(mainUser),

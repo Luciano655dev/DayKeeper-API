@@ -30,7 +30,7 @@ router.get("/:name", checkTokenMW, getTodayStories) // get today user stories
 router.get("/:name/all", checkTokenMW, getUserStories) // get All User Stories
 router.get("/:storieId/likes", checkTokenMW, getStorieLikes) // Get Storie Likes
 router.get("/:storieId/views", checkTokenMW, getStorieViews) // Get Storie Views
-router.get("/:name/:title", checkTokenMW, getStorie) // get Storie
+router.get("/get/:storieId", checkTokenMW, getStorie) // get Storie
 
 router.post(
   "/create",
@@ -40,18 +40,13 @@ router.post(
   detectInappropriateFileMW,
   createStorie
 ) // createStories
-router.post("/:name/:storieId/like", checkTokenMW, likeStorie) // like a storie
+router.post("/:storieId/like", checkTokenMW, likeStorie) // like a storie
 router.delete(
   "/:storieId",
   checkTokenMW,
   verifyStoriesOwnershipMW,
   deleteStorie
 ) // delete a storie
-router.post(
-  `/:name/:title/report`,
-  checkTokenMW,
-  checkBannedUserMW,
-  reportStorie
-) // report storie
+router.post(`/:storieId/report`, checkTokenMW, checkBannedUserMW, reportStorie) // report storie
 
 module.exports = router

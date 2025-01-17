@@ -8,12 +8,12 @@ const {
 } = require("../../repositories/index")
 
 const {
-  errors: { notFound },
+  errors: { notFound, invalidValue },
   success: { fetched },
 } = require("../../../constants/index")
 
 const getStorie = async (props) => {
-  const { name: username, title, loggedUser } = props
+  const { name: username, storieId, loggedUser } = props
 
   try {
     // Get User
@@ -22,18 +22,19 @@ const getStorie = async (props) => {
     else user = user[0]
 
     // Get Stories
-    const storieInput = mongoose.Types.ObjectId.isValid(title)
-      ? new mongoose.Types.ObjectId(title)
-      : title
+    if (!mongoose.Types.ObjectId.isValid(storieId))
+      return invalidValue("Storie ID")
 
-    const stories = await Storie.aggregate(
-      getStoriePipeline(user._id, storieInput, loggedUser)
+    const storie = await Storie.aggregate(
+      getStoriePipeline(storieId, loggedUser)
     )
 
-    // View Stories
-    await viewStories(stories, loggedUser)
+    if (!storie[0] || !storie) return notFound("Storie")
 
-    return fetched("Stories", { data: stories })
+    // View Stories
+    await viewStories(storie, loggedUser)
+
+    return fetched("Stories", { data: storie[0] })
   } catch (error) {
     throw new Error(error.message)
   }

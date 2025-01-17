@@ -72,6 +72,13 @@ const storieInfoPipeline = (mainUser) => [
       likes: { $ifNull: ["$like_info.totalLikes", 0] },
       userLiked: { $gt: ["$like_info.userLiked", 0] },
       userViewed: { $gt: ["$view_info.userViewed", 0] },
+      date: {
+        $dateToString: {
+          format: "%Y-%m-%d %H:%M:%S",
+          date: "$date",
+          timezone: mainUser.timeZone || defaultTimeZone,
+        },
+      },
       created_at: {
         $dateToString: {
           format: "%Y-%m-%d %H:%M:%S",

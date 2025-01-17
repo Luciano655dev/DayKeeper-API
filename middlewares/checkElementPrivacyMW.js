@@ -10,14 +10,12 @@ const {
 
 function checkElementPrivacy(elementType) {
   return async (req, res, next) => {
-    const { name, title, storieId, eventId, noteId, taskId } = req.params
+    const { eventId, noteId, taskId } = req.params
     const loggedUser = req.user
 
     try {
       const element = await (async () => {
         switch (elementType) {
-          case "storie":
-            return getStorie({ name, title: storieId, loggedUser: req.user })
           case "event":
             return DayEvent.findById(eventId)
           case "note":
