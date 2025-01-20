@@ -3,9 +3,8 @@ const mongoose = require("mongoose")
 const dayEventSchema = mongoose.Schema({
   title: String,
   description: String,
-  date: String,
-  timeStart: Date,
-  timeEnd: Date,
+  dateStart: Date,
+  dateEnd: Date,
   location: String,
   privacy: {
     type: String,

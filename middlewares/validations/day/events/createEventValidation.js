@@ -1,4 +1,4 @@
-const { parse, isValid } = require("date-fns")
+const { parse, isValid, isBefore } = require("date-fns")
 const getPlaceById = require("../../../../api/services/location/getPlaceById")
 
 const {
@@ -11,9 +11,6 @@ const createEvent = async (req, res, next) => {
   const {
     title,
     description,
-    date, // dd-mm-yyyy
-    timeStart, // HH:mm:ss
-    timeEnd, // HH:mm:ss
     privacy,
     placeId, // location
   } = req.body
@@ -24,28 +21,14 @@ const createEvent = async (req, res, next) => {
   if (title?.length > maxEventTitleLength)
     return res.status(413).json({ message: "Event Title is too long" })
 
-  const parsedDate = parse(date, "dd-MM-yyyy", new Date())
-  if (!/^\d{2}-\d{2}-\d{4}$/.test(date) || !isValid(parsedDate))
-    return res.status(400).json({ message: "The Date is Invalid" })
-
-  const parsedTimeStart = parse(
-    `${date} ${timeStart}`,
-    "dd-MM-yyyy HH:mm:ss",
-    new Date()
-  )
-  const parsedTimeEnd = parse(
-    `${date} ${timeEnd}`,
-    "dd-MM-yyyy HH:mm:ss",
-    new Date()
-  )
-
+  const dateStart = new Date(req.body.dateStart)
+  const dateEnd = new Date(req.body.dateEnd)
   if (
-    !/^\d{2}:\d{2}:\d{2}$/.test(timeStart) ||
-    !isValid(parsedTimeStart) ||
-    !/^\d{2}:\d{2}:\d{2}$/.test(timeEnd) ||
-    !isValid(parsedTimeEnd)
+    !isValid(new Date(dateStart)) ||
+    !isValid(new Date(dateEnd)) ||
+    !isBefore(dateStart, dateEnd)
   )
-    return res.status(413).json({ message: "The Start/End Date is Invalid" })
+    return res.status(400).json({ message: "Invalid Date" })
 
   // Privacy
   switch (privacy) {

@@ -12,9 +12,8 @@ const editEvent = async (props) => {
 
     title,
     description,
-    date, // dd-mm-yyyy
-    timeStart, // HH:mm:ss
-    timeEnd, // HH:mm:ss
+    dateStart,
+    dateEnd,
     placeId, // location
     privacy,
     loggedUser,
@@ -27,9 +26,8 @@ const editEvent = async (props) => {
     const updateData = {
       ...(title && { title }),
       ...(description && { description }),
-      ...(date && { date }),
-      ...(timeStart && { timeStart }),
-      ...(timeEnd && { timeEnd }),
+      ...(dateStart && { dateStart }),
+      ...(dateEnd && { dateEnd }),
       ...(privacy && { privacy }),
       ...(placeId && { placeId }),
       user: loggedUser._id,

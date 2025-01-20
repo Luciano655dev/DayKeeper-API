@@ -8,7 +8,6 @@ const getPostPipeline = (postId, mainUser) => [
       _id: new mongoose.Types.ObjectId(postId),
     },
   },
-  ...postValidationPipeline(mainUser),
   ...postInfoPipeline(mainUser),
 ]
 

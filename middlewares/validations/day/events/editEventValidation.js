@@ -1,6 +1,6 @@
-const { parse, isValid } = require("date-fns")
+const { isValid } = require("date-fns")
 const getPlaceById = require("../../../../api/services/location/getPlaceById")
-const getEventById = require("../../../../api/services/day/events/getEventById")
+const getEvent = require("../../../../api/services/day/events/getEvent")
 
 const {
   day: {
@@ -14,9 +14,6 @@ const createEvent = async (req, res, next) => {
 
     title,
     description,
-    date, // dd-mm-yyyy
-    timeStart, // HH:mm:ss
-    timeEnd, // HH:mm:ss
     privacy,
     placeId, // location
   } = req.body
@@ -27,27 +24,14 @@ const createEvent = async (req, res, next) => {
   if (title && title?.length > maxEventTitleLength)
     return res.status(413).json({ message: "Event Title is too long" })
 
-  const parsedDate = parse(date, "dd-MM-yyyy", new Date())
-  if (date && (!/^\d{2}-\d{2}-\d{4}$/.test(date) || !isValid(parsedDate)))
-    return res.status(400).json({ message: "The Date is Invalid" })
-
-  const parsedTimeStart = parse(
-    `${date} ${timeStart}`,
-    "dd-MM-yyyy HH:mm:ss",
-    new Date()
-  )
-  const parsedTimeEnd = parse(
-    `${date} ${timeEnd}`,
-    "dd-MM-yyyy HH:mm:ss",
-    new Date()
-  )
+  const dateStart = req.body.dateStart ? new Date(req.body.dateStart) : null
+  const dateEnd = req.body.dateStart ? new Date(req.body.dateEnd) : null
   if (
-    (timeStart &&
-      (!/^\d{2}:\d{2}:\d{2}$/.test(timeStart) || !isValid(parsedTimeStart))) ||
-    (timeEnd &&
-      (!/^\d{2}:\d{2}:\d{2}$/.test(timeEnd) || !isValid(parsedTimeEnd)))
+    (dateStart && !isValid(dateStart)) ||
+    (dateEnd && !isValid(dateEnd)) ||
+    (dateStart && dateEnd && !isBefore(dateStart, dateEnd))
   )
-    return res.status(413).json({ message: "The Start/End Date is Invalid" })
+    return res.status(400).json({ message: "Invalid Date" })
 
   // Privacy
   if (privacy)
@@ -62,7 +46,7 @@ const createEvent = async (req, res, next) => {
     }
 
   try {
-    const event = await getEventById({ eventId })
+    const event = await getEvent({ eventId, loggedUser: req.user })
     if (!event) return res.status(404).json({ message: "Event not Found" })
 
     if (placeId) {

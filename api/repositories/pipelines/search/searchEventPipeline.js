@@ -1,179 +1,38 @@
-const hideUserData = require("../../hideProject/hideUserData")
-const { format, parse } = require("date-fns")
+const eventInfoPipeline = require("../../common/day/events/eventInfoPipeline")
+const mongoose = require("mongoose")
 
-const searchEventPipeline = (searchQuery, userId, filter) => {
-  const searchDate = format(
-    parse(`${searchQuery}`, "dd-MM-yyyy", new Date()),
-    "dd-MM-yyyy"
-  )
+const searchEventPipeline = (searchQuery, filterPipe, user, mainUser) => [
+  ...eventInfoPipeline(mainUser),
+  {
+    $match: {
+      $and: [
+        { "user_info._id": new mongoose.Types.ObjectId(user._id) },
 
-  let filterPipe = {}
-  switch (filter) {
-    case "upcoming":
-      filterPipe = { timeStart: { $gt: new Date() } }
-      break
-    case "past":
-      filterPipe = { timeStart: { $lt: new Date() } }
-      break
-    case "ongoing":
-      filterPipe = {
-        $and: [
-          { timeStart: { $lt: new Date() } },
-          { timeEnd: { $gt: new Date() } },
-        ],
-      }
-      break
-    default:
-      break
-  }
+        filterPipe,
+      ],
 
-  // mainUser
-
-  return [
-    {
-      $lookup: {
-        from: "users",
-        let: { userId: { $toObjectId: "$user" } },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ["$_id", "$$userId"] },
-            },
-          },
-          {
-            $project: hideUserData,
-          },
-        ],
-        as: "user_info",
-      },
+      // search
+      $or: [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { description: { $regex: new RegExp(searchQuery, "i") } },
+        { dateStart: { $regex: new RegExp(searchQuery, "i") } },
+        { dateEnd: { $regex: new RegExp(searchQuery, "i") } },
+      ],
     },
-    {
-      $unwind: "$user_info",
+  },
+  {
+    $project: {
+      _id: 1,
+      title: 1,
+      description: 1,
+      dateStart: 1,
+      dateEnd: 1,
+      location: 1,
+      user: 1,
+      user_info: 1,
+      created_at: 1,
     },
-    {
-      $lookup: {
-        from: "followers",
-        let: { followingId: "$user_info._id" },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$followerId", userId] },
-                  { $eq: ["$followingId", "$$followingId"] },
-                ],
-              },
-            },
-          },
-        ],
-        as: "following_info",
-      },
-    },
-    {
-      $lookup: {
-        from: "blocks",
-        let: { blockedId: "$user_info._id" },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$blockId", userId] },
-                  { $eq: ["$blockedId", "$$blockedId"] },
-                ],
-              },
-            },
-          },
-        ],
-        as: "block_info",
-      },
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "closeFriendId",
-        foreignField: "_id",
-        as: "closeFriendInfo",
-        pipeline: [
-          {
-            $project: hideUserData,
-          },
-        ],
-      },
-    },
-    {
-      $addFields: {
-        closeFriendInfo: { $arrayElemAt: ["$closeFriendInfo", 0] },
-      },
-    },
-    {
-      $match: {
-        $or: [
-          { privacy: undefined },
-          { privacy: "public" },
-          {
-            $and: [
-              { privacy: "private" },
-              {
-                "user_info._id": userId,
-              },
-            ],
-          },
-          {
-            $and: [
-              { privacy: "close friends" },
-              {
-                $expr: { $eq: ["$closeFriendId", userId] },
-              },
-            ],
-          },
-        ],
-
-        $and: [
-          { "block_info.0": { $exists: false } },
-          { "user_info.banned": { $ne: true } },
-          {
-            $or: [
-              { "user_info._id": userId },
-              {
-                $and: [
-                  { "user_info.private": false },
-                  {
-                    $and: [
-                      { "user_info.private": true },
-                      { "following_info.0": { $exists: true } },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-
-          filterPipe,
-          { "user_info._id": userId },
-          {
-            date: {
-              $regex: new RegExp(searchDate, "i"),
-            },
-          },
-        ],
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        title: 1,
-        description: 1,
-        date: 1,
-        timeStart: 1,
-        timeEnd: 1,
-        location: 1,
-        user: 1,
-        user_info: 1,
-        created_at: 1,
-      },
-    },
-  ]
-}
+  },
+]
 
 module.exports = searchEventPipeline

@@ -4,7 +4,7 @@ const {
   createEvent,
   editEvent,
   deleteEvent,
-  getEventById,
+  getEvent,
   searchEvents,
 
   createNote,
@@ -39,13 +39,12 @@ const checkValidUserMW = require("../middlewares/checkValidUserMW")
 router.post("/event", checkTokenMW, createEventValidation, createEvent)
 router.put("/event/:eventId", checkTokenMW, editEventValidation, editEvent)
 router.delete("/event/:eventId", checkTokenMW, deleteEvent)
-router.get("/event/search/:userId", checkTokenMW, searchEvents)
+router.get("/event/search", checkTokenMW, searchEvents)
 router.get(
-  "/event/:name/:eventId",
+  "/event/:eventId",
   checkTokenMW,
-  checkValidUserMW,
   checkElementPrivacy("event"),
-  getEventById
+  getEvent
 )
 
 // Note Router

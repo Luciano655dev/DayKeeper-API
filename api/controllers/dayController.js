@@ -2,7 +2,7 @@
 const createEvent = require("../services/day/events/createEvent")
 const editEvent = require("../services/day/events/editEvent")
 const deleteEvent = require("../services/day/events/deleteEvent")
-const getEventById = require("../services/day/events/getEventById")
+const getEvent = require("../services/day/events/getEvent")
 const searchEvents = require("../services/day/events/searchEvents")
 
 // Notes
@@ -22,12 +22,12 @@ const searchTasks = require("../services/day/tasks/searchTasks")
 // ========== EVENT CONTROLLERS ==========
 const createEventController = async (req, res) => {
   try {
-    const { code, message, event } = await createEvent({
+    const { code, message, data } = await createEvent({
       ...req.body,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, event })
+    return res.status(code).json({ message, data })
   } catch (error) {
     return res.status(500).json({ error })
   }
@@ -57,14 +57,14 @@ const deleteEventController = async (req, res) => {
     return res.status(500).json({ error })
   }
 }
-const getEventByIdController = async (req, res) => {
+const getEventController = async (req, res) => {
   try {
-    const { code, message, event } = await getEventById({
+    const { code, message, data } = await getEvent({
       ...req.params,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, event })
+    return res.status(code).json({ message, data })
   } catch (error) {
     return res.status(500).json({ error })
   }
@@ -81,6 +81,7 @@ const searchEventsController = async (req, res) => {
     const { code, message, response } = await searchEvents({
       ...req.params,
       ...req.query,
+      loggedUser: req.user,
       page,
       maxPageSize,
     })
@@ -241,7 +242,7 @@ module.exports = {
   createEvent: createEventController,
   editEvent: editEventController,
   deleteEvent: deleteEventController,
-  getEventById: getEventByIdController,
+  getEvent: getEventController,
   searchEvents: searchEventsController,
 
   createNote: createNoteController,

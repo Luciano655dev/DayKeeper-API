@@ -1,5 +1,5 @@
 const DayEvent = require("../../../models/DayEvent")
-const getEventById = require("./getEventById")
+const getEvent = require("./getEvent")
 
 const {
   errors: { notFound, unauthorized },
@@ -10,13 +10,13 @@ const deleteEvent = async (props) => {
   const { eventId, loggedUser } = props
 
   try {
-    const event = await getEventById({ eventId })
+    const event = await getEvent({ eventId, loggedUser })
     if (!event) return notFound("Event")
 
-    if (!event.event.user.equals(loggedUser._id))
+    if (!event.data.user.equals(loggedUser._id))
       return unauthorized(
         "You can't delete this event",
-        "only the person who creted this event can delete it",
+        "only the person who created this event can delete it",
         409
       )
 

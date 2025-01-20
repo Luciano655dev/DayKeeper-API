@@ -12,9 +12,8 @@ const createEvent = async (props) => {
     title,
     description,
     privacy,
-    date, // dd-mm-yyyy
-    timeStart, // HH:mm:ss
-    timeEnd, // HH:mm:ss
+    dateStart,
+    dateEnd, // HH:mm:ss
     placeId, // location
     loggedUser,
   } = props
@@ -22,24 +21,11 @@ const createEvent = async (props) => {
   try {
     const timeZone = loggedUser?.timeZone || defaultTimeZone
 
-    // Format dates to convert Later
-    const startDateTime = parse(
-      `${date} ${timeStart}`,
-      "dd-MM-yyyy HH:mm:ss",
-      new Date()
-    )
-    const endDateTime = parse(
-      `${date} ${timeEnd}`,
-      "dd-MM-yyyy HH:mm:ss",
-      new Date()
-    )
-
     const newEvent = new DayEvent({
       title,
       description,
-      date,
-      timeStart: startDateTime,
-      timeEnd: endDateTime,
+      dateStart,
+      dateEnd,
       placeId,
       privacy,
       user: loggedUser._id,
@@ -48,10 +34,10 @@ const createEvent = async (props) => {
     await newEvent.save()
 
     return created(`Day Event`, {
-      event: {
+      data: {
         ...newEvent._doc,
-        timeStart: convertTimeZone(startDateTime, timeZone),
-        timeEnd: convertTimeZone(endDateTime, timeZone),
+        dateStart: convertTimeZone(dateStart, timeZone),
+        dateEnd: convertTimeZone(dateEnd, timeZone),
         created_at: convertTimeZone(new Date(), timeZone),
       },
     })

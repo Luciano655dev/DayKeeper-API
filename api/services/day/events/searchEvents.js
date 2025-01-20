@@ -1,45 +1,59 @@
+const User = require("../../../models/User")
 const { searchEventPipeline } = require("../../../repositories/index")
-const convertTimeZone = require(`../../../utils/convertTimeZone`)
 const getDataWithPages = require("../../getDataWithPages")
-const mongoose = require("mongoose")
-const { format } = require("date-fns")
 
 const {
-  user: { defaultTimeZone },
-  errors: { invalidValue },
+  errors: { notFound },
   success: { fetched },
 } = require("../../../../constants/index")
 
 const searchEvent = async (props) => {
-  const { userId, page, maxPageSize } = props
+  const { page, maxPageSize, name, loggedUser } = props
   const searchQuery = props.q || ""
-  const filter = props?.filter || "upcoming"
-  const loggedUser = props.user
+  const filter = props?.filter || ""
 
   try {
-    if (!mongoose.Types.ObjectId.isValid(userId)) return invalidValue("User ID")
-    userIdObjId = new mongoose.Types.ObjectId(userId)
+    // get user
+    let user = loggedUser
+    if (name) {
+      user = await User.findOne({ name })
+      if (!user) return notFound("User")
+    }
+
+    let filterPipe = {}
+    switch (filter) {
+      case "upcoming":
+        filterPipe = { dateStart: { $gt: new Date() } }
+        break
+      case "past":
+        filterPipe = { dateStart: { $lt: new Date() } }
+        break
+      case "ongoing":
+        filterPipe = {
+          $and: [
+            { dateStart: { $lt: new Date() } },
+            { dateEnd: { $gt: new Date() } },
+          ],
+        }
+        break
+      default:
+        break
+    }
 
     const response = await getDataWithPages(
       {
         type: "DayEvent",
-        pipeline: searchEventPipeline(searchQuery, userIdObjId, filter),
-        order: "recent",
+        pipeline: searchEventPipeline(
+          searchQuery,
+          filterPipe,
+          user,
+          loggedUser
+        ),
         page,
         maxPageSize,
       },
       loggedUser
     )
-
-    // Convert to TZ
-    const timeZone = loggedUser?.timeZone || defaultTimeZone
-    response.data = response.data.map((event) => ({
-      ...event,
-      date: format(convertTimeZone(event.timeStart, timeZone), "dd-MM-yyyy"),
-      timeStart: convertTimeZone(event.timeStart, timeZone),
-      timeEnd: convertTimeZone(event.timeEnd, timeZone),
-      created_at: convertTimeZone(event.created_at, timeZone),
-    }))
 
     return fetched(`Events`, { response })
   } catch (error) {
