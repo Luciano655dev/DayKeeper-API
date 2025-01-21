@@ -10,7 +10,7 @@ const {
   createNote,
   editNote,
   deleteNote,
-  getNoteById,
+  getNote,
   searchNotes,
 
   createTask,
@@ -40,25 +40,14 @@ router.post("/event", checkTokenMW, createEventValidation, createEvent)
 router.put("/event/:eventId", checkTokenMW, editEventValidation, editEvent)
 router.delete("/event/:eventId", checkTokenMW, deleteEvent)
 router.get("/event/search", checkTokenMW, searchEvents)
-router.get(
-  "/event/:eventId",
-  checkTokenMW,
-  checkElementPrivacy("event"),
-  getEvent
-)
+router.get("/event/:eventId", checkTokenMW, getEvent)
 
 // Note Router
 router.post("/note", checkTokenMW, createNoteValidation, createNote)
 router.put("/note/:noteId", checkTokenMW, editNoteValidation, editNote)
 router.delete("/note/:noteId", checkTokenMW, deleteNote)
-router.get("/note/search/:userId", checkTokenMW, searchNotes)
-router.get(
-  "/note/:name/:noteId",
-  checkTokenMW,
-  checkValidUserMW,
-  checkElementPrivacy("note"),
-  getNoteById
-)
+router.get("/note/search", checkTokenMW, searchNotes)
+router.get("/note/:noteId", checkTokenMW, getNote)
 
 // Task Router
 router.post("/task", checkTokenMW, createTaskValidation, createTask)

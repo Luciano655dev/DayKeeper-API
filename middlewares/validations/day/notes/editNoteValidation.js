@@ -1,5 +1,5 @@
-const getNoteById = require("../../../../api/services/day/notes/getNoteById")
-const { parse, isValid } = require("date-fns")
+const getNote = require("../../../../api/services/day/notes/getNote")
+const { isValid } = require("date-fns")
 const {
   day: {
     note: { maxNoteLength },
@@ -8,15 +8,15 @@ const {
 
 const editNoteValidation = async (req, res, next) => {
   const { noteId } = req.params
-  const { text, date, privacy } = req.body
+  const { text, privacy } = req.body
 
   // Validations
   if (text && text?.length > maxNoteLength)
     return res.status(413).json({ message: "Note is too long" })
 
-  const parsedDate = parse(date, "dd-MM-yyyy", new Date())
-  if (date && (!/^\d{2}-\d{2}-\d{4}$/.test(date) || !isValid(parsedDate)))
-    return res.status(400).json({ message: "The Date is Invalid" })
+  const date = req.body.date ? new Date(req.body.date) : null
+  if (date && !isValid(date))
+    return res.status(400).json({ message: "Date is Invalid" })
 
   // privacy
   if (privacy)
@@ -31,11 +31,13 @@ const editNoteValidation = async (req, res, next) => {
     }
 
   try {
-    const note = await getNoteById({ noteId })
-    if (!note) return res.status(404).json({ message: "Note not Found" })
+    const note = await getNote({ noteId, loggedUser: req.user })
+    if (note.code != 200)
+      return res.status(404).json({ message: "Note not Found" })
 
     return next()
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: error.message })
   }
 }

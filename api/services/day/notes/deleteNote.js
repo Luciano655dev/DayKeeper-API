@@ -1,5 +1,5 @@
 const DayNote = require("../../../models/DayNote")
-const getNoteById = require("./getNoteById")
+const getNote = require("./getNote")
 
 const {
   errors: { notFound, unauthorized },
@@ -10,12 +10,10 @@ const deleteNote = async (props) => {
   const { noteId, loggedUser } = props
 
   try {
-    const note = await getNoteById({ noteId })
+    const note = await getNote({ noteId, loggedUser })
     if (!note) return notFound("Note")
 
-    console.log(note)
-
-    if (!note.note.user.equals(loggedUser._id))
+    if (!note.data.user.equals(loggedUser._id))
       return unauthorized(
         "You can't delete this note",
         "only the person who creted this note can delete it",

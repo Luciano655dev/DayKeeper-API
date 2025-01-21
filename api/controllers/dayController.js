@@ -9,7 +9,7 @@ const searchEvents = require("../services/day/events/searchEvents")
 const createNote = require("../services/day/notes/createNote")
 const editNote = require("../services/day/notes/editNote")
 const deleteNote = require("../services/day/notes/deleteNote")
-const getNoteById = require("../services/day/notes/getNoteById")
+const getNote = require("../services/day/notes/getNote")
 const searchNotes = require("../services/day/notes/searchNotes")
 
 // Tasks
@@ -131,14 +131,14 @@ const deleteNoteController = async (req, res) => {
     return res.status(500).json({ error })
   }
 }
-const getNoteByIdController = async (req, res) => {
+const getNoteController = async (req, res) => {
   try {
-    const { code, message, note } = await getNoteById({
+    const { code, message, data } = await getNote({
       ...req.params,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, note })
+    return res.status(code).json({ message, data })
   } catch (error) {
     return res.status(500).json({ error })
   }
@@ -157,6 +157,7 @@ const searchNotesController = async (req, res) => {
       ...req.query,
       page,
       maxPageSize,
+      loggedUser: req.user,
     })
 
     return res.status(code).json({ message, ...response })
@@ -248,7 +249,7 @@ module.exports = {
   createNote: createNoteController,
   editNote: editNoteController,
   deleteNote: deleteNoteController,
-  getNoteById: getNoteByIdController,
+  getNote: getNoteController,
   searchNotes: searchNotesController,
 
   createTask: createTaskController,

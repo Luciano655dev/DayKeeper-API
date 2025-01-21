@@ -1,8 +1,8 @@
 const mongoose = require("mongoose")
 
 const dayNoteSchema = mongoose.Schema({
+  date: Date,
   text: String,
-  date: String,
   privacy: {
     type: String,
     enum: ["public", "private", "close friends"],

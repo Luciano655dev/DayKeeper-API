@@ -1,29 +1,52 @@
+const User = require("../../../models/User")
 const { searchNotePipeline } = require("../../../repositories/index")
 const convertTimeZone = require(`../../../utils/convertTimeZone`)
 const getDataWithPages = require("../../getDataWithPages")
 const mongoose = require("mongoose")
-const { format } = require("date-fns")
 
 const {
   user: { defaultTimeZone },
-  errors: { invalidValue },
   success: { fetched },
 } = require("../../../../constants/index")
 
 const searchNotes = async (props) => {
-  const { userId, page, maxPageSize } = props
+  const { page, maxPageSize, name, loggedUser } = props
   const searchQuery = props.q || ""
   const filter = props?.filter || "upcoming" // `upcoming` or `past`
-  const loggedUser = props.user
 
   try {
-    if (!mongoose.Types.ObjectId.isValid(userId)) return invalidValue("User ID")
-    userIdObjId = new mongoose.Types.ObjectId(userId)
+    // get user
+    let user = loggedUser
+    if (name) {
+      user = await User.findOne({ name })
+      if (!user) return notFound("User")
+    }
+
+    // filter
+    let filterPipe = {}
+    switch (filter) {
+      case "upcoming":
+        filterPipe = {
+          $expr: {
+            $gt: ["$date", new Date()], // Compare directly as dates
+          },
+        }
+        break
+      case "past":
+        filterPipe = {
+          $expr: {
+            $lt: ["$date", new Date()], // Compare directly as dates
+          },
+        }
+        break
+      default:
+        break
+    }
 
     const response = await getDataWithPages(
       {
         type: "DayNote",
-        pipeline: searchNotePipeline(searchQuery, userIdObjId, filter),
+        pipeline: searchNotePipeline(searchQuery, filterPipe, user, loggedUser),
         order: "recent",
         page,
         maxPageSize,
