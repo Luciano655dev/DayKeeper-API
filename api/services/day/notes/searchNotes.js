@@ -2,7 +2,6 @@ const User = require("../../../models/User")
 const { searchNotePipeline } = require("../../../repositories/index")
 const convertTimeZone = require(`../../../utils/convertTimeZone`)
 const getDataWithPages = require("../../getDataWithPages")
-const mongoose = require("mongoose")
 
 const {
   user: { defaultTimeZone },

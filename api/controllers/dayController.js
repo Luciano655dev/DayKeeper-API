@@ -16,7 +16,7 @@ const searchNotes = require("../services/day/notes/searchNotes")
 const createTask = require("../services/day/tasks/createTask")
 const editTask = require("../services/day/tasks/editTask")
 const deleteTask = require("../services/day/tasks/deleteTask")
-const getTaskById = require("../services/day/tasks/getTaskById")
+const getTask = require("../services/day/tasks/getTask")
 const searchTasks = require("../services/day/tasks/searchTasks")
 
 // ========== EVENT CONTROLLERS ==========
@@ -176,7 +176,6 @@ const createTaskController = async (req, res) => {
 
     return res.status(code).json({ message, task })
   } catch (error) {
-    console.log(error)
     return res.status(500).json({ error })
   }
 }
@@ -205,14 +204,14 @@ const deleteTaskController = async (req, res) => {
     return res.status(500).json({ error })
   }
 }
-const getTaskByIdController = async (req, res) => {
+const getTaskController = async (req, res) => {
   try {
-    const { code, message, task } = await getTaskById({
+    const { code, message, data } = await getTask({
       ...req.params,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, task })
+    return res.status(code).json({ message, data })
   } catch (error) {
     return res.status(500).json({ error })
   }
@@ -229,6 +228,7 @@ const searchTasksController = async (req, res) => {
     const { code, message, response } = await searchTasks({
       ...req.params,
       ...req.query,
+      loggedUser: req.user,
       page,
       maxPageSize,
     })
@@ -255,6 +255,6 @@ module.exports = {
   createTask: createTaskController,
   editTask: editTaskController,
   deleteTask: deleteTaskController,
-  getTaskById: getTaskByIdController,
+  getTask: getTaskController,
   searchTasks: searchTasksController,
 }

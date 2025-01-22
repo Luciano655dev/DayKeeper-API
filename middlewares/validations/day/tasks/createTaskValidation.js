@@ -7,7 +7,7 @@ const {
 } = require("../../../../constants/index")
 
 const createTaskValidation = async (req, res, next) => {
-  const { title, value, date, privacy } = req.body
+  const { title, value, privacy } = req.body
 
   // Validations
   if (title?.length > maxTitleLength)
@@ -15,9 +15,9 @@ const createTaskValidation = async (req, res, next) => {
   if (value != true && value != false)
     return res.status(400).json({ message: "Task Value is invalid" })
 
-  const parsedDate = parse(date, "dd-MM-yyyy", new Date())
-  if (!/^\d{2}-\d{2}-\d{4}$/.test(date) || !isValid(parsedDate))
-    return res.status(400).json({ message: "The Date is Invalid" })
+  const date = req.body.date ? new Date(req.body.date) : null
+  if (!date || !isValid(date))
+    return res.status(400).json({ message: "Date is Invalid" })
 
   // Privacy
   switch (privacy) {

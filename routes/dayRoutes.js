@@ -16,22 +16,18 @@ const {
   createTask,
   editTask,
   deleteTask,
-  getTaskById,
+  getTask,
   searchTasks,
 } = require("../api/controllers/dayController")
 
 // Middlewares
 const checkTokenMW = require("../middlewares/checkTokenMW")
-const checkElementPrivacy = require("../middlewares/checkElementPrivacyMW")
 const createEventValidation = require("../middlewares/validations/day/events/createEventValidation")
 const editEventValidation = require("../middlewares/validations/day/events/editEventValidation")
 const createNoteValidation = require("../middlewares/validations/day/notes/createNoteValidation")
 const editNoteValidation = require("../middlewares/validations/day/notes/editNoteValidation")
 const createTaskValidation = require("../middlewares/validations/day/tasks/createTaskValidation")
 const editTaskValidation = require("../middlewares/validations/day/tasks/editTaskValidation")
-
-// Get Validations
-const checkValidUserMW = require("../middlewares/checkValidUserMW")
 
 // Routes (/day)
 
@@ -53,13 +49,7 @@ router.get("/note/:noteId", checkTokenMW, getNote)
 router.post("/task", checkTokenMW, createTaskValidation, createTask)
 router.put("/task/:taskId", checkTokenMW, editTaskValidation, editTask)
 router.delete("/task/:taskId", checkTokenMW, deleteTask)
-router.get("/task/search/:userId", checkTokenMW, searchTasks)
-router.get(
-  "/task/:name/:taskId",
-  checkTokenMW,
-  checkValidUserMW,
-  checkElementPrivacy("task"),
-  getTaskById
-)
+router.get("/task/search", checkTokenMW, searchTasks)
+router.get("/task/:taskId", checkTokenMW, getTask)
 
 module.exports = router

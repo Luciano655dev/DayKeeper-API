@@ -1,5 +1,5 @@
 const DayTask = require("../../../models/DayTask")
-const getTaskById = require("./getTaskById")
+const getTask = require("./getTask")
 
 const {
   errors: { notFound, unauthorized },
@@ -10,10 +10,10 @@ const deleteTask = async (props) => {
   const { taskId, loggedUser } = props
 
   try {
-    const task = await getTaskById({ taskId })
+    const task = await getTask({ taskId, loggedUser })
     if (!task) return notFound("Task")
 
-    if (!task.task.user.equals(loggedUser._id))
+    if (!task.data.user.equals(loggedUser._id))
       return unauthorized(
         "You can't delete this task",
         "only the person who creted this task can delete it"

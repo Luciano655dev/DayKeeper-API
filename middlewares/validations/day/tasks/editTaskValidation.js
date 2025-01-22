@@ -1,6 +1,6 @@
-const getTaskById = require("../../../../api/services/day/tasks/getTaskById")
+const getTask = require("../../../../api/services/day/tasks/getTask")
 const mongoose = require("mongoose")
-const { parse, isValid } = require("date-fns")
+const { isValid } = require("date-fns")
 const {
   day: {
     task: { maxTitleLength },
@@ -9,7 +9,7 @@ const {
 
 const editTaskValidation = async (req, res, next) => {
   const { taskId } = req.params
-  const { title, value, date, privacy } = req.body
+  const { title, value, privacy } = req.body
 
   // Validations
   if (title && title?.length > maxTitleLength)
@@ -17,9 +17,9 @@ const editTaskValidation = async (req, res, next) => {
   if (value && value != true && value != false)
     return res.status(400).json({ message: "Task Value is invalid" })
 
-  const parsedDate = parse(date, "dd-MM-yyyy", new Date())
-  if (date && (!/^\d{2}-\d{2}-\d{4}$/.test(date) || !isValid(parsedDate)))
-    return res.status(400).json({ message: "The Date is Invalid" })
+  const date = req.body.date ? new Date(req.body.date) : null
+  if (date && !isValid(date))
+    return res.status(400).json({ message: "Date is Invalid" })
 
   if (!mongoose.Types.ObjectId.isValid(taskId))
     return res.status(400).json({ message: "The Task ID is Invalid" })
@@ -37,8 +37,9 @@ const editTaskValidation = async (req, res, next) => {
     }
 
   try {
-    const task = await getTaskById({ taskId })
-    if (!task) return res.status(404).json({ message: "Task not Found" })
+    const task = await getTask({ taskId, loggedUser: req.user })
+    if (task.code != 200)
+      return res.status(404).json({ message: "Task not Found" })
 
     return next()
   } catch (error) {

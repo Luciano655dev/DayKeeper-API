@@ -3,7 +3,7 @@ const mongoose = require("mongoose")
 const dayTaskSchema = mongoose.Schema({
   title: String,
   value: Boolean,
-  date: String,
+  date: Date,
   privacy: {
     type: String,
     enum: ["public", "private", "close friends"],
