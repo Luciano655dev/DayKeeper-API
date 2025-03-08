@@ -208,6 +208,7 @@ const getDataWithPages = async (
       pageSize: data.length,
       maxPageSize,
       totalPages,
+      totalCount: totalCount.total,
     }
   } catch (error) {
     throw new Error(error.message)

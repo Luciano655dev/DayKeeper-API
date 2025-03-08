@@ -56,11 +56,10 @@ router.get("/logout", (req, res) => {
         return
       }
 
-      console.log(`deslogado`)
       res.redirect("/")
     })
   } catch {
-    return res.status(400).json({ message: `nao tem nenhum usuario logado` })
+    return res.status(400).json({ message: `There's no user logged in` })
   }
 })
 

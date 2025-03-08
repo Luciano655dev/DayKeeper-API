@@ -1,5 +1,6 @@
 const userValidationPipeline = require("./userValidationPipeline")
 const followInfoPipeline = require("./user/followInfoPipeline")
+const hideUserData = require("../hideProject/hideUserData")
 const {
   user: { defaultTimeZone },
 } = require("../../../constants/index")
@@ -17,6 +18,9 @@ const userInfoPipeline = (mainUser) => [
         },
       },
     },
+  },
+  {
+    $project: hideUserData,
   },
 ]
 

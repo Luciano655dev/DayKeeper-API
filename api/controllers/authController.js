@@ -64,7 +64,7 @@ const userDataController = async (req, res) => {
   try {
     const { code, message, user, token } = await getUserData({
       ...req.params,
-      user: req.user,
+      loggedUser: req.user,
       cookies: req.cookies,
     })
 

@@ -1,9 +1,17 @@
 const userInfoPipeline = require("../../common/userInfoPipeline")
+const mongoose = require("mongoose")
 
-const getUserPipeline = (username, mainUser) => [
+const getUserPipeline = (userInput, mainUser) => [
   {
     $match: {
-      name: username,
+      $or: [
+        { name: userInput },
+        {
+          _id: mongoose.Types.ObjectId.isValid(userInput)
+            ? new mongoose.Types.ObjectId(userInput)
+            : "",
+        },
+      ],
     },
   },
   ...userInfoPipeline(mainUser),

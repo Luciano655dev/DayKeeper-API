@@ -1,4 +1,5 @@
 const User = require("../../models/User")
+const getUser = require("../user/getUser")
 const { hideUserData } = require(`../../repositories/index`)
 const {
   errors: { notFound },
@@ -6,14 +7,15 @@ const {
 } = require("../../../constants/index")
 
 const getUserData = async (props) => {
-  const { user: fetchedUser, cookies } = props
+  const { loggedUser, cookies } = props
 
   try {
-    const user = await User.findById(fetchedUser._id).select(hideUserData)
+    const user = await getUser({ name: loggedUser._id, loggedUser })
     if (!user) return notFound("User")
 
-    return fetched(`user`, { user, token: cookies?.["connect.sid"] })
+    return fetched(`user`, { user: user.data, token: cookies?.["connect.sid"] })
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }
