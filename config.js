@@ -2,7 +2,6 @@ require("dotenv").config()
 
 module.exports = {
   secret: process.env.SECRET,
-  resetTime: process.env.RESET_TIME,
   giphy: {
     apiKey: process.env.GIPHY_API_KEY,
   },

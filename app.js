@@ -12,7 +12,6 @@ dotenv.config()
 
 // Jobs
 require("./api/jobs/deleteUsersWithoutConfirmedEmail")
-require("./api/jobs/sendNewDayNotifications.js")
 
 // Initialize Firebase
 firebaseAdmin.initializeApp({
