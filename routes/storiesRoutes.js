@@ -47,6 +47,6 @@ router.delete(
   verifyStoriesOwnershipMW,
   deleteStorie
 ) // delete a storie
-router.post(`/:storieId/report`, checkTokenMW, checkBannedUserMW, reportStorie) // report storie
+router.post(`/:storieId/report`, checkTokenMW, reportStorie) // report storie
 
 module.exports = router

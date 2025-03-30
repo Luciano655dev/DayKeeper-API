@@ -12,6 +12,7 @@ dotenv.config()
 
 // Jobs
 require("./api/jobs/deleteUsersWithoutConfirmedEmail")
+require("./api/jobs/resetStreaks")
 
 // Initialize Firebase
 firebaseAdmin.initializeApp({

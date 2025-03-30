@@ -13,14 +13,9 @@ const {
 } = require("../../../constants/index")
 
 const getStorie = async (props) => {
-  const { name: username, storieId, loggedUser } = props
+  const { storieId, loggedUser } = props
 
   try {
-    // Get User
-    let user = await User.aggregate(getUserPipeline(username, loggedUser))
-    if (!user[0]) return notFound("User")
-    else user = user[0]
-
     // Get Stories
     if (!mongoose.Types.ObjectId.isValid(storieId))
       return invalidValue("Storie ID")
@@ -36,7 +31,7 @@ const getStorie = async (props) => {
 
     return fetched("Stories", { data: storie[0] })
   } catch (error) {
-    throw new Error(error.message)
+    return new Error(error.message)
   }
 }
 

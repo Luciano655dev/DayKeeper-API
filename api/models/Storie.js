@@ -1,7 +1,10 @@
 const mongoose = require("mongoose")
 
 const storieSchema = mongoose.Schema({
-  date: Date,
+  date: {
+    type: Date,
+    default: Date.now,
+  },
   privacy: {
     type: String,
     enum: ["public", "private", "close friends"],

@@ -7,7 +7,6 @@ const {
   user: { maxReportReasonLength },
   errors: { inputTooLong, notFound, doubleAction, invalidValue },
   success: { custom },
-  user,
 } = require("../../../constants/index")
 
 const reportPost = async (props) => {
@@ -31,7 +30,7 @@ const reportPost = async (props) => {
 
     await Report.create({
       referenceId: storie._id,
-      userId: user._id,
+      userId: loggedUser._id,
       reason,
       created_at: new Date(),
       type: "storie",

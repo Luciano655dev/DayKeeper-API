@@ -16,6 +16,10 @@ const userSchema = mongoose.Schema({
   private: Boolean,
   roles: [String], // ['user', 'admin']
 
+  // Post strikes, like Duolingo
+  currentStrike: Number,
+  maxStrike: Number,
+
   google_id: {
     type: String,
     required: false,

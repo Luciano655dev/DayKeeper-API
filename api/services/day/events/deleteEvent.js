@@ -11,7 +11,7 @@ const deleteEvent = async (props) => {
 
   try {
     const event = await getEvent({ eventId, loggedUser })
-    if (!event) return notFound("Event")
+    if (!event || event?.code != 200) return notFound("Event")
 
     if (!event.data.user.equals(loggedUser._id))
       return unauthorized(

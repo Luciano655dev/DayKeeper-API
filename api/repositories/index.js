@@ -20,6 +20,7 @@ const getPostCommentsPipeline = require("./pipelines/post/getPostCommentsPipelin
 const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipeline")
 
 const getStoriePipeline = require("./pipelines/storie/getStoriePipeline")
+const getTodayStoriesPipeline = require("./pipelines/storie/getTodayStoriesPipeline")
 const getStorieLikesPipeline = require("./pipelines/storie/getStorieLikesPipeline")
 const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipeline")
 const userStoriesPipeline = require("./pipelines/storie/userStoriesPipeline")
@@ -65,6 +66,7 @@ module.exports = {
   getPostCommentsPipeline,
   getCommentLikesPipeline,
   getStoriePipeline,
+  getTodayStoriesPipeline,
   getStorieLikesPipeline,
   getStorieViewsPipeline,
 }

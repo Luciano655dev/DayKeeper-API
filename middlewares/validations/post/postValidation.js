@@ -6,12 +6,11 @@ const {
 
 const postValidation = async (req, res, next) => {
   const { data, privacy, emotion } = req.body
-  const loggedUser = req.user
+  const files = req?.files
   const maxDataLength = 1000
 
   try {
     function handleBadRequest(errorCode, message) {
-      /* Delete previous files */
       if (files) {
         for (let i in req.files) {
           deleteFile(req.files[i].key)
@@ -26,18 +25,6 @@ const postValidation = async (req, res, next) => {
 
     if (data.length > maxDataLength)
       return handleBadRequest(413, `Text is too long`)
-
-    /* One post per day */
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    const lastPostToday = await Post.findOne({
-      user: loggedUser._id,
-      created_at: { $gte: today },
-    })
-
-    if (lastPostToday)
-      return handleBadRequest(400, "You can only make one post per day")
 
     // Privacy
     switch (privacy) {
@@ -64,3 +51,11 @@ const postValidation = async (req, res, next) => {
 }
 
 module.exports = postValidation
+
+/*
+CHANGES:
+- user streak
+- fixed problems with storie functions
+- fixed problem with day functions
+- fixed problem with post creation
+*/

@@ -11,7 +11,7 @@ const deleteTask = async (props) => {
 
   try {
     const task = await getTask({ taskId, loggedUser })
-    if (!task) return notFound("Task")
+    if (!task || task?.code != 200) return notFound("Task")
 
     if (!task.data.user.equals(loggedUser._id))
       return unauthorized(

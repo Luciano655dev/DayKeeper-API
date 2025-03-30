@@ -14,21 +14,12 @@ const {
 } = require("../../../constants/index")
 
 const likeStorie = async (props) => {
-  const { name: username, storieId, loggedUser } = props
+  const { storieId, loggedUser } = props
 
   try {
-    // Get User
-    let user = await User.aggregate(getUserPipeline(username, loggedUser))
-    if (!user[0]) return notFound("User")
-    else user = user[0]
-
     // getStorie
     let storie = await Storie.aggregate(
-      getStoriePipeline(
-        user._id,
-        new mongoose.Types.ObjectId(storieId),
-        loggedUser
-      )
+      getStoriePipeline(new mongoose.Types.ObjectId(storieId), loggedUser)
     )
     if (!storie[0]) return notFound(`Storie`)
     else storie = storie[0]

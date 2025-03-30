@@ -11,12 +11,12 @@ const deleteNote = async (props) => {
 
   try {
     const note = await getNote({ noteId, loggedUser })
-    if (!note) return notFound("Note")
+    if (!note || note?.code != 200) return notFound("Note")
 
     if (!note.data.user.equals(loggedUser._id))
       return unauthorized(
         "You can't delete this note",
-        "only the person who creted this note can delete it",
+        "only the person who created this note can delete it",
         409
       )
 

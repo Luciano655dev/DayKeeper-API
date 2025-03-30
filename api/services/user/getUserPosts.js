@@ -19,6 +19,7 @@ const getUserPosts = async (props) => {
 
     return fetched(`user's posts`, { response })
   } catch (error) {
+    console.log(error)
     throw new Error(`${error}`)
   }
 }

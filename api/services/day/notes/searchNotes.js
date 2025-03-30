@@ -11,7 +11,7 @@ const {
 const searchNotes = async (props) => {
   const { page, maxPageSize, name, loggedUser } = props
   const searchQuery = props.q || ""
-  const filter = props?.filter || "upcoming" // `upcoming` or `past`
+  const filter = props?.filter || "" // `upcoming` or `past`
 
   try {
     // get user
@@ -27,18 +27,19 @@ const searchNotes = async (props) => {
       case "upcoming":
         filterPipe = {
           $expr: {
-            $gt: ["$date", new Date()], // Compare directly as dates
+            $gt: [{ $toDate: "$date" }, new Date()],
           },
         }
         break
       case "past":
         filterPipe = {
           $expr: {
-            $lt: ["$date", new Date()], // Compare directly as dates
+            $lt: [{ $toDate: "$date" }, new Date()],
           },
         }
         break
       default:
+        filterPipe = {}
         break
     }
 
@@ -46,22 +47,16 @@ const searchNotes = async (props) => {
       {
         type: "DayNote",
         pipeline: searchNotePipeline(searchQuery, filterPipe, user, loggedUser),
-        order: "recent",
         page,
         maxPageSize,
       },
       loggedUser
     )
-
-    // Convert to TZ
-    const timeZone = loggedUser?.timeZone || defaultTimeZone
-    response.data = response.data.map((note) => ({
-      ...note,
-      created_at: convertTimeZone(note.created_at, timeZone),
-    }))
+    console.log(response)
 
     return fetched(`Notes`, { response })
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }

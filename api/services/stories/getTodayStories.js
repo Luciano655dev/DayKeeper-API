@@ -1,9 +1,8 @@
 const User = require("../../models/User")
 const Storie = require("../../models/Storie")
-const getTodayDate = require(`../../utils/getTodayDate`)
 const viewStories = require("./general/viewStories")
 const {
-  getStoriePipeline,
+  getTodayStoriesPipeline,
   getUserPipeline,
 } = require("../../repositories/index")
 
@@ -20,10 +19,15 @@ const getStorie = async (props) => {
     else user = user[0]
 
     // Get Stories
-    const todayDate = getTodayDate()
+    const todayDate = new Date()
+    const startOfDay = new Date(todayDate)
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const endOfDay = new Date(todayDate)
+    endOfDay.setHours(23, 59, 59, 999)
 
     const stories = await Storie.aggregate(
-      getStoriePipeline(user._id, todayDate, loggedUser)
+      getTodayStoriesPipeline(user._id, startOfDay, endOfDay, loggedUser)
     )
 
     // View Stories

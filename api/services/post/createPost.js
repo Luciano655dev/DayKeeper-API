@@ -1,5 +1,5 @@
 const Post = require("../../models/Post")
-const getTodayDate = require(`../../utils/getTodayDate`)
+const updateStreak = require(`../user/streak/updateStreak`)
 const deleteFile = require("../../utils/deleteFile")
 const getPlaceById = require("../location/getPlaceById")
 
@@ -35,8 +35,10 @@ const createPost = async (props) => {
       user: loggedUser._id,
       created_at: Date.now(),
     })
-
     await post.save()
+
+    /* Update Streak */
+    await updateStreak(loggedUser)
 
     return created(`post`, { post })
   } catch (error) {
