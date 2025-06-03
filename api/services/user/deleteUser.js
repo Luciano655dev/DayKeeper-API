@@ -49,6 +49,7 @@ const deleteUser = async (props) => {
       storie_likes: deletedStorieLikes,
     })
   } catch (error) {
+    console.log(error)
     throw new Error(error.message)
   }
 }

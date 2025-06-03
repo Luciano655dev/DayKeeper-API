@@ -19,7 +19,7 @@ passportConfig(passport)
 
 // Routes
 router.post("/register", userRegisterValidation, register)
-router.get("/confirm_email", confirmEmail)
+router.post("/confirm_email", confirmEmail)
 router.post("/forget_password", forgetPassword)
 router.post("/reset_password", resetPassword)
 router.get("/user", checkTokenMW, userData)
