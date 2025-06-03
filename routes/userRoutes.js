@@ -64,12 +64,12 @@ router.delete(
 
 // Close Friends
 router.post(
-  "/closeFriends/:name",
+  "/close_friends/:name",
   checkTokenMW,
   checkValidUserMW,
   addOrRemoveFromCloseFriends
 )
-router.get("/closeFriends", checkTokenMW, getCloseFriends)
+router.get("/close_friends", checkTokenMW, getCloseFriends)
 
 // Interactions
 router.post("/:name/block", checkTokenMW, checkBannedUserMW, blockUser)

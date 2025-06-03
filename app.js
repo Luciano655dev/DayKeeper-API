@@ -1,5 +1,6 @@
 const express = require("express")
 const session = require("express-session")
+const MongoStore = require("connect-mongo")
 const mongoose = require("mongoose")
 const cookieParser = require("cookie-parser")
 const firebaseAdmin = require("firebase-admin")
@@ -9,6 +10,11 @@ const passportConfig = require("./api/config/passportAuth")
 const cors = require("cors")
 const dotenv = require("dotenv")
 dotenv.config()
+
+// Variables
+const DBuser = process.env.DB_USER
+const DBpass = process.env.DB_PASS
+const DBclusterName = process.env.DB_CLUSTER_NAME
 
 // Jobs
 require("./api/jobs/deleteUsersWithoutConfirmedEmail")
@@ -36,10 +42,14 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: `mongodb+srv://${DBuser}:${DBpass}@${DBclusterName}.iyslifi.mongodb.net/Daykeeper`,
+      ttl: 60 * 60 * 24, // 1 day
+    }),
     cookie: {
-      secure: false, // True in prod (https)
-      maxAge: 1000 * 60 * 60 * 24, // 1 day (example)
+      secure: false, // true in production with https
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
 )
@@ -68,9 +78,6 @@ app.use("/", searchRoutes)
 app.use("/", userRoutes)
 
 // ==================== MongoDB Connection ====================
-const DBuser = process.env.DB_USER
-const DBpass = process.env.DB_PASS
-const DBclusterName = process.env.DB_CLUSTER_NAME
 
 mongoose
   .connect(

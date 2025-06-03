@@ -1,4 +1,3 @@
-const Post = require("../../../api/models/Post")
 const deleteFile = require("../../../api/utils/deleteFile")
 const {
   errors: { serverError },
@@ -51,11 +50,3 @@ const postValidation = async (req, res, next) => {
 }
 
 module.exports = postValidation
-
-/*
-CHANGES:
-- user streak
-- fixed problems with storie functions
-- fixed problem with day functions
-- fixed problem with post creation
-*/
