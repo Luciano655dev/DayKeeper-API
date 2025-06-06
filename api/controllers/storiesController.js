@@ -12,6 +12,7 @@ const getStorie = require(`../services/stories/getStorie`)
 const getTodayStories = require(`../services/stories/getTodayStories`)
 const getUserStories = require(`../services/stories/getUserStories`)
 const getStorieViews = require(`../services/stories/getStorieViews`)
+const getFollowingStories = require("../services/stories/getFollowingStories")
 
 const createStorieController = async (req, res) => {
   if (!req.file)
@@ -58,28 +59,6 @@ const likeStorieController = async (req, res) => {
     return res.status(code).json({ message, storie })
   } catch (error) {
     return serverError(`${error}`)
-  }
-}
-
-const getStorieLikesController = async (req, res) => {
-  const page = Number(req.query?.page) || 1
-  const maxPageSize = req.query?.maxPageSize
-    ? Number(req.query?.maxPageSize) <= 100
-      ? Number(req.query?.maxPageSize)
-      : 100
-    : 1
-
-  try {
-    const { code, message, response } = await getStorieLikes({
-      ...req.params,
-      loggedUser: req.user,
-      page,
-      maxPageSize,
-    })
-
-    return res.status(code).json({ message, ...response })
-  } catch (error) {
-    return res.status(500).json({ message: `${error}` })
   }
 }
 
@@ -163,15 +142,59 @@ const getStorieViewsController = async (req, res) => {
   }
 }
 
+const getStorieLikesController = async (req, res) => {
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getStorieLikes({
+      ...req.params,
+      loggedUser: req.user,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
+  }
+}
+
+const getFollowingStoriesController = async (req, res) => {
+  const page = Number(req.query?.page) || 1
+  const maxPageSize = req.query?.maxPageSize
+    ? Number(req.query?.maxPageSize) <= 100
+      ? Number(req.query?.maxPageSize)
+      : 100
+    : 1
+
+  try {
+    const { code, message, response } = await getFollowingStories({
+      loggedUser: req.user,
+      page,
+      maxPageSize,
+    })
+
+    return res.status(code).json({ message, ...response })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
+  }
+}
+
 module.exports = {
   createStorie: createStorieController,
   deleteStorie: deleteStorieController,
   likeStorie: likeStorieController,
-  reportStorie: reportStorieController,
+  reportStorie: reportStorieController, // story
 
   getStorie: getStorieController,
   getTodayStories: getTodayStoriesController,
   getUserStories: getUserStoriesController,
   getStorieLikes: getStorieLikesController,
   getStorieViews: getStorieViewsController,
+  getFollowingStories: getFollowingStoriesController,
 }
