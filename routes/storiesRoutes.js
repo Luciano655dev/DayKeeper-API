@@ -10,7 +10,7 @@ const {
   likeStorie,
   getStorieLikes,
   getStorieViews,
-  getFollowingStories,
+  getUserStoriesFeed,
   reportStorie,
 } = require("../api/controllers/storiesController")
 
@@ -26,7 +26,7 @@ const handleMulterError = require("../middlewares/handleMulterError")
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
 // Routes
-router.get("/", checkTokenMW, getFollowingStories) // get today stories from followers
+router.get("/", checkTokenMW, getUserStoriesFeed) // get Main Stories Feed
 router.get("/:name", checkTokenMW, getTodayStories) // get today user stories
 router.get("/:name/all", checkTokenMW, getUserStories) // get All User Stories
 router.get("/:storieId/likes", checkTokenMW, getStorieLikes) // Get Storie Likes

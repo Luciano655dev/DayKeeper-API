@@ -1,11 +1,11 @@
 const getDataWithPages = require("../getDataWithPages")
-const { getFollowingStoriesPipeline } = require("../../repositories/index")
+const { getUserStoriesFeedPipeline } = require("../../repositories/index")
 
 const {
   success: { fetched },
 } = require("../../../constants/index")
 
-const getFollowingStories = async (props) => {
+const getUserStoriesFeed = async (props) => {
   const { page, maxPageSize, loggedUser } = props
 
   try {
@@ -16,12 +16,12 @@ const getFollowingStories = async (props) => {
     endOfToday.setHours(23, 59, 59, 999)
 
     const response = await getDataWithPages({
-      pipeline: getFollowingStoriesPipeline(
+      pipeline: getUserStoriesFeedPipeline(
         loggedUser,
         startOfToday,
         endOfToday
       ),
-      type: "Storie",
+      type: "User",
       page,
       maxPageSize,
     })
@@ -32,7 +32,4 @@ const getFollowingStories = async (props) => {
   }
 }
 
-module.exports = getFollowingStories
-
-/*
- */
+module.exports = getUserStoriesFeed

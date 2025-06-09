@@ -12,7 +12,7 @@ const getStorie = require(`../services/stories/getStorie`)
 const getTodayStories = require(`../services/stories/getTodayStories`)
 const getUserStories = require(`../services/stories/getUserStories`)
 const getStorieViews = require(`../services/stories/getStorieViews`)
-const getFollowingStories = require("../services/stories/getFollowingStories")
+const getUserStoriesFeed = require("../services/stories/getUserStoriesFeed")
 
 const createStorieController = async (req, res) => {
   if (!req.file)
@@ -164,7 +164,7 @@ const getStorieLikesController = async (req, res) => {
   }
 }
 
-const getFollowingStoriesController = async (req, res) => {
+const getUserStoriesFeedController = async (req, res) => {
   const page = Number(req.query?.page) || 1
   const maxPageSize = req.query?.maxPageSize
     ? Number(req.query?.maxPageSize) <= 100
@@ -173,7 +173,7 @@ const getFollowingStoriesController = async (req, res) => {
     : 1
 
   try {
-    const { code, message, response } = await getFollowingStories({
+    const { code, message, response } = await getUserStoriesFeed({
       loggedUser: req.user,
       page,
       maxPageSize,
@@ -196,5 +196,5 @@ module.exports = {
   getUserStories: getUserStoriesController,
   getStorieLikes: getStorieLikesController,
   getStorieViews: getStorieViewsController,
-  getFollowingStories: getFollowingStoriesController,
+  getUserStoriesFeed: getUserStoriesFeedController,
 }

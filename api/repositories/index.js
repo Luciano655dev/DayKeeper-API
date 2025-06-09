@@ -23,7 +23,7 @@ const getStoriePipeline = require("./pipelines/storie/getStoriePipeline")
 const getTodayStoriesPipeline = require("./pipelines/storie/getTodayStoriesPipeline")
 const getStorieLikesPipeline = require("./pipelines/storie/getStorieLikesPipeline")
 const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipeline")
-const getFollowingStoriesPipeline = require("./pipelines/storie/getFollowingStoriesPipeline")
+const getUserStoriesFeedPipeline = require("./pipelines/storie/getUserStoriesFeedPipeline")
 const userStoriesPipeline = require("./pipelines/storie/userStoriesPipeline")
 
 const searchEventPipeline = require("./pipelines/search/searchEventPipeline")
@@ -70,5 +70,5 @@ module.exports = {
   getTodayStoriesPipeline,
   getStorieLikesPipeline,
   getStorieViewsPipeline,
-  getFollowingStoriesPipeline,
+  getUserStoriesFeedPipeline,
 }
