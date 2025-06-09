@@ -21,7 +21,7 @@ const getUserStoriesFeed = async (props) => {
         startOfToday,
         endOfToday
       ),
-      type: "User",
+      type: "Storie",
       page,
       maxPageSize,
     })

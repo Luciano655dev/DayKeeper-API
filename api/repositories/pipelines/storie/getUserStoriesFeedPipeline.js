@@ -1,73 +1,78 @@
-const mongoose = require("mongoose")
+const storieInfoPipeline = require("../../common/storieInfoPipeline")
 
-const getUserStoriesFeed = (mainUserId, startOfDay, endOfDay) => [
-  {
-    $lookup: {
-      from: "stories",
-      let: { userId: "$_id" },
-      pipeline: [
-        {
-          $match: {
-            $expr: {
-              $and: [
-                { $eq: ["$user", "$$userId"] },
-                { $gte: ["$created_at", startOfDay] },
-                { $lte: ["$created_at", endOfDay] },
-              ],
-            },
-          },
-        },
-      ],
-      as: "todaysStories",
-    },
-  },
-
-  // Only keep users who posted at least one story today
+const getUserStoriesFeed = (mainUser, startOfDay, endOfDay) => [
   {
     $match: {
-      "todaysStories.0": { $exists: true },
+      created_at: { $gte: startOfDay, $lte: endOfDay },
     },
   },
-
-  // Lookup story views for today's stories (flattened via $lookup inside)
+  ...storieInfoPipeline(mainUser),
+  {
+    $sort: { created_at: 1 },
+  },
+  {
+    $group: {
+      _id: "$user",
+      stories: { $push: "$$ROOT" },
+      storyIds: { $push: "$_id" },
+      total: { $sum: 1 },
+    },
+  },
+  {
+    $lookup: {
+      from: "users",
+      localField: "_id",
+      foreignField: "_id",
+      as: "user",
+    },
+  },
+  { $unwind: "$user" },
   {
     $lookup: {
       from: "storieViews",
-      let: { storyIds: "$todaysStories._id" },
+      let: { storyIds: "$storyIds" },
       pipeline: [
         {
           $match: {
             $expr: {
               $and: [
                 { $in: ["$storieId", "$$storyIds"] },
-                { $eq: ["$userId", new mongoose.Types.ObjectId(mainUserId)] },
+                { $eq: ["$userId", mainUser._id] },
               ],
             },
           },
         },
       ],
-      as: "userViews",
+      as: "views",
     },
   },
-
-  // Add field: userViewed = all stories viewed by main user?
   {
     $addFields: {
-      totalStories: { $size: "$todaysStories" },
-      viewedStories: { $size: "$userViews" },
       userViewed: {
-        $eq: [{ $size: "$todaysStories" }, { $size: "$userViews" }],
+        $eq: [{ $size: "$views" }, "$total"],
       },
     },
   },
-
-  // Optional cleanup
   {
     $project: {
-      todaysStories: 0,
-      userViews: 0,
-      totalStories: 0,
-      viewedStories: 0,
+      _id: "$user._id",
+      name: "$user.name",
+      profile_picture: "$user.profile_picture",
+      userViewed: 1,
+      stories: {
+        $map: {
+          input: "$stories",
+          as: "storie",
+          in: {
+            _id: "$$storie._id",
+            file: "$$storie.file",
+            text: "$$storie.text",
+            created_at: "$$storie.created_at",
+            privacy: "$$storie.privacy",
+            date: "$$storie.date",
+          },
+        },
+      },
     },
   },
 ]
