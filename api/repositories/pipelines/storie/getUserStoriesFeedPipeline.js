@@ -3,6 +3,7 @@ const storieInfoPipeline = require("../../common/storieInfoPipeline")
 const getUserStoriesFeed = (mainUser, startOfDay, endOfDay) => [
   {
     $match: {
+      user: { $ne: mainUser._id },
       created_at: { $gte: startOfDay, $lte: endOfDay },
     },
   },
