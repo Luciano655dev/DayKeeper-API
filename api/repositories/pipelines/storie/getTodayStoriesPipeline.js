@@ -1,11 +1,10 @@
 const storieInfoPipeline = require("../../common/storieInfoPipeline")
-const mongoose = require("mongoose")
 
 const getTodayStoriesPipeline = (userId, startOfDay, endOfDay, mainUser) => [
   {
     $match: {
       $and: [
-        { user: new mongoose.Types.ObjectId(userId) },
+        { user: userId },
         {
           created_at: {
             $gte: startOfDay,
