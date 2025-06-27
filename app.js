@@ -59,23 +59,15 @@ app.use(passport.session())
 passportConfig(passport)
 
 // Routes
-const authRoutes = require("./routes/authRoutes")
-const userRoutes = require("./routes/userRoutes")
-const postRoutes = require("./routes/postRoutes")
-const storiesRoutes = require(`./routes/storiesRoutes`)
-const adminRoutes = require("./routes/adminRoutes")
-const searchRoutes = require("./routes/searchRoutes")
-const locationRoutes = require("./routes/locationRoutes")
-const dayRoutes = require("./routes/dayRoutes")
-
-app.use("/auth", authRoutes)
-app.use("/post", postRoutes)
-app.use("/stories", storiesRoutes)
-app.use("/day", dayRoutes)
-app.use("/admin", adminRoutes)
-app.use("/location", locationRoutes)
-app.use("/", searchRoutes)
-app.use("/", userRoutes)
+app.use("/webhooks", require("./routes/webhooks"))
+app.use("/auth", require("./routes/authRoutes"))
+app.use("/post", require("./routes/postRoutes"))
+app.use("/stories", require(`./routes/storiesRoutes`))
+app.use("/day", require("./routes/dayRoutes"))
+app.use("/admin", require("./routes/adminRoutes"))
+app.use("/location", require("./routes/locationRoutes"))
+app.use("/", require("./routes/searchRoutes"))
+app.use("/", require("./routes/userRoutes"))
 
 // ==================== MongoDB Connection ====================
 

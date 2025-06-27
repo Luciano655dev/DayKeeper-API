@@ -4,6 +4,8 @@ const postSchema = mongoose.Schema({
   date: Date,
   data: String,
   emotion: Number,
+  media: [{ type: mongoose.Schema.Types.ObjectId, ref: "Media" }],
+
   privacy: {
     type: String,
     enum: ["public", "private", "close friends"],
@@ -22,19 +24,8 @@ const postSchema = mongoose.Schema({
     default: Date.now(),
     required: true,
   },
-  files: [
-    {
-      name: String,
-      key: String,
-      mimetype: String,
-      url: String,
-      placeId: {
-        required: false,
-        type: String,
-      },
-    },
-  ],
 
+  status: String, // 'pending' or 'public'
   banned: { type: Boolean, required: false },
 })
 

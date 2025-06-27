@@ -13,6 +13,8 @@ module.exports = {
     bucketName: process.env.BUCKET_NAME,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    snsTopicArn: process.env.SNS_TOPIC_ARN,
+    rekogRoleArn: process.env.REKOG_ROLE_ARN,
     defaultRegion: `us-east-1`,
   },
   google: {

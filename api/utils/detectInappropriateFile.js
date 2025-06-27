@@ -1,56 +1,65 @@
 const AWS = require(`aws-sdk`)
+const rekognition = new AWS.Rekognition()
 const { inappropriateLabels } = require(`../../constants/index`)
+const Media = require("../models/Media")
 const {
   aws: {
     accessKeyId,
     secretAccessKey,
     defaultRegion,
-    bucketName
-  }
+    bucketName,
+    snsTopicArn,
+    rekogRoleArn,
+  },
 } = require(`../../config`)
 
 AWS.config.update({
   accessKeyId: accessKeyId,
   secretAccessKey: secretAccessKey,
-  region: defaultRegion
-});
+  region: defaultRegion,
+})
 
-const rekognition = new AWS.Rekognition()
+const detectInappropriateContent = async (key, type = "image", mediaId) => {
+  if (type === "image") {
+    const response = await rekognition
+      .detectModerationLabels({
+        Image: { S3Object: { Bucket: bucketName, Name: key } },
+      })
+      .promise()
 
-const detectInappropriateContent = async (imageKey, type = `image`) => {
-  const params = type == `image` ? {
-    Image: {
-      S3Object: {
-        Bucket: bucketName,
-        Name: imageKey
-      }
-    }
-  } : {
-    Video: {
-      S3Object: {
-        Bucket: bucketName,
-        Name: imageKey
-      }
-    }
-  }
-
-  try {
-    const response = await rekognition.detectModerationLabels(params).promise()
-
-    for(let label of response.ModerationLabels){
-      // log
-      console.log(`Label: ${label.Name}, Confidence: ${label.Confidence}`)
-
-      if (inappropriateLabels.includes(label.Name) && label.Confidence > 90){
+    for (let label of response.ModerationLabels) {
+      console.log(`Image Label: ${label.Name}, Confidence: ${label.Confidence}`)
+      if (inappropriateLabels.includes(label.Name) && label.Confidence > 90) {
         return false
       }
     }
 
+    await Media.findByIdAndUpdate(mediaId, { status: "public" })
     return true
-  } catch (error) {
-    console.error('Error detecting moderation labels:', error)
-    throw error
   }
+
+  if (type === "video") {
+    const res = await rekognition
+      .startContentModeration({
+        Video: {
+          S3Object: { Bucket: bucketName, Name: key },
+        },
+        NotificationChannel: {
+          SNSTopicArn: snsTopicArn,
+          RoleArn: rekogRoleArn,
+        },
+      })
+      .promise()
+
+    await Media.findByIdAndUpdate(mediaId, {
+      jobId: res.JobId,
+      status: "pending",
+    })
+
+    return true
+  }
+
+  return false
 }
 
 module.exports = detectInappropriateContent

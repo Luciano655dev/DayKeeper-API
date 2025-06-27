@@ -12,9 +12,11 @@ async function detectInappropriateContentMW(req, res, next) {
 
   try {
     for (let file of files) {
+      const mediaType = file.mimetype.split("/")[0]
       const isAppropriate = await detectInappropriateContent(
         file.key,
-        file.mimetype.split(`/`)[0]
+        mediaType,
+        file.mediaId
       )
 
       if (!isAppropriate) {

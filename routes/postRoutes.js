@@ -21,6 +21,7 @@ const multerConfig = require("../api/config/multer")
 const handleMulterError = require("../middlewares/handleMulterError") // status de erro bonitinho do multer :)
 const postValidation = require("../middlewares/validations/post/postValidation")
 const postEditValidation = require("../middlewares/validations/post/postEditValidation")
+const createMediaDocsMW = require("../middlewares/createMediaDocsMW")
 
 const checkTokenMW = require("../middlewares/checkTokenMW")
 
