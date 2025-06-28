@@ -1,31 +1,31 @@
+const Media = require("../models/Media")
 const {
-  aws: {
-    bucketName,
-    storageType
-  }
+  aws: { bucketName, storageType },
 } = require(`../../config`)
 
-const awsS3Config = require('../config/awsS3Config')
+const awsS3Config = require("../config/awsS3Config")
 
-const deleteFile = (key) => {
-  if (storageType === "s3"){
+const deleteFile = async (key) => {
+  if (storageType === "s3") {
     awsS3Config
       .deleteObject({
         Bucket: bucketName,
-        Key: key
+        Key: key,
       })
       .promise()
-      .then(response => {
+      .then((response) => {
         console.log(response.status)
       })
-      .catch(response => {
+      .catch((response) => {
         console.log(response.status)
       })
-  } else if(storageType === "local"){
-    promisify(fs.unlink)(
-      path.resolve(__dirname, "..", "tmp", "uploads", key)
-    )
+  } else if (storageType === "local") {
+    promisify(fs.unlink)(path.resolve(__dirname, "..", "tmp", "uploads", key))
   }
+
+  await Media.deleteOne({ key })
+
+  console.log(`DELETED ${key}`)
 }
 
 module.exports = deleteFile

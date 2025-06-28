@@ -1,5 +1,4 @@
 const AWS = require(`aws-sdk`)
-const rekognition = new AWS.Rekognition()
 const { inappropriateLabels } = require(`../../constants/index`)
 const Media = require("../models/Media")
 const {
@@ -18,6 +17,8 @@ AWS.config.update({
   secretAccessKey: secretAccessKey,
   region: defaultRegion,
 })
+
+const rekognition = new AWS.Rekognition() // dont put that damn line before the config
 
 const detectInappropriateContent = async (key, type = "image", mediaId) => {
   if (type === "image") {

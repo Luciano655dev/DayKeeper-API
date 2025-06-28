@@ -6,15 +6,20 @@ const getPlaceById = require("../location/getPlaceById")
 
 const {
   success: { created },
+  errors: { serverError },
 } = require("../../../constants/index")
 
-const createPost = async (req, res, next) => {
+const createPost = async (req) => {
   const { data, emotion, privacy } = req.body
   const loggedUser = req.user
   const placesIds = req?.body?.placesIds?.split(",") || []
-  const mediaDocs = req.mediaDocs
+  const mediaDocs = req?.mediaDocs
 
   try {
+    for (let file of req.files || []) {
+      await deleteFile(file.key)
+    }
+
     // Add placeId to media if provided
     if (placesIds && placesIds.length > 0 && mediaDocs.length > 0) {
       for (let i in mediaDocs) {
@@ -26,7 +31,7 @@ const createPost = async (req, res, next) => {
         mediaDocs[i].placeId = placesIds[i]
         await mediaDocs[i].save()
       }
-    }
+    } else console.log("No place IDs...")
 
     // Create post with status 'pending' and link media
     const post = await Post.create({
@@ -39,6 +44,8 @@ const createPost = async (req, res, next) => {
       created_at: new Date(),
     })
 
+    console.log("post created")
+
     // Link media to this post
     await Promise.all(
       mediaDocs.map((media) =>
@@ -50,14 +57,14 @@ const createPost = async (req, res, next) => {
 
     await updateStreak(loggedUser)
 
-    return res.status(201).json(created("post", { post }))
+    return created("post", { post })
   } catch (error) {
     for (let file of req.files || []) {
       await deleteFile(file.key)
     }
 
     console.error("Error creating post:", error)
-    return res.status(500).json({ message: "Failed to create post" })
+    return serverError(error)
   }
 }
 

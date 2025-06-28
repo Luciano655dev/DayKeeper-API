@@ -4,6 +4,7 @@ const {
 } = require("../../../constants/index")
 
 const postValidation = async (req, res, next) => {
+  console.log("postValidation")
   const { data, privacy, emotion } = req.body
   const files = req?.files
   const maxDataLength = 1000
@@ -37,13 +38,13 @@ const postValidation = async (req, res, next) => {
     }
 
     /* Emotions */
-    if (!emotion || emotion > 100 || emotion < 0 || isNaN(emotion))
+    if (emotion && (emotion > 100 || emotion < 0))
       return handleBadRequest(400, "Invalid emotion value")
 
-    console.log("next")
-
+    console.log("Post Validation FInished")
     return next()
   } catch (error) {
+    console.log("post Validation Error")
     console.log(error)
     return res.status(500).json({ message: serverError(error.message) })
   }

@@ -5,20 +5,6 @@ const multerS3 = require("multer-s3")
 const awsS3Config = require("./awsS3Config")
 
 const storageTypes = {
-  local: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, path.resolve(__dirname, "..", "temp", "uploads"))
-    },
-    filename: (req, file, cb) => {
-      crypto.randomBytes(16, (err, hash) => {
-        if (err) cb(err)
-
-        file.key = `${hash.toString("hex")}-${file.originalname}`
-
-        cb(null, file.key)
-      })
-    },
-  }),
   s3: multerS3({
     s3: awsS3Config,
     bucket: process.env.BUCKET_NAME,
@@ -33,6 +19,7 @@ const storageTypes = {
         const fileUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${fileName}`
 
         file.url = fileUrl
+        console.log(file.originalname)
 
         cb(null, fileName)
       })
@@ -47,12 +34,7 @@ const MulterConfig = (mediaType) => {
 
   switch (mediaType) {
     case "image":
-      allowedMimes = [
-        "image/jpeg",
-        "image/pjpeg",
-        "image/png",
-        // "image/gif"
-      ]
+      allowedMimes = ["image/jpeg", "image/pjpeg", "image/png"]
       break
     case "both":
       allowedMimes = [
@@ -68,12 +50,12 @@ const MulterConfig = (mediaType) => {
   }
 
   return {
-    dest: path.resolve(__dirname, "..", "tmp", "uploads"),
     storage: storageTypes["s3"],
     limits: {
       fileSize: fileSizeLimit,
     },
     fileFilter: (req, file, cb) => {
+      console.log("Checking file:", file.originalname)
       if (allowedMimes.includes(file.mimetype)) {
         cb(null, true)
       } else {

@@ -6,6 +6,7 @@ const {
 } = require("../constants/index")
 
 async function detectInappropriateContentMW(req, res, next) {
+  console.log("dettecting innapropriate file...")
   const files = req?.file ? [req.file] : req.files
 
   if (!files) return next()
@@ -26,6 +27,8 @@ async function detectInappropriateContentMW(req, res, next) {
           .json({ message: `This image violates DayKeeper's terms of service` })
       }
     }
+
+    console.log("No innapropriate files dettected upfront")
 
     next()
   } catch (error) {

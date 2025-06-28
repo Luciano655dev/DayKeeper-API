@@ -74,7 +74,6 @@ app.use("/", require("./routes/userRoutes"))
 mongoose
   .connect(
     `mongodb+srv://${DBuser}:${DBpass}@${DBclusterName}.iyslifi.mongodb.net/?retryWrites=true&w=majority`
-    // localhost: mongodb://127.0.0.1:27017/Daykeeper
   )
   .then(() => {
     console.log("\x1b[36mDatabase connected successfully\x1b[0m")

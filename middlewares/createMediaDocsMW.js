@@ -2,7 +2,13 @@
 const Media = require("../api/models/Media")
 
 async function createMediaDocsMW(req, res, next) {
-  if (!req.files || !req.files.length) return next()
+  console.log("CREATING MEDIA DOCS (MW)...")
+
+  if (!req.files || !req.files.length) {
+    console.log("NO FILES FOUNDED")
+    console.log(req?.files, req?.file)
+    return res.status(200).json({ message: "testing" })
+  }
 
   try {
     const placesIds = req?.body?.placesIds?.split(",") || []
@@ -23,11 +29,13 @@ async function createMediaDocsMW(req, res, next) {
         })
 
         file.mediaId = doc._id
+        console.log("Media Doc Created: " + file.originalname)
         return doc
       })
     )
 
     req.mediaDocs = mediaDocs
+    console.log("createdMediaDocs")
     req.files.forEach((file, i) => {
       file.mediaId = mediaDocs[i]._id
     })

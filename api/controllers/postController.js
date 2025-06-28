@@ -30,23 +30,8 @@ const getPostController = async (req, res) => {
 
 // submitPost
 const createPostController = async (req, res) => {
-  const files = req?.files
-    ? req?.files.map((file) => {
-        return {
-          name: file.originalname,
-          key: file.key,
-          mimetype: file.mimetype,
-          url: file.url,
-        }
-      })
-    : []
-
   try {
-    const { code, message, post } = await createPost({
-      ...req.body,
-      loggedUser: req.user,
-      files,
-    })
+    const { code, message, post } = await createPost(req)
 
     return res.status(code).json({ message, post })
   } catch (error) {

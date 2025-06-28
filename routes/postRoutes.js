@@ -31,10 +31,10 @@ const detectInappropriateFileMW = require("../middlewares/detectInappropriateFil
 router.get("/:postId", checkTokenMW, getPostById) // One Post
 router.post(
   "/create",
-  checkTokenMW,
   multer(multerConfig("both")).array("files", 5),
-  detectInappropriateFileMW,
   handleMulterError,
+  createMediaDocsMW,
+  detectInappropriateFileMW,
   postValidation,
   createPost
 ) // Create Post
