@@ -9,8 +9,6 @@ let awsS3Config = new aws.S3({
     accessKeyId,
     secretAccessKey,
   },
-  sslEnabled: false,
-  s3ForcePathStyle: true,
   signatureVersion: "v4",
 })
 

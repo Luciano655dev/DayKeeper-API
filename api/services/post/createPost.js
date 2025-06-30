@@ -16,10 +16,6 @@ const createPost = async (req) => {
   const mediaDocs = req?.mediaDocs
 
   try {
-    for (let file of req.files || []) {
-      await deleteFile(file.key)
-    }
-
     // Add placeId to media if provided
     if (placesIds && placesIds.length > 0 && mediaDocs.length > 0) {
       for (let i in mediaDocs) {

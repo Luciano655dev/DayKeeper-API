@@ -52,6 +52,7 @@ const detectInappropriateContent = async (key, type = "image", mediaId) => {
       })
       .promise()
 
+    console.log("Pending Media Created: " + res.JobId)
     await Media.findByIdAndUpdate(mediaId, {
       jobId: res.JobId,
       status: "pending",

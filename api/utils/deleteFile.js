@@ -5,7 +5,8 @@ const {
 
 const awsS3Config = require("../config/awsS3Config")
 
-const deleteFile = async (key) => {
+const deleteFile = async (key, path = "") => {
+  console.log(`Called From ${path}`)
   if (storageType === "s3") {
     awsS3Config
       .deleteObject({

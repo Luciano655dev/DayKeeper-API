@@ -7,6 +7,7 @@ const rekognition = new AWS.Rekognition()
 const { inappropriateLabels } = require("../constants/index")
 
 router.post("/rekognition", async (req, res) => {
+  console.log("REKOGNITION WEBHOOK TRIGGERED ----------")
   const type = req.headers["x-amz-sns-message-type"]
   const body = req.body
 
@@ -19,7 +20,10 @@ router.post("/rekognition", async (req, res) => {
     const msg = JSON.parse(body.Message)
     const jobId = msg.JobId
     const media = await Media.findOne({ jobId })
-    if (!media) return res.send("media not found")
+    if (!media) {
+      console.log("Media not found")
+      return res.send("media not found")
+    }
 
     const result = await rekognition
       .getContentModeration({ JobId: jobId })
@@ -32,6 +36,7 @@ router.post("/rekognition", async (req, res) => {
     )
 
     media.status = flagged ? "rejected" : "public"
+    if (flagged) console.log("THIS F MEDIA AINT SAFE")
     await media.save()
 
     // ✅ Now check if the related post is ready to go public
@@ -40,10 +45,12 @@ router.post("/rekognition", async (req, res) => {
       const allApproved = allMedia.every((m) => m.status === "public")
 
       if (allApproved) {
+        console.log("POST IS ALL RIGHT, READY TO GO PUBLIC")
         await Post.findByIdAndUpdate(media.usedIn.refId, { status: "public" })
       }
     }
 
+    console.log("VIDEO MODERATION FINISHED")
     return res.send("Handled video moderation result")
   }
 
