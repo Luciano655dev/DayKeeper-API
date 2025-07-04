@@ -27,7 +27,7 @@ const createPost = async (req) => {
         mediaDocs[i].placeId = placesIds[i]
         await mediaDocs[i].save()
       }
-    } else console.log("No place IDs...")
+    }
 
     // Create post with status 'pending' and link media
     const post = await Post.create({
