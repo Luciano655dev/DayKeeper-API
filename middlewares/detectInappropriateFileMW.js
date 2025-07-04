@@ -28,6 +28,7 @@ async function detectInappropriateContentMW(req, res, next) {
       }
     }
 
+    console.log("no innapropriate files")
     next()
   } catch (error) {
     for (let file of files) deleteFile(file.key)

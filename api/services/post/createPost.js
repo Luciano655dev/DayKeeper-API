@@ -16,7 +16,6 @@ const createPost = async (req) => {
   const mediaDocs = req?.mediaDocs
 
   try {
-    // Add placeId to media if provided
     if (placesIds && placesIds.length > 0 && mediaDocs.length > 0) {
       for (let i in mediaDocs) {
         if (!placesIds[i]) continue
@@ -29,30 +28,30 @@ const createPost = async (req) => {
       }
     }
 
-    // Create post with status 'pending' and link media
     const post = await Post.create({
       data,
       emotion,
       privacy,
       status: "pending",
-      media: mediaDocs.map((m) => m._id),
+      media: mediaDocs ? mediaDocs.map((m) => m._id) : [],
       user: loggedUser._id,
       created_at: new Date(),
     })
 
-    console.log("post created")
-
-    // Link media to this post
-    await Promise.all(
-      mediaDocs.map((media) =>
-        Media.findByIdAndUpdate(media._id, {
-          usedIn: { model: "Post", refId: post._id },
-        })
+    // Link media to the post
+    if (mediaDocs)
+      await Promise.all(
+        mediaDocs.map((media) =>
+          Media.findByIdAndUpdate(media._id, {
+            usedIn: { model: "Post", refId: post._id },
+          })
+        )
       )
-    )
 
     await updateStreak(loggedUser)
 
+    console.log("post created, id:")
+    console.log()
     return created("post", { post })
   } catch (error) {
     for (let file of req.files || []) {
