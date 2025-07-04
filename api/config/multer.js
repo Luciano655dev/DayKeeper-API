@@ -5,7 +5,7 @@ const fs = require("fs")
 const multerS3 = require("multer-s3")
 const awsS3Config = require("./awsS3Config")
 const {
-  aws: { bucketName },
+  aws: { bucketName, storageType },
 } = require("../../config")
 
 // Ensure local upload dir exists (for local use)
@@ -55,7 +55,7 @@ const storageTypes = {
 
 const fileSizeLimit = 4 * 1024 * 1024 * 1024 // 4 GB
 
-const MulterConfig = (mediaType = "both", useS3 = true) => {
+const MulterConfig = (mediaType = "both") => {
   let allowedMimes = []
 
   switch (mediaType) {
@@ -80,7 +80,7 @@ const MulterConfig = (mediaType = "both", useS3 = true) => {
 
   return {
     dest: uploadDir,
-    storage: useS3 ? storageTypes.s3 : storageTypes.local,
+    storage: storageTypes[storageType],
     limits: {
       fileSize: fileSizeLimit,
     },

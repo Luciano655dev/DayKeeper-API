@@ -31,8 +31,16 @@ const detectInappropriateFileMW = require("../middlewares/detectInappropriateFil
 router.get("/:postId", checkTokenMW, getPostById) // One Post
 router.post(
   "/create",
+  (req, res, next) => {
+    console.time("multerJob")
+    return next()
+  },
   multer(multerConfig("both")).array("files", 5),
   handleMulterError,
+  (req, res, next) => {
+    console.timeEnd("multerJob")
+    return next()
+  },
   createMediaDocsMW,
   detectInappropriateFileMW,
   postValidation,

@@ -6,7 +6,6 @@ const {
 } = require("../constants/index")
 
 async function detectInappropriateContentMW(req, res, next) {
-  console.log("detecting innapropriate file...")
   const files = req?.file ? [req.file] : req.files
 
   if (!files) return next()

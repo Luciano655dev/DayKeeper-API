@@ -21,6 +21,7 @@ AWS.config.update({
 const rekognition = new AWS.Rekognition() // dont put that damn line before the config
 
 const detectInappropriateContent = async (key, type = "image", mediaId) => {
+  console.time("DetectInnapripriateContent")
   if (type === "image") {
     const response = await rekognition
       .detectModerationLabels({
@@ -40,6 +41,7 @@ const detectInappropriateContent = async (key, type = "image", mediaId) => {
   }
 
   if (type === "video") {
+    console.log("type: VIDEO")
     const res = await rekognition
       .startContentModeration({
         Video: {
@@ -52,11 +54,12 @@ const detectInappropriateContent = async (key, type = "image", mediaId) => {
       })
       .promise()
 
-    console.log("Pending Media Created: " + res.JobId)
+    console.log("Pending Media Job Created: " + res.JobId)
     await Media.findByIdAndUpdate(mediaId, {
       jobId: res.JobId,
       status: "pending",
     })
+    console.timeEnd("DetectInnapripriateContent")
 
     return true
   }

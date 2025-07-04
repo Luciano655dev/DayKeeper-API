@@ -32,7 +32,11 @@ const createPost = async (req) => {
       data,
       emotion,
       privacy,
-      status: "pending",
+      status: mediaDocs.reduce((acc, media) => {
+        return acc && media.status === "public"
+      }, true)
+        ? "public"
+        : "pending",
       media: mediaDocs ? mediaDocs.map((m) => m._id) : [],
       user: loggedUser._id,
       created_at: new Date(),
@@ -50,8 +54,6 @@ const createPost = async (req) => {
 
     await updateStreak(loggedUser)
 
-    console.log("post created, id:")
-    console.log()
     return created("post", { post })
   } catch (error) {
     for (let file of req.files || []) {
