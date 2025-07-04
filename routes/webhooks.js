@@ -7,6 +7,16 @@ const Media = require("../api/models/Media")
 const Post = require("../api/models/Post")
 const AWS = require("aws-sdk")
 const { inappropriateLabels } = require("../constants/index")
+const {
+  aws: { accessKeyId, secretAccessKey, defaultRegion },
+} = require(`../config`)
+
+AWS.config.update({
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
+  region: defaultRegion,
+})
+
 const rekognition = new AWS.Rekognition()
 
 // Parse raw body as text
@@ -86,5 +96,24 @@ router.post(
     }
   }
 )
+
+router.get("/rekognition/status/:jobId", async (req, res) => {
+  const { jobId } = req.params
+
+  try {
+    const result = await rekognition
+      .getContentModeration({
+        JobId: jobId,
+      })
+      .promise()
+
+    res.json({
+      status: result.JobStatus,
+      labels: result.ModerationLabels,
+    })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
 
 module.exports = router

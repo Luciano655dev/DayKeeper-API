@@ -41,7 +41,6 @@ const detectInappropriateContent = async (key, type = "image", mediaId) => {
   }
 
   if (type === "video") {
-    console.log("type: VIDEO")
     const res = await rekognition
       .startContentModeration({
         Video: {
@@ -54,7 +53,12 @@ const detectInappropriateContent = async (key, type = "image", mediaId) => {
       })
       .promise()
 
-    console.log("Pending Media Job Created: " + res.JobId)
+    const checkJob = await rekognition
+      .getContentModeration({
+        JobId: res.jobId,
+      })
+      .promise()
+    console.log(`${checkJob.jobStatus} --> ${res.JobId}`)
     await Media.findByIdAndUpdate(mediaId, {
       jobId: res.JobId,
       status: "pending",

@@ -31,6 +31,7 @@ const detectInappropriateFileMW = require("../middlewares/detectInappropriateFil
 router.get("/:postId", checkTokenMW, getPostById) // One Post
 router.post(
   "/create",
+  checkTokenMW,
   (req, res, next) => {
     console.time("multerJob")
     return next()

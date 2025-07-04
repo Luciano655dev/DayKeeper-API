@@ -32,11 +32,13 @@ const createPost = async (req) => {
       data,
       emotion,
       privacy,
-      status: mediaDocs.reduce((acc, media) => {
-        return acc && media.status === "public"
-      }, true)
-        ? "public"
-        : "pending",
+      status: mediaDocs
+        ? mediaDocs.reduce((acc, media) => {
+            return acc && media.status === "public"
+          }, true)
+          ? "public"
+          : "pending"
+        : "public",
       media: mediaDocs ? mediaDocs.map((m) => m._id) : [],
       user: loggedUser._id,
       created_at: new Date(),

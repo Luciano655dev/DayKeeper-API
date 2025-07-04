@@ -1,7 +1,7 @@
 const Media = require("../api/models/Media")
 
 async function createMediaDocsMW(req, res, next) {
-  console.time("CreateMediaDocsMW")
+  console.time("CreateMediaDocsTimer")
   if (!req.files || !req.files.length) return next()
 
   try {
@@ -31,7 +31,7 @@ async function createMediaDocsMW(req, res, next) {
     req.files.forEach((file, i) => {
       file.mediaId = mediaDocs[i]._id
     })
-    console.timeEnd("CreateMediaDocsMW")
+    console.timeEnd("CreateMediaDocsTimer")
     next()
   } catch (err) {
     console.error("Error creating media docs:", err)
