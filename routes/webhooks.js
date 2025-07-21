@@ -19,7 +19,6 @@ AWS.config.update({
 
 const rekognition = new AWS.Rekognition()
 
-// Parse raw body as text
 router.post(
   "/rekognition",
   bodyParser.text({ type: "*/*" }),
@@ -39,9 +38,7 @@ router.post(
       if (type === "SubscriptionConfirmation") {
         console.log("Confirming subscription:", body.SubscribeURL)
         await axios.get(body.SubscribeURL, {
-          httpsAgent: new https.Agent({
-            rejectUnauthorized: true, // make sure it's secure
-          }),
+          httpsAgent: new https.Agent({ rejectUnauthorized: true }),
         })
         console.log("subscription confirmed")
         return res.send("SNS confirmed")

@@ -53,17 +53,12 @@ const detectInappropriateContent = async (key, type = "image", mediaId) => {
       })
       .promise()
 
-    const checkJob = await rekognition
-      .getContentModeration({
-        JobId: res.JobId,
-      })
-      .promise()
-    console.log(`${checkJob.JobStatus} --> ${res.JobId}`)
+    console.log(`JOB_ID --> ${res.JobId}`)
+
     await Media.findByIdAndUpdate(mediaId, {
       jobId: res.JobId,
       status: "pending",
     })
-    console.timeEnd("DetectInnapripriateContent")
 
     return true
   }

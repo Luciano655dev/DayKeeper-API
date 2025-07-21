@@ -16,7 +16,7 @@ module.exports = {
     snsTopicArn: process.env.SNS_TOPIC_ARN,
     rekogRoleArn: process.env.REKOG_ROLE_ARN,
     storageType: "s3", // process.env.STORAGE_TYPE
-    defaultRegion: `us-east-1`,
+    defaultRegion: process.env.AWS_DEFAULT_REGION,
   },
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,
