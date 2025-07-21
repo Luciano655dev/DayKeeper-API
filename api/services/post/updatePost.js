@@ -1,4 +1,5 @@
 const Post = require("../../models/Post")
+const Media = require("../../models/Media")
 const deleteFile = require("../../utils/deleteFile")
 const getPost = require("./getPost")
 const getPlaceById = require("../location/getPlaceById")
@@ -18,104 +19,92 @@ const updatePost = async (props) => {
     data,
     privacy,
     emotion,
-    postId, // req.params
-    loggedUser, // req.user
-    reqFiles, // req.files
+    postId,
+    loggedUser,
+    mediaDocs = [], // novas mídias (req.mediaDocs)
+    keepMediaIds = [], // mídias que o usuário quer manter
   } = props
-  const keepFilesFromProps = props?.keep_files || ""
 
   try {
-    // find Post
-    let post
+    // 1. Get Post
     const postResponse = await getPost({ postId, loggedUser })
+    if (postResponse.code !== 200) return notFound("Post")
+    const post = postResponse.data
 
-    if (postResponse.code == 200) {
-      post = postResponse.data
-    } else return notFound("Post")
+    // 2. Look for old medias that will be keeped in the post
+    const mediaToKeep = await Media.find({ _id: { $in: keepMediaIds } })
 
-    /* Verify File Limit */
-    const keep_files = keepFilesFromProps.split("").map(Number) || []
-    const maxFiles =
-      post.files.length -
-      1 -
-      (post.files.length - keep_files.length) +
-      reqFiles.length
-    if (maxFiles >= 5) throw new Error(inputTooLong(`image field`).message)
-
-    /* Delete files from original post */
-    let files = post.files
-
-    for (let i = 0; i < post.files.length; i++) {
-      if (keep_files.includes(i)) continue
-
-      deleteFile(post.files[i].key)
+    //  3. Verify if the total number is still in the limit
+    const totalAfterUpdate = mediaToKeep.length + mediaDocs.length
+    if (totalAfterUpdate > 5) {
+      throw new Error(inputTooLong("media field").message)
     }
 
-    /* Verify Privacy */
-    if (privacy && post?.privacy != privacy) {
-      switch (privacy) {
-        case "private":
-        case "close_friends":
-          deletePostLikes(post._id)
-          deletePostComments(post._id)
-          deleteCommentLikes(post._id)
-          break
-        case "public":
-        default:
-          break
-      }
-    }
-
-    const newPostfiles = files.filter((el, index) => keep_files.includes(index))
-    const newFiles = reqFiles.map((file) => {
-      return {
-        name: file.originalname,
-        key: file.key,
-        mimetype: file.mimetype,
-        url: file.url,
-      }
+    // 4. Delete Media that user don't want
+    const mediaToDelete = await Media.find({
+      _id: { $in: post.media },
+      _id: { $nin: keepMediaIds },
     })
-    files = [...newPostfiles, ...newFiles]
 
-    /* Verify Place ID */
-    if (placesIds && placesIds?.length > 0) {
-      for (let i in files) {
+    for (let media of mediaToDelete) {
+      await deleteFile(media.key)
+      await media.deleteOne()
+    }
+
+    // 5. Link placeIds to medias
+    if (placesIds.length > 0) {
+      for (let i in mediaDocs) {
         if (!placesIds[i]) continue
-
-        const placeById = await getPlaceById({ placeId: placesIds[i] })
-        if (placesIds && placeById.code !== 200) continue
-
-        files[i].placeId = placesIds[i]
+        const place = await getPlaceById({ placeId: placesIds[i] })
+        if (place.code === 200) {
+          mediaDocs[i].placeId = placesIds[i]
+          await mediaDocs[i].save()
+        }
       }
     }
 
-    /* Update Post */
-    const updatedPost = await Post.findOneAndUpdate(
-      { _id: post._id },
-      {
-        $set: {
-          data: data || post.data,
-          privacy: privacy || post?.privacy,
-          emotion: emotion || post?.emotion,
-          files,
+    // 6. Link post to new medias
+    if (mediaDocs.length) {
+      await Promise.all(
+        mediaDocs.map((media) =>
+          Media.findByIdAndUpdate(media._id, {
+            usedIn: { model: "Post", refId: post._id },
+          })
+        )
+      )
+    }
 
-          edited_at: Date.now(),
-        },
-      },
-      { new: true }
-    )
+    // 7. Calculate new Post Status
+    const allMedia = [...mediaToKeep, ...mediaDocs]
+    const postStatus = allMedia.every((m) => m.status === "public")
+      ? "public"
+      : "pending"
 
-    // Debug
-    if (JSON.stringify(post) == JSON.stringify(updatedPost))
-      return { code: 204, message: "The haven't changed" }
+    // 8. If the privacy changed, delete al previous interactions
+    if (privacy && post.privacy !== privacy) {
+      if (["private", "close_friends"].includes(privacy)) {
+        await deletePostLikes(post._id)
+        await deletePostComments(post._id)
+        await deleteCommentLikes(post._id)
+      }
+    }
 
-    await updatedPost.save()
+    // 9. Update Post
+    post.data = data ?? post.data
+    post.privacy = privacy ?? post.privacy
+    post.emotion = emotion ?? post.emotion
+    post.media = allMedia.map((m) => m._id)
+    post.status = postStatus
+    post.edited_at = Date.now()
 
-    return updated(`post`)
+    await post.save()
+
+    return updated("post")
   } catch (error) {
-    console.log(error)
-    for (let i in newFiles) deleteFile(newFiles[i].key)
-
+    console.error(error)
+    for (let media of mediaDocs) {
+      await deleteFile(media.key)
+    }
     throw new Error(error.message)
   }
 }

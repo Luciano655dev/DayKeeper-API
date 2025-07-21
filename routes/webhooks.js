@@ -64,24 +64,33 @@ router.post(
         )
 
         media.status = flagged ? "rejected" : "public"
-        if (flagged) console.log("THIS F MEDIA AINT SAFE")
         await media.save()
 
-        if (!flagged && media.usedIn?.model === "Post") {
+        if (media.usedIn?.model === "Post") {
           const allMedia = await Media.find({
             "usedIn.refId": media.usedIn.refId,
           })
-          const allApproved = allMedia.every((m) => m.status === "public")
 
-          if (allApproved) {
-            console.log("POST IS ALL RIGHT, READY TO GO PUBLIC")
-            await Post.findByIdAndUpdate(media.usedIn.refId, {
-              status: "public",
-            })
+          // Check if all medias from that post have been processed
+          const stillPending = allMedia.some((m) => m.status === "pending")
+          if (stillPending) {
+            console.log(
+              "Some media still pending. Skipping post status update."
+            )
+            return res.send("Waiting for all media to be moderated")
           }
+
+          // If every media was processed, update post status to 'public' or 'rejected'
+          const someRejected = allMedia.some((m) => m.status === "rejected")
+          const newStatus = someRejected ? "rejected" : "public"
+
+          console.log(`All media moderated. Setting post to: ${newStatus}`)
+
+          await Post.findByIdAndUpdate(media.usedIn.refId, {
+            status: newStatus,
+          })
         }
 
-        console.log("VIDEO MODERATION FINISHED")
         return res.send("Handled video moderation result")
       }
 

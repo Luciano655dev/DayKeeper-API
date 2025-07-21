@@ -32,16 +32,8 @@ router.get("/:postId", checkTokenMW, getPostById) // One Post
 router.post(
   "/create",
   checkTokenMW,
-  (req, res, next) => {
-    console.time("multerJob")
-    return next()
-  },
   multer(multerConfig("both")).array("files", 5),
   handleMulterError,
-  (req, res, next) => {
-    console.timeEnd("multerJob")
-    return next()
-  },
   createMediaDocsMW,
   detectInappropriateFileMW,
   postValidation,
@@ -51,8 +43,9 @@ router.put(
   "/:postId",
   checkTokenMW,
   multer(multerConfig("both")).array("files", 5),
-  detectInappropriateFileMW,
   handleMulterError,
+  createMediaDocsMW,
+  detectInappropriateFileMW,
   postEditValidation,
   updatePost
 ) // Edit Post

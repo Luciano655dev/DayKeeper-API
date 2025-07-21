@@ -45,6 +45,7 @@ const updatePostController = async (req, res) => {
     const { code, message, post } = await updatePost({
       ...req.body,
       ...req.params,
+      mediaDocs: req.mediaDocs,
       loggedUser: req.user,
       reqFiles: req.files,
     })
