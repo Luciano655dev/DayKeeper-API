@@ -8,17 +8,22 @@ const deleteReports = require("../delete/deleteReports")
 const deleteBanHistory = require("../delete/deleteBanHistory")
 
 const {
-  errors: { notFound },
+  errors: { notFound, unauthorized },
   success: { deleted },
 } = require("../../../constants/index")
 
 const deleteStorie = async (props) => {
-  const { storieId } = props
+  const { storieId, loggedUser } = props
 
   try {
-    const storie = await Storie.findByIdAndDelete(storieId)
-    if (!storie) return notFound(`Storie`)
+    const storie = await Storie.findById(storieId)
+    if (!storie) return notFound("Storie")
 
+    // Verify if the storie is from the logged user
+    if (loggedUser?._id?.toString() != storie?.user?.toString())
+      return unauthorized("Delete Storie", "This storie was not posted by you")
+
+    await storie.deleteOne()
     deleteFile(storie.file.key)
     await deleteStorieLikes(storie._id)
     await deleteStorieViews(storie._id)

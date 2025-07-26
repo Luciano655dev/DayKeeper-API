@@ -7,6 +7,7 @@ module.exports = {
   maxPageSize: 100,
   stories: {
     maxStoriesPerDay: 5,
+    maxStorieTextLength: 500,
   },
   post: {
     maxCommentLength: 500,

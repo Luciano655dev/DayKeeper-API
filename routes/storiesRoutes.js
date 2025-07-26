@@ -16,14 +16,13 @@ const {
 
 // Middlewares
 const checkTokenMW = require("../middlewares/checkTokenMW")
-const verifyStoriesOwnershipMW = require("../middlewares/verifyStoriesOwnership")
+const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
+const createMediaDocsMW = require("../middlewares/createMediaDocsMW")
 
 // Multer
 const multer = require("multer")
 const multerConfig = require("../api/config/multer")
 const handleMulterError = require("../middlewares/handleMulterError")
-
-const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
 // Routes
 router.get("/", checkTokenMW, getUserStoriesFeed) // get Main Stories Feed
@@ -38,16 +37,12 @@ router.post(
   checkTokenMW,
   multer(multerConfig("both")).single(`file`),
   handleMulterError,
+  createMediaDocsMW,
   detectInappropriateFileMW,
   createStorie
 ) // createStories
 router.post("/:storieId/like", checkTokenMW, likeStorie) // like a storie
-router.delete(
-  "/:storieId",
-  checkTokenMW,
-  verifyStoriesOwnershipMW,
-  deleteStorie
-) // delete a storie
+router.delete("/:storieId", checkTokenMW, deleteStorie) // delete a storie
 router.post(`/:storieId/report`, checkTokenMW, reportStorie) // report storie
 
 module.exports = router

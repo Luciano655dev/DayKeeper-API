@@ -17,6 +17,9 @@ const {
   aws: { accessKeyId, secretAccessKey, defaultRegion },
 } = require(`../config`)
 
+// middleware
+const checkTokenMW = require("../middlewares/checkTokenMW")
+
 AWS.config.update({
   accessKeyId: accessKeyId,
   secretAccessKey: secretAccessKey,
@@ -118,7 +121,7 @@ router.post(
   }
 )
 
-router.get("/rekognition/status/:jobId", async (req, res) => {
+router.get("/rekognition/status/:jobId", checkTokenMW, async (req, res) => {
   const { jobId } = req.params
 
   try {

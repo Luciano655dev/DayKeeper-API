@@ -15,19 +15,14 @@ const getStorieViews = require(`../services/stories/getStorieViews`)
 const getUserStoriesFeed = require("../services/stories/getUserStoriesFeed")
 
 const createStorieController = async (req, res) => {
-  if (!req.file)
+  if (!req?.mediaDocs || req?.mediaDocs?.length <= 0)
     return res.status(400).json({ message: `The file need to be filled in` })
-
-  const file = {
-    name: req.file.originalname,
-    key: req.file.key,
-    mimetype: req.file.mimetype,
-    url: req.file.url,
-  }
 
   try {
     const { code, message, storie } = await createStorie({
-      file,
+      placeIds: req?.body?.placesId,
+      mediaDocs: req?.mediaDocs,
+      privacy: req?.body?.privacy,
       text: req.body.text,
       loggedUser: req.user,
     })
@@ -40,7 +35,10 @@ const createStorieController = async (req, res) => {
 
 const deleteStorieController = async (req, res) => {
   try {
-    const { code, message } = await deleteStorie({ ...req.params })
+    const { code, message } = await deleteStorie({
+      ...req.params,
+      loggedUser: req?.user,
+    })
 
     return res.status(code).json({ message })
   } catch (error) {
