@@ -18,6 +18,39 @@ const postValidationPipeline = (mainUser) => [
   },
   {
     $lookup: {
+      from: "media",
+      let: { mediaIds: "$media" },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                {
+                  $in: [
+                    "$_id",
+                    {
+                      $map: {
+                        input: "$$mediaIds",
+                        as: "id",
+                        in: { $toObjectId: "$$id" },
+                      },
+                    },
+                  ],
+                },
+                { $eq: ["$status", "public"] },
+              ],
+            },
+          },
+        },
+      ],
+      as: "media",
+    },
+  },
+  {
+    $unwind: "$media",
+  },
+  {
+    $lookup: {
       from: "followers",
       let: { followingId: "$user_info._id" },
       pipeline: [
@@ -78,6 +111,8 @@ const postValidationPipeline = (mainUser) => [
       $and: [
         { "block_info.0": { $exists: false } },
         { "user_info.banned": { $ne: true } },
+        { "media.status": "public" },
+        { status: "public" },
 
         {
           $or: [
@@ -105,3 +140,9 @@ const postValidationPipeline = (mainUser) => [
 ]
 
 module.exports = postValidationPipeline
+
+/*
+  NOTE:
+  When some media is pending or rejected, the post status will be different than 'public'.
+  Even with that, this code will only return Medias with the 'public' status.
+*/

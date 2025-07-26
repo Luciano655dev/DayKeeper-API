@@ -65,15 +65,15 @@ const sendPasswordResetEmail = async (email, verificationCode) => {
   )
 }
 
-const sendBanEmail = async ({ username, email, adminUsername, reason }) => {
+const sendBanEmail = async ({ username, email, reason }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
-    from: "Day Keeper <daykeepeer655@gmail.com>",
+    from: "Daykeeper <daykeepeer655@gmail.com>",
     to: email,
     subject: `Sua conta ${username} foi banida no DayKeeper :(`,
     text: `Você está recebendo este email pois <strong>Sua conta de nome ${username} foi banida no DayKeeper</strong>
-            Sua conta foi revisada e banida do DayKeeper por ${adminUsername} pelo seguinte motivo:
+            Sua conta foi revisada e banida do DayKeeper pelo seguinte motivo:
 
             ${reason}
 
@@ -85,15 +85,15 @@ const sendBanEmail = async ({ username, email, adminUsername, reason }) => {
   })
 }
 
-const sendUnbanEmail = async ({ username, email, adminUsername, reason }) => {
+const sendUnbanEmail = async ({ username, email, reason }) => {
   const transporter = nodemailer.createTransport(transporterOptions)
 
   await transporter.sendMail({
-    from: "Day Keeper <daykeepeer655@gmail.com>",
+    from: "Daykeeper <daykeepeer655@gmail.com>",
     to: email,
     subject: `Sua conta ${username} foi DESBANIDA do DayKeeper ;)`,
     text: `Temos boas noticias! <strong>Sua conta de nome ${username} foi DESBANIDA no DayKeeper</strong>
-            Sua conta foi revisada por ${adminUsername} e, concluimos que, pelo seguinte motivo:
+            Sua conta foi revisada e, concluimos que, pelo seguinte motivo:
 
             ${reason}
 

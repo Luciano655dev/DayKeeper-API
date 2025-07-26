@@ -6,7 +6,7 @@ const {
   sendStorieUnbanEmail,
 } = require(`../../../utils/emailHandler`)
 const {
-  admin: { maxReportMessageLength },
+  admin: { maxReportMessageLength, defaultBannedById },
   errors: { inputTooLong, notFound },
   success: { custom },
 } = require(`../../../../constants/index`)
@@ -27,7 +27,7 @@ const banOrUnbanStorie = async (props) => {
         action_type: "unban",
         entity_id: storie._id,
 
-        unbanned_by: loggedUser._id,
+        unbanned_by: loggedUser?._id || defaultBannedById,
         unban_date: Date.now(),
         uban_message: reason,
       })
@@ -53,7 +53,7 @@ const banOrUnbanStorie = async (props) => {
       action_type: "ban",
       entity_id: storie._id,
 
-      banned_by: loggedUser._id,
+      banned_by: loggedUser?._id || defaultBannedById,
       ban_date: Date.now(),
       ban_message: reason,
     })

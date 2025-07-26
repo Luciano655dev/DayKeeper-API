@@ -109,7 +109,7 @@ const postInfoPipeline = (mainUser) => [
       date: 1,
       data: 1,
       user: 1,
-      files: 1,
+      media: 1,
       emotion: 1,
       created_at: 1,
       likes: 1,

@@ -6,7 +6,13 @@ const https = require("https")
 const Media = require("../api/models/Media")
 const Post = require("../api/models/Post")
 const AWS = require("aws-sdk")
-const { inappropriateLabels } = require("../constants/index")
+const banOrUnbanUser = require("../api/services/admin/user/banOrUnbanUser")
+const {
+  inappropriateLabels,
+  messages: {
+    admin: { inapropriateMediaBanMessage },
+  },
+} = require("../constants/index")
 const {
   aws: { accessKeyId, secretAccessKey, defaultRegion },
 } = require(`../config`)
@@ -24,7 +30,6 @@ router.post(
   bodyParser.text({ type: "*/*" }),
   async (req, res) => {
     try {
-      console.log("REKOGNITION WEBHOOK TRIGGERED ----------")
       const type = req.headers["x-amz-sns-message-type"]
 
       let body
@@ -65,6 +70,16 @@ router.post(
 
         media.status = flagged ? "rejected" : "public"
         await media.save()
+
+        if (media.status == "rejected") {
+          const user = await user.findOne({ _id: media.uploadedBy })
+
+          if (user && user?.banned != true)
+            await banOrUnbanUser({
+              name: user.name,
+              message: inapropriateMediaBanMessage,
+            })
+        }
 
         if (media.usedIn?.model === "Post") {
           const allMedia = await Media.find({

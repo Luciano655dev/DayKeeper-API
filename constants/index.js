@@ -1,6 +1,7 @@
 const notifications = require("./notifications")
 const { errors, errorGif } = require(`./errors`)
 const success = require(`./success`)
+const messages = require("./messages")
 
 module.exports = {
   maxPageSize: 100,
@@ -26,6 +27,7 @@ module.exports = {
     daysToDeleteBannedUser: 30,
     daysToDeleteBannedPost: 7,
     daysToDeleteBannedStorie: 3,
+    defaultBannedById: "65cbaab84b9d1cce41e98b60", // change to a default User later
   },
   auth: {
     resetTokenExpiresTime: "1h",
@@ -89,4 +91,5 @@ module.exports = {
   errors,
   success,
   notifications,
+  messages,
 }
