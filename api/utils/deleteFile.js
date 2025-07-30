@@ -1,4 +1,8 @@
 const Media = require("../models/Media")
+const fs = require("fs")
+const path = require("path")
+const { promisify } = require("util")
+
 const {
   aws: { bucketName, storageType },
 } = require(`../../config`)

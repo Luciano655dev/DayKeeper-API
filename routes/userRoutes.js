@@ -37,8 +37,8 @@ router.put(
   "/user",
   checkTokenMW,
   multer(multerConfig("image")).single("file"),
-  detectInappropriateFileMW,
   handleMulterError,
+  detectInappropriateFileMW,
   userEditValidation,
   updateUser
 )

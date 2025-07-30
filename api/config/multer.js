@@ -53,7 +53,7 @@ const storageTypes = {
   }),
 }
 
-const fileSizeLimit = 4 * 1024 * 1024 * 1024 // 4 GB
+const fileSizeLimit = 1024 * 1024 * 1024 // 1 GB
 
 const MulterConfig = (mediaType = "both") => {
   let allowedMimes = []

@@ -29,6 +29,7 @@ const createPost = async (req) => {
     }
 
     const post = await Post.create({
+      date: new Date(),
       data,
       emotion,
       privacy,
@@ -54,6 +55,7 @@ const createPost = async (req) => {
         )
       )
 
+    /* Update streak */
     await updateStreak(loggedUser)
 
     return created("post", { post })
