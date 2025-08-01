@@ -1,69 +1,37 @@
-const AWS = require(`aws-sdk`)
-const { inappropriateLabels } = require(`../../constants/index`)
+const moderationQueue = require("../../queues/moderationQueue")
 const Media = require("../models/Media")
-const {
-  aws: {
-    accessKeyId,
-    secretAccessKey,
-    defaultRegion,
-    bucketName,
-    snsTopicArn,
-    rekogRoleArn,
-  },
-} = require(`../../config`)
 
-AWS.config.update({
-  accessKeyId: accessKeyId,
-  secretAccessKey: secretAccessKey,
-  region: defaultRegion,
-})
+const detectInappropriateContent = async (
+  key,
+  type = "image",
+  mediaId,
+  trustScore
+) => {
+  const shouldSkip = trustScore >= 80 && Math.random() < 0.5
 
-const rekognition = new AWS.Rekognition() // dont put that damn line before the config
-
-const detectInappropriateContent = async (key, type = "image", mediaId) => {
-  console.time("DetectInnapripriateContent")
-  if (type === "image") {
-    const response = await rekognition
-      .detectModerationLabels({
-        Image: { S3Object: { Bucket: bucketName, Name: key } },
-      })
-      .promise()
-
-    for (let label of response.ModerationLabels) {
-      console.log(`Image Label: ${label.Name}, Confidence: ${label.Confidence}`)
-      if (inappropriateLabels.includes(label.Name) && label.Confidence > 90) {
-        return false
-      }
-    }
-
-    await Media.findByIdAndUpdate(mediaId, { status: "public" })
-    return true
-  }
-
-  if (type === "video") {
-    const res = await rekognition
-      .startContentModeration({
-        Video: {
-          S3Object: { Bucket: bucketName, Name: key },
-        },
-        NotificationChannel: {
-          SNSTopicArn: snsTopicArn,
-          RoleArn: rekogRoleArn,
-        },
-      })
-      .promise()
-
-    console.log(`JOB_ID --> ${res.JobId}`)
-
+  if (shouldSkip && type != "image") {
+    console.log(`skipping ${mediaId}`)
     await Media.findByIdAndUpdate(mediaId, {
-      jobId: res.JobId,
-      status: "pending",
+      status: "public",
+      verified: false,
+      skippedModeration: true,
     })
-
     return true
   }
 
-  return false
+  console.log(`adding ${mediaId} to the moderation Queue`)
+  await moderationQueue.add("analyzeMedia", {
+    key,
+    type,
+    mediaId,
+  })
+
+  await Media.findByIdAndUpdate(mediaId, {
+    status: "pending",
+    verified: false,
+  })
+
+  return true
 }
 
 module.exports = detectInappropriateContent

@@ -1,4 +1,6 @@
-const { serverError } = require("../constants/index")
+const {
+  errors: { serverError },
+} = require("../constants/index")
 
 async function checkAdminMW(req, res, next) {
   const loggedUser = req.user

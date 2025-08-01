@@ -17,6 +17,7 @@ const reportUser = async (props) => {
 
     const reportRelation = await Report.exists({
       referenceId: user._id,
+      reportedUserId: user._id,
       userId: loggedUser._id,
       type: "user",
     })

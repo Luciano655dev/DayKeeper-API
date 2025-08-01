@@ -29,6 +29,7 @@ const reportPost = async (props) => {
     await Report.create({
       referenceId: post._id,
       userId: loggedUser._id,
+      reportedUserId: post.user,
       reason,
       created_at: new Date(),
       type: "post",

@@ -43,20 +43,6 @@ const banHistorySchema = new mongoose.Schema({
     ref: "User",
     required: false,
   },
-
-  // suspension
-  suspension_start_date: {
-    type: Date,
-    required: false,
-  },
-  suspension_end_date: {
-    type: Date,
-    required: false,
-  },
-  suspension_message: {
-    type: String,
-    required: false,
-  },
 })
 
 const BanHistory = mongoose.model("BanHistory", banHistorySchema, "banHistory")

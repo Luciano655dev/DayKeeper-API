@@ -20,6 +20,9 @@ const DBclusterName = process.env.DB_CLUSTER_NAME
 require("./api/jobs/deleteUsersWithoutConfirmedEmail")
 require("./api/jobs/resetStreaks")
 
+// workers
+require("./workers/mediaWorker")
+
 // Initialize Firebase
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccountKey),
@@ -89,3 +92,7 @@ app.listen(PORT, () => {
 })
 
 module.exports = app
+
+/*
+NOTE remember to have Redis, Docker and ffpeg installed 
+*/

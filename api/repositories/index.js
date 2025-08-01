@@ -18,6 +18,7 @@ const getPostPipeline = require("./pipelines/post/getPostPipeline")
 const getPostLikesPipeline = require("./pipelines/post/getPostLikesPipeline")
 const getPostCommentsPipeline = require("./pipelines/post/getPostCommentsPipeline")
 const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipeline")
+const getAveragePostLikesPipeline = require("./pipelines/post/getAveragePostLikesPipeline")
 
 const getStoriePipeline = require("./pipelines/storie/getStoriePipeline")
 const getTodayStoriesPipeline = require("./pipelines/storie/getTodayStoriesPipeline")
@@ -65,6 +66,7 @@ module.exports = {
   getPostPipeline,
   getPostLikesPipeline,
   getPostCommentsPipeline,
+  getAveragePostLikesPipeline,
   getCommentLikesPipeline,
   getStoriePipeline,
   getTodayStoriesPipeline,

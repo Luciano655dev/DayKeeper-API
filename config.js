@@ -31,4 +31,7 @@ module.exports = {
     pass: process.env.EMAIL_PASS,
     secret: process.env.EMAIL_SECRET,
   },
+  redis: {
+    url: process.env.REDIS_URL,
+  },
 }

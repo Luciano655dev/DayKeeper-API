@@ -2,6 +2,7 @@ const notifications = require("./notifications")
 const { errors, errorGif } = require(`./errors`)
 const success = require(`./success`)
 const messages = require("./messages")
+const trustScore = require("./trustScore")
 
 module.exports = {
   maxPageSize: 100,
@@ -93,4 +94,5 @@ module.exports = {
   success,
   notifications,
   messages,
+  trustScore,
 }

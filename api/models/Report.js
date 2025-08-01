@@ -5,9 +5,13 @@ const ReportSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  referenceId: {
+  reportedUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+  },
+
+  referenceId: {
+    type: mongoose.Schema.Types.ObjectId,
   },
   type: String, // 'user', 'post' or 'storie'
   reason: String,

@@ -67,6 +67,7 @@ const handleRekognition = async (req, res) => {
       )
 
       media.status = flagged ? "rejected" : "public"
+      media.verified = true
       await media.save()
 
       if (media.status == "rejected") {

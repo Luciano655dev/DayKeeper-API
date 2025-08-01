@@ -24,6 +24,7 @@ const postEditValidation = require("../middlewares/validations/post/postEditVali
 const createMediaDocsMW = require("../middlewares/createMediaDocsMW")
 
 const checkTokenMW = require("../middlewares/checkTokenMW")
+const calculateTrustScoreMW = require("../middlewares/calculateTrustScoreMW")
 
 const detectInappropriateFileMW = require("../middlewares/detectInappropriateFileMW")
 
@@ -34,6 +35,7 @@ router.post(
   checkTokenMW,
   multer(multerConfig("both")).array("files", 5),
   handleMulterError,
+  calculateTrustScoreMW,
   createMediaDocsMW,
   detectInappropriateFileMW,
   postValidation,
@@ -44,6 +46,7 @@ router.put(
   checkTokenMW,
   multer(multerConfig("both")).array("files", 5),
   handleMulterError,
+  calculateTrustScoreMW,
   createMediaDocsMW,
   detectInappropriateFileMW,
   postEditValidation,

@@ -7,6 +7,8 @@ const mediaSchema = mongoose.Schema({
   url: String,
   placeId: String,
 
+  verified: Boolean,
+
   status: String, // 'private', 'pending', 'public'
   jobId: String,
   usedIn: {
