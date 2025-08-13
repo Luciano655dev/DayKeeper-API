@@ -47,7 +47,7 @@ const updateMedia = async (mediaId, isSafe) => {
   }
 }
 
-// Worker principal
+// Main Worker
 const worker = new Worker(
   "moderationQueue",
   async (job) => {

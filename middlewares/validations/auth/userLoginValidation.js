@@ -1,6 +1,6 @@
 const User = require("../../../api/models/User")
 const { sendVerificationEmail } = require("../../../api/utils/emailHandler")
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcryptjs")
 
 const {
   errors: { serverError },

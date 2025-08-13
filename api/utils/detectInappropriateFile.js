@@ -1,4 +1,4 @@
-const moderationQueue = require("../../queues/moderationQueue")
+const { enqueueModeration } = require("../../queue/moderation.queue")
 const Media = require("../models/Media")
 
 const detectInappropriateContent = async (
@@ -20,7 +20,7 @@ const detectInappropriateContent = async (
   }
 
   console.log(`adding ${mediaId} to the moderation Queue`)
-  await moderationQueue.add("analyzeMedia", {
+  await enqueueModeration({
     key,
     type,
     mediaId,

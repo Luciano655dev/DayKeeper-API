@@ -1,6 +1,6 @@
 const User = require("../../models/User")
 const Followers = require("../../models/Followers")
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcryptjs")
 const { sendVerificationEmail } = require("../../utils/emailHandler")
 
 const {

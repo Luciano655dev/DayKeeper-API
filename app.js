@@ -20,9 +20,6 @@ const DBclusterName = process.env.DB_CLUSTER_NAME
 require("./api/jobs/deleteUsersWithoutConfirmedEmail")
 require("./api/jobs/resetStreaks")
 
-// workers
-require("./workers/mediaWorker")
-
 // Initialize Firebase
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccountKey),
@@ -62,6 +59,11 @@ app.use(passport.session())
 passportConfig(passport)
 
 // Routes
+app.use("/ping", (req, res) => {
+  // test route
+  res.status(200).send("PONG")
+})
+
 app.use("/webhooks", require("./routes/webhooks"))
 app.use("/auth", require("./routes/authRoutes"))
 app.use("/post", require("./routes/postRoutes"))
@@ -92,7 +94,3 @@ app.listen(PORT, () => {
 })
 
 module.exports = app
-
-/*
-NOTE remember to have Redis, Docker and ffpeg installed 
-*/

@@ -9,8 +9,20 @@ const connection = new IORedis(redisUrl)
 
 const moderationQueue = new Queue("moderationQueue", { connection })
 
+function enqueueModeration(mediaId, key, type) {
+  return moderationQueue.add(
+    "moderate",
+    { mediaId, key, type },
+    {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 3000 },
+      removeOnComplete: true,
+    }
+  )
+}
+
 connection.on("ready", () => {
   console.log(`\x1b[36mRedis connected successfully\x1b[0m`)
 })
 
-module.exports = moderationQueue
+module.exports = { enqueueModeration, moderationQueue }

@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  daykeeper-api:
+    build: .
+    container_name: daykeeper-api
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_CLUSTER_NAME=${DB_CLUSTER_NAME}
+      - SECRET=${SECRET}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: daykeeper-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

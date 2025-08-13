@@ -1,5 +1,5 @@
 const User = require("../../models/User")
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcryptjs")
 const { sendVerificationEmail } = require("../../utils/emailHandler")
 
 const {
@@ -64,5 +64,3 @@ const register = async (props) => {
 }
 
 module.exports = register
-
-
