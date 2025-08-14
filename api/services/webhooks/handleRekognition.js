@@ -46,6 +46,7 @@ const handleRekognition = async (req, res) => {
       return { code: 200, message: "SNS confirmed" }
     }
 
+    /* Server just verified a Media */
     if (type === "Notification") {
       const msg = JSON.parse(body.Message)
       const jobId = msg.JobId

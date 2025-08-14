@@ -1,5 +1,4 @@
 const postValidationPipeline = require("./postValidationPipeline")
-const getTodayDate = require("../../utils/getTodayDate")
 const {
   user: { defaultTimeZone },
 } = require("../../../constants/index")

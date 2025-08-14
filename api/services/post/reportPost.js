@@ -1,7 +1,10 @@
-const getPost = require("./getPost")
+const Media = require("../../models/Media")
 const Report = require("../../models/Report")
+const getPost = require("./getPost")
+const moderateFullVideo = require("../../utils/moderateFullVideo")
 const {
   user: { maxReportReasonLength },
+  admin: { reportCountToVerifyFullVideo },
   errors: { inputTooLong, notFound, doubleAction },
   success: { custom },
 } = require("../../../constants/index")
@@ -35,7 +38,22 @@ const reportPost = async (props) => {
       type: "post",
     })
 
-    console.log("here")
+    /* Find and verify Post Medias If it has too many reports */
+    const reportCount = await Report.countDocuments({ referenceId: post._id })
+
+    if (reportCount == reportCountToVerifyFullVideo) {
+      const medias = await Promise.all(
+        post.medias.map((mediaId) => Media.findById(mediaId))
+      )
+
+      for (let media of medias) {
+        // if media is not a video or it was fully verified already, skip
+        if (media?.type != "video" || media?.jobId) continue
+
+        await moderateFullVideo(media.key, media._id)
+      }
+    }
+
     return custom("Post reported successfully", 200, { reason })
   } catch (error) {
     throw new Error(error.message)

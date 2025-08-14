@@ -9,9 +9,9 @@ const connection = new IORedis(redisUrl)
 
 const moderationQueue = new Queue("moderationQueue", { connection })
 
-function enqueueModeration(mediaId, key, type) {
+function enqueueModeration({ mediaId, key, type }) {
   return moderationQueue.add(
-    "moderate",
+    "analyzeMedia",
     { mediaId, key, type },
     {
       attempts: 3,

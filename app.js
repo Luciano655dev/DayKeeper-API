@@ -16,10 +16,6 @@ const DBuser = process.env.DB_USER
 const DBpass = process.env.DB_PASS
 const DBclusterName = process.env.DB_CLUSTER_NAME
 
-// Jobs
-require("./api/jobs/deleteUsersWithoutConfirmedEmail")
-require("./api/jobs/resetStreaks")
-
 // Initialize Firebase
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccountKey),

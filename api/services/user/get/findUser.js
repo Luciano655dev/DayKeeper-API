@@ -3,26 +3,11 @@ const mongoose = require(`mongoose`)
 
 const { hideUserData } = require("../../../repositories/index")
 
-const findUser = async ({
-  userInput = "",
-  fieldsToPopulate = [],
-  hideData = false,
-}) => {
+const findUser = async ({ userInput = "" }) => {
   try {
-    const populateOptions = fieldsToPopulate.map((field) => ({
-      path: field,
-      match: { banned: { $ne: true } },
-      select: { ...hideUserData },
-    }))
-    const hideDataObj = hideData ? hideUserData : {}
-
-    let user = await User.findOne({ name: userInput })
-      .select(hideUserData)
-      .populate(populateOptions)
+    let user = await User.findOne({ name: userInput }).select(hideUserData)
     if (!user && mongoose.Types.ObjectId.isValid(userInput))
-      user = await User.findById(userInput)
-        .select(hideDataObj)
-        .populate(populateOptions)
+      user = await User.findById(userInput).select(hideUserData)
 
     return user
   } catch (error) {

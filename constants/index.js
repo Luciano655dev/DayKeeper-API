@@ -29,6 +29,7 @@ module.exports = {
     daysToDeleteBannedUser: 30,
     daysToDeleteBannedPost: 7,
     daysToDeleteBannedStorie: 3,
+    reportCountToVerifyFullVideo: 5,
     defaultBannedById: "65cbaab84b9d1cce41e98b60", // change to a default User later
   },
   auth: {

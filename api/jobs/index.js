@@ -1,0 +1,2 @@
+require("./deleteUsersWithoutConfirmedEmail")
+require("./resetStreaks")
