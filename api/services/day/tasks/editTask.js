@@ -34,7 +34,7 @@ const editTask = async (props) => {
 
     return updated(`Day Task`)
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

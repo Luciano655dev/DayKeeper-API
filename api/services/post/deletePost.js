@@ -30,7 +30,11 @@ const deletePost = async (props) => {
     await deleteBanHistory(deletedPost._id)
 
     // delete files
-    for (let i in deletedPost?.files) deleteFile(deletedPost.files[i].key)
+    for (let i in deletedPost?.medias)
+      deleteFile({
+        key: deletedPost.medias[i],
+        type: "mediaId",
+      })
 
     return deleted(`Post`)
   } catch (error) {

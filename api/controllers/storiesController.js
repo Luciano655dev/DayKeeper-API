@@ -85,7 +85,7 @@ const getStorieController = async (req, res) => {
 
     return res.status(code).json({ message, data })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return serverError(`${error}`)
   }
 }
@@ -99,7 +99,7 @@ const getTodayStoriesController = async (req, res) => {
 
     return res.status(code).json({ message, data })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return serverError(`${error}`)
   }
 }

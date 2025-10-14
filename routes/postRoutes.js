@@ -35,7 +35,6 @@ router.post(
   checkTokenMW,
   multer(multerConfig("both")).array("files", 5),
   handleMulterError,
-  calculateTrustScoreMW,
   createMediaDocsMW,
   detectInappropriateFileMW,
   postValidation,

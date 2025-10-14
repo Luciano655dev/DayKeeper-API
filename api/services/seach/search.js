@@ -43,7 +43,7 @@ const search = async (props) => {
 
     return fetched(`data`, { response })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

@@ -23,7 +23,7 @@ async function detectInappropriateContentMW(req, res, next) {
 
     next()
   } catch (error) {
-    for (let media of req.mediaDocs) deleteFile(media.key)
+    for (let media of req.mediaDocs) deleteFile({ key: media.key })
 
     console.error(`error at detectInappropriateContentMW: ${error}`)
     return res.status(500).json({ message: serverError(error.message).message })

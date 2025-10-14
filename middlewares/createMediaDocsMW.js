@@ -1,14 +1,16 @@
 const Media = require("../api/models/Media")
 
 async function createMediaDocsMW(req, res, next) {
-  console.time("CreateMediaDocsTimer")
-  if (!req.files || !req.files.length) return next()
+  if ((!req.files || !req.files.length) && !req.file) return next()
+  let files = req.files
+  if (!files) files = [req.file]
 
   try {
     const placesIds = req?.body?.placesIds?.split(",") || []
 
     const mediaDocs = await Promise.all(
-      req.files.map(async (file, index) => {
+      files.map(async (file, index) => {
+        console.log(file)
         const type = file.mimetype.startsWith("video") ? "video" : "image"
 
         const doc = await Media.create({
@@ -28,10 +30,10 @@ async function createMediaDocsMW(req, res, next) {
     )
 
     req.mediaDocs = mediaDocs
-    req.files.forEach((file, i) => {
+    files.forEach((file, i) => {
       file.mediaId = mediaDocs[i]._id
     })
-    console.timeEnd("CreateMediaDocsTimer")
+
     next()
   } catch (err) {
     console.error("Error creating media docs:", err)

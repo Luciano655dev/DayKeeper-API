@@ -38,7 +38,7 @@ const likePost = async (props) => {
     await newPostLikeRelation.save()
     return custom("Post liked successfully", 200, { post })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

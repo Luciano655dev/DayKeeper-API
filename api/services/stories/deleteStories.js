@@ -1,6 +1,6 @@
 const Storie = require(`../../models/Storie`)
 
-const deleteFile = require(`../../utils/deleteFile`)
+const deleteFile = require("../../utils/deleteFile")
 const deleteStorieLikes = require("./delete/deleteStorieLikes")
 const deleteStorieViews = require("./delete/deleteStorieViews")
 
@@ -23,8 +23,11 @@ const deleteStorie = async (props) => {
     if (loggedUser?._id?.toString() != storie?.user?.toString())
       return unauthorized("Delete Storie", "This storie was not posted by you")
 
-    await storie.deleteOne()
-    deleteFile(storie.file.key)
+    // await storie.deleteOne()
+    await deleteFile({
+      key: storie?.media,
+      type: "mediaId",
+    })
     await deleteStorieLikes(storie._id)
     await deleteStorieViews(storie._id)
 

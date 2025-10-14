@@ -114,8 +114,7 @@ const handleRekognition = async (req, res) => {
 
     return { code: 200, message: "No-op" }
   } catch (error) {
-    console.log("Webhook Error:")
-    console.log(error)
+    console.error(error)
     return res.status(500).json("Webhook Error, please contact an admin")
   }
 }

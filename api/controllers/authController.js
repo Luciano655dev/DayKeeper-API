@@ -37,7 +37,7 @@ const forgetPasswordController = async (req, res) => {
 
     return res.status(code).json({ message })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return res.status(500).json({ message: serverError(error.message) })
   }
 }
@@ -51,7 +51,7 @@ const resetPasswordController = async (req, res) => {
       .status(code)
       .json({ message: message || "Password reset successfull" })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return res.status(400).json({
       message:
         "Invalid or expired token. If this error persists, contact an admin",

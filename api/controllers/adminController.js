@@ -130,7 +130,7 @@ const getBanHistoryMadeByAdminController = async (req, res) => {
 
     return res.status(code).json({ message, ...response })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return res.status(500).json({ message: serverError(error.toString()) })
   }
 }

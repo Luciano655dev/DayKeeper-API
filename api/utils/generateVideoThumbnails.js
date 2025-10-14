@@ -1,30 +1,48 @@
 const fs = require("fs")
 const path = require("path")
-const { exec } = require("child_process")
+const { spawn } = require("child_process")
 
 function generateVideoThumbnails(videoPath, outputDir, count = 10) {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
 
-    const outputPattern = path.join(outputDir, "thumb-%03d.jpg")
-    const cmd = `ffmpeg -i "${videoPath}" -vf "fps=1/${Math.floor(
-      3 * count
-    )}" -vframes ${count} "${outputPattern}" -hide_banner -loglevel error`
+    const jobDir = fs.mkdtempSync(path.join(outputDir, "job-"))
+    const ext = "png"
+    const outPattern = path.join(jobDir, `thumb-%03d.${ext}`)
 
-    exec(cmd, (err) => {
-      if (err) return reject(err)
+    const args = [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-i",
+      videoPath,
+      "-vf",
+      `fps=1,scale=trunc(iw/2)*2:trunc(ih/2)*2`,
+      "-frames:v",
+      String(count),
+      outPattern,
+    ]
 
-      const thumbs = Array.from({ length: count }, (_, i) =>
-        path.join(outputDir, `thumb-${String(i + 1).padStart(3, "0")}.jpg`)
-      )
+    const child = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] })
 
-      const existingThumbs = thumbs.filter(fs.existsSync)
+    let stderr = ""
+    child.stderr.on("data", (d) => (stderr += d.toString()))
 
-      if (existingThumbs.length === 0) {
-        return reject(new Error("Nenhum thumbnail foi gerado pelo ffmpeg."))
+    child.on("close", (code) => {
+      if (code !== 0) {
+        return reject(new Error(`ffmpeg exited with ${code}: ${stderr}`))
       }
 
-      resolve(existingThumbs)
+      const files = fs
+        .readdirSync(jobDir)
+        .filter((f) => f.startsWith("thumb-") && f.endsWith(`.${ext}`))
+        .map((f) => path.join(jobDir, f))
+        .sort()
+
+      if (files.length === 0) {
+        return reject(new Error("Nenhum thumbnail foi gerado pelo ffmpeg."))
+      }
+      resolve(files)
     })
   })
 }

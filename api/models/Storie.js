@@ -14,16 +14,9 @@ const storieSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  file: {
-    name: String,
-    key: String,
-    mimetype: String,
-    url: String,
-    placeId: {
-      required: false,
-      type: String,
-    },
-  },
+  media: String,
+  placeId: String,
+  status: String,
   text: {
     type: String,
     required: false,

@@ -10,7 +10,7 @@ const postValidation = async (req, res, next) => {
 
   try {
     function handleBadRequest(errorCode, message) {
-      if (files) for (let i in req.files) deleteFile(req.files[i].key)
+      if (files) for (let i in req.files) deleteFile({ key: req.files[i].key })
 
       return res.status(errorCode).json({ message })
     }
@@ -40,7 +40,7 @@ const postValidation = async (req, res, next) => {
       return handleBadRequest(400, "Invalid emotion value")
     return next()
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return res.status(500).json({ message: serverError(error.message) })
   }
 }

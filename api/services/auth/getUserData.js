@@ -15,7 +15,7 @@ const getUserData = async (props) => {
 
     return fetched(`user`, { user: user.data, token: cookies?.["connect.sid"] })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

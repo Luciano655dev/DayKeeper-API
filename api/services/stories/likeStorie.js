@@ -53,7 +53,7 @@ const likeStorie = async (props) => {
       storie,
     })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

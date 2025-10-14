@@ -16,7 +16,7 @@ const reseteProfilePicture = async (props) => {
 
     // deleteLastPFP
     if (loggedUser.profile_picture.name != defaultPfp.name)
-      deleteFile(loggedUser.profile_picture.key)
+      deleteFile({ key: loggedUser.profile_picture.key })
 
     const updatedUser = await User.findByIdAndUpdate(loggedUser._id, {
       $set: {

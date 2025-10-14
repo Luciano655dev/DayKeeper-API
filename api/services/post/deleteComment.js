@@ -56,7 +56,7 @@ const deleteComment = async (props) => {
 
     return deleted(`Comment`, { response: { post, comment } })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

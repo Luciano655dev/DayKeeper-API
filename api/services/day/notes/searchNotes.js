@@ -52,11 +52,11 @@ const searchNotes = async (props) => {
       },
       loggedUser
     )
-    console.log(response)
+    console.error(response)
 
     return fetched(`Notes`, { response })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

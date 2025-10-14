@@ -3,12 +3,7 @@ const Post = require("../../../models/Post")
 const User = require("../../../models/User")
 const getPost = require("../../post/getPost")
 
-const deleteFile = require(`../../../utils/deleteFile`)
-const deletePostLikes = require("../../post/delete/deletePostLikes")
-const deletePostComments = require("../../post/delete/deletePostComments")
-const deleteCommentLikes = require("../../post/delete/deleteCommentLikes")
-const deleteReports = require("../../delete/deleteReports")
-const deleteBanHistory = require("../../delete/deleteBanHistory")
+const deletePost = require("../../post/deletePost")
 
 const { differenceInDays } = require("date-fns")
 const { sendPostDeletionEmail } = require(`../../../utils/emailHandler`)
@@ -27,10 +22,10 @@ const deleteBannedPosts = async (props) => {
     // Get Post and User
     let post
     const postResponse = await getPost({ postId, loggedUser })
-
     if (postResponse.code == 200) {
       post = postResponse.data
     } else return notFound("Post")
+
     const adminUser = await User.findById(latestBan.banned_by)
 
     if (post.banned != "true")
@@ -59,14 +54,7 @@ const deleteBannedPosts = async (props) => {
       )
 
     // DELETE POST
-    await Post.deleteOne({ _id: post._id })
-    for (let i in post.images) deleteFile(post.files[i].key)
-
-    await deletePostLikes(post._id)
-    await deletePostComments(post._id)
-    await deleteCommentLikes(post._id)
-    await deleteReports(post._id)
-    await deleteBanHistory(post._id)
+    await deletePost({ postId: post._id, loggedUser })
 
     if (!adminUser) adminUser = loggedUser
 

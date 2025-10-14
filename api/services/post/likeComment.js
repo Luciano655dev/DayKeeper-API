@@ -70,7 +70,7 @@ const likeComment = async (props) => {
       post,
     })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

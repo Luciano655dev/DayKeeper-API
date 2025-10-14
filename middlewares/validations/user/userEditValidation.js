@@ -11,7 +11,7 @@ const userValidation = async (req, res, next) => {
   const { name: username, email, password, bio, lastPassword } = req.body
 
   const handleBadRequest = (errCode, message) => {
-    if (req.file) deleteFile(req.file.key)
+    if (req.file) deleteFile({ key: req.file.key })
     return res.status(errCode).json({ message })
   }
 

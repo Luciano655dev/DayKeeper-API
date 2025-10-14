@@ -3,11 +3,11 @@ const multer = require("multer")
 
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
-    console.log("Multer Error:", err.message)
+    console.error("Multer Error:", err.message)
 
     if (req?.file) {
       const key = req.file.key || req.file.filename
-      if (key) deleteImage(key)
+      if (key) deleteImage({ key })
     }
 
     if (req?.files) {

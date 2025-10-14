@@ -47,7 +47,7 @@ const updatePost = async (props) => {
     })
 
     for (let media of mediaToDelete) {
-      await deleteFile(media.key)
+      await deleteFile({ key: media.key })
       await media.deleteOne()
     }
 
@@ -103,7 +103,7 @@ const updatePost = async (props) => {
   } catch (error) {
     console.error(error)
     for (let media of mediaDocs) {
-      await deleteFile(media.key)
+      await deleteFile({ key: media.key })
     }
     throw new Error(error.message)
   }

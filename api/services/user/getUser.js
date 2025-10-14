@@ -16,7 +16,7 @@ const getUser = async (props) => {
       data: user[0],
     })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

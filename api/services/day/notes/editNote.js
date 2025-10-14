@@ -36,7 +36,7 @@ const editNote = async (props) => {
 
     return updated(`Day Note`)
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

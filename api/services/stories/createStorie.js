@@ -19,6 +19,8 @@ const createStorie = async ({
   if (!mediaDoc) return fieldNotFilledIn("Media")
   if (text?.length > maxStorieTextLength) return inputTooLong("Text")
 
+  console.log(mediaDoc)
+
   try {
     /* Check stories daily max quantity */
     const startOfDay = new Date()

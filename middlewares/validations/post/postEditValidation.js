@@ -8,7 +8,8 @@ const postEditValidation = async (req, res, next) => {
   const maxDataLength = 1000
 
   function handleBadRequest(errorCode, message) {
-    if (req.files) for (let i in req.files) deleteFile(req.files[i].key)
+    if (req.files)
+      for (let i in req.files) deleteFile({ key: req.files[i].key })
 
     return res.status(errorCode).json({ message })
   }

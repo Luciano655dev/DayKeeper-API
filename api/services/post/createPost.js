@@ -60,8 +60,8 @@ const createPost = async (req) => {
 
     return created("post", { post })
   } catch (error) {
-    for (let file of req.files || []) {
-      await deleteFile(file.key)
+    for (let mediaDoc of req.mediaDocs || []) {
+      await deleteFile({ key: mediaDoc.key })
     }
 
     console.error("Error creating post:", error)

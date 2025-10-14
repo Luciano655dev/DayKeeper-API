@@ -9,7 +9,20 @@ const {
 
 const awsS3Config = require("../config/awsS3Config")
 
-const deleteFile = async (key) => {
+const deleteFile = async (props) => {
+  let key = props?.key
+  const type = props?.type
+
+  if (type == "mediaId") {
+    const media = await Media.findById(key)
+    if (!media) {
+      console.log("not found")
+      return
+    }
+
+    key = media._id
+  }
+
   if (storageType === "s3") {
     awsS3Config
       .deleteObject({
@@ -28,6 +41,8 @@ const deleteFile = async (key) => {
   }
 
   await Media.deleteOne({ key })
+
+  return
 }
 
 module.exports = deleteFile

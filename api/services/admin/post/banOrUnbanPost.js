@@ -80,7 +80,7 @@ const banOrUnbanPost = async (props) => {
       `${post.user_info.name}'s post from ${post.date} banned successfully`
     )
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

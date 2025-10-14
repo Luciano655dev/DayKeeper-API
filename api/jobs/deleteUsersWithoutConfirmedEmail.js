@@ -10,7 +10,7 @@ const deleteUsersWithoutConfirmedEmail = async () => {
       creation_date: { $lt: twentyFourHoursAgo.toISOString() },
     })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return
   }
 }

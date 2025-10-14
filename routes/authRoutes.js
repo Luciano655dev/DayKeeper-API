@@ -52,7 +52,7 @@ router.get("/logout", (req, res) => {
   try {
     req.logout((err) => {
       if (err) {
-        console.log(`error`)
+        console.error(`LogOut Error`)
         return
       }
 

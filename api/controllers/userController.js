@@ -83,7 +83,7 @@ const reseteProfilePictureController = async (req, res) => {
 
     return res.status(code).json({ message })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return res.status(500).json({ message: `${error}` })
   }
 }

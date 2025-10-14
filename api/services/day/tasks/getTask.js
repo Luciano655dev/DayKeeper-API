@@ -16,7 +16,7 @@ const getTask = async ({ taskId, loggedUser }) => {
 
     return fetched("task", { data: task[0] })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }

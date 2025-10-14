@@ -28,7 +28,7 @@ const createNote = async (props) => {
       },
     })
   } catch (error) {
-    console.log(error)
+    console.error(error)
     throw new Error(error.message)
   }
 }
