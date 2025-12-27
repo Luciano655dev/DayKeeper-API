@@ -1,4 +1,4 @@
-const Report = require("../../models/Report")
+const Report = require("../../../models/Report")
 
 const deleteReports = async (referenceId) => {
   try {

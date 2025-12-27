@@ -67,6 +67,7 @@ app.use("/stories", require(`./routes/storiesRoutes`))
 app.use("/day", require("./routes/dayRoutes"))
 app.use("/admin", require("./routes/adminRoutes"))
 app.use("/location", require("./routes/locationRoutes"))
+app.use("/media", require("./routes/mediaRoutes"))
 app.use("/", require("./routes/searchRoutes"))
 app.use("/", require("./routes/userRoutes"))
 

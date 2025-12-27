@@ -4,8 +4,8 @@ const deleteFile = require("../../utils/deleteFile")
 const deleteStorieLikes = require("./delete/deleteStorieLikes")
 const deleteStorieViews = require("./delete/deleteStorieViews")
 
-const deleteReports = require("../delete/deleteReports")
-const deleteBanHistory = require("../delete/deleteBanHistory")
+const deleteReports = require("../admin/delete/deleteReports")
+const deleteBanHistory = require("../admin/delete/deleteBanHistory")
 
 const {
   errors: { notFound, unauthorized },

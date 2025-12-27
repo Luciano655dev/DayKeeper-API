@@ -14,8 +14,8 @@ const deleteStories = require("./delete/deleteStories")
 const deleteStorieLikes = require("../stories/delete/deleteStorieLikes")
 const deleteStorieViews = require("../stories/delete/deleteStorieViews")
 
-const deleteReports = require("../delete/deleteReports")
-const deleteBanHistory = require("../delete/deleteBanHistory")
+const deleteReports = require("../admin/delete/deleteReports")
+const deleteBanHistory = require("../admin/delete/deleteBanHistory")
 
 const deleteUser = async (props) => {
   const { loggedUser } = props

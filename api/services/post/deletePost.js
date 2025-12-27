@@ -3,8 +3,8 @@ const deleteFile = require("../../utils/deleteFile")
 const deletePostLikes = require("./delete/deletePostLikes")
 const deletePostComments = require("./delete/deletePostComments")
 const deleteCommentLikes = require("./delete/deleteCommentLikes")
-const deleteReports = require("../delete/deleteReports")
-const deleteBanHistory = require("../delete/deleteBanHistory")
+const deleteReports = require("../admin/delete/deleteReports")
+const deleteBanHistory = require("../admin/delete/deleteBanHistory")
 const {
   errors: { notFound },
   success: { deleted },

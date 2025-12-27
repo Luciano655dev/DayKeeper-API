@@ -1,4 +1,4 @@
-const BanHistory = require("../../models/BanHistory")
+const BanHistory = require("../../../models/BanHistory")
 
 const deleteBanHistory = async (entity_id) => {
   try {
