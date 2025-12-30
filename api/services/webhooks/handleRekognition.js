@@ -74,7 +74,7 @@ const handleRekognition = async (req, res) => {
       if (media.status == "rejected") {
         const user = await user.findOne({ _id: media.uploadedBy })
 
-        if (user && user?.banned != true)
+        if (user && !user?.banned)
           await banOrUnbanUser({
             name: user.name,
             message: inapropriateMediaBanMessage,

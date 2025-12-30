@@ -40,7 +40,7 @@ module.exports = {
     },
     invalidValue: (value, props) => {
       return {
-        code: 400,
+        code: 401,
         message: `Enter a valid ${value}`,
         ...props,
       }
@@ -58,7 +58,7 @@ module.exports = {
         message: "you have already done this action",
       }
     },
-    custom: (message, code, props) => {
+    custom: (message, props, code) => {
       return {
         code: code || 400,
         message,

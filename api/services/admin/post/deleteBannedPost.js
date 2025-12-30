@@ -28,7 +28,7 @@ const deleteBannedPosts = async (props) => {
 
     const adminUser = await User.findById(latestBan.banned_by)
 
-    if (post.banned != "true")
+    if (!post.banned)
       return unauthorized(`delete this post`, `this post isn't banned`)
 
     const latestBan = await BanHistory.findOne({

@@ -12,7 +12,7 @@ async function checkBannedUserMW(req, res, next) {
 
     req.fetchedUser = user
 
-    if (user?.banned?.toString() == "true")
+    if (!user?.banned)
       return res.status(402).json({ message: "This user is banned" })
 
     next()

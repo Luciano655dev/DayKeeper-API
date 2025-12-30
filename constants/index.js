@@ -6,6 +6,10 @@ const trustScore = require("./trustScore")
 
 module.exports = {
   maxPageSize: 100,
+  tokens: {
+    AccessTTLSeconds: 60 * 15, // 15 min
+    RefreshTTLDays: 30,
+  },
   stories: {
     maxStoriesPerDay: 5,
     maxStorieTextLength: 500,

@@ -34,7 +34,7 @@ module.exports = {
       ...props,
     }
   },
-  custom: (message, code, props) => {
+  custom: (message, props, code) => {
     return {
       code: code || 200,
       message: message || ``,

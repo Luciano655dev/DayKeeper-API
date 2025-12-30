@@ -1,23 +1,13 @@
 const User = require("../../models/User")
-const getUser = require("../user/getUser")
-const { hideUserData } = require(`../../repositories/index`)
-const {
-  errors: { notFound },
-  success: { fetched },
-} = require("../../../constants/index")
 
-const getUserData = async (props) => {
-  const { loggedUser, cookies } = props
+module.exports = async function getUserData({ userId }) {
+  const user = await User.findById(userId).select(
+    "_id name email profile_picture roles verified_email timeZone private"
+  )
 
-  try {
-    const user = await getUser({ name: loggedUser._id, loggedUser })
-    if (!user) return notFound("User")
-
-    return fetched(`user`, { user: user.data, token: cookies?.["connect.sid"] })
-  } catch (error) {
-    console.error(error)
-    throw new Error(error.message)
+  if (!user) {
+    return { code: 404, message: "User not found", user: null }
   }
-}
 
-module.exports = getUserData
+  return { code: 200, message: "User data", user }
+}

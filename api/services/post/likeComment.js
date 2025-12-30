@@ -53,7 +53,7 @@ const likeComment = async (props) => {
         commentId: comment._id,
       })
 
-      return custom("The like was removed from the comment", 200, {
+      return custom("The like was removed from the comment", {
         post,
       })
     }
@@ -66,7 +66,7 @@ const likeComment = async (props) => {
     })
     await newLikeRelation.save()
 
-    return custom("The like was added to the comment", 200, {
+    return custom("The like was added to the comment", {
       post,
     })
   } catch (error) {

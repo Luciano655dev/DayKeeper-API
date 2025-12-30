@@ -2,28 +2,37 @@ require("dotenv").config()
 const mongoose = require("mongoose")
 
 const userSchema = mongoose.Schema({
-  name: String,
-  email: String,
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true,
+    lowercase: true,
+    trim: true,
+  },
   profile_picture: {
     name: String,
     key: String,
     url: String,
   },
+  password: { type: String, default: null },
   timeZone: String,
   bio: String,
   verified_email: Boolean,
-  password: String,
   private: Boolean,
   roles: [String], // ['user', 'admin']
+  google_id: { type: String, index: true, sparse: true, unique: true },
 
   // Post strikes, like Duolingo
-  currentStrike: Number,
-  maxStrike: Number,
-
-  google_id: {
-    type: String,
-    required: false,
-  },
+  currentStrike: { type: Number, default: 0 },
+  maxStrike: { type: Number, default: 0 },
 
   device_tokens: [
     {
@@ -36,6 +45,7 @@ const userSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
     required: true,
+    index: true,
   },
 
   verification_code: {
@@ -47,7 +57,7 @@ const userSchema = mongoose.Schema({
     required: false,
   },
 
-  banned: { type: String, required: false },
+  banned: { type: Boolean, default: false, required: false },
 })
 
 const User = mongoose.model("User", userSchema)

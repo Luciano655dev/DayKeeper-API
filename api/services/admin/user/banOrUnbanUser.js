@@ -21,7 +21,7 @@ const banOrUnbanUser = async (props) => {
     if (user.roles.indexOf("admin") == -1)
       return unauthorized(`ban user`, `you can not ban an admin`)
 
-    if (user.banned == "true") {
+    if (!user.banned) {
       const newBanHistoryRelation = new BanHistory({
         entity_type: "user",
         action_type: "unban",
@@ -42,7 +42,7 @@ const banOrUnbanUser = async (props) => {
         reason,
       })
 
-      return custom(`${user.name} unbanned successfully`, 200)
+      return custom(`${user.name} unbanned successfully`)
     }
 
     // Ban user
@@ -66,7 +66,7 @@ const banOrUnbanUser = async (props) => {
       reason,
     })
 
-    return custom(`${user.name} banned successfully`, 200)
+    return custom(`${user.name} banned successfully`)
   } catch (error) {
     console.error(error)
     throw new Error(error.message)

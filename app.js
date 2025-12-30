@@ -16,10 +16,12 @@ const DBuser = process.env.DB_USER
 const DBpass = process.env.DB_PASS
 const DBclusterName = process.env.DB_CLUSTER_NAME
 
-// Initialize Firebase
+/*
+/ Initialize Firebase (NOT WORKING)
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccountKey),
 })
+*/
 
 // App config
 const app = express()
@@ -27,12 +29,14 @@ app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+/*
 app.use(
   cors({
     origin: "http://localhost:19006", // React Native App URL
     credentials: true,
   })
 )
+*/
 
 app.use(
   session({
@@ -51,7 +55,6 @@ app.use(
 )
 
 app.use(passport.initialize())
-app.use(passport.session())
 passportConfig(passport)
 
 // Routes
@@ -63,11 +66,11 @@ app.use("/ping", (req, res) => {
 app.use("/webhooks", require("./routes/webhooks"))
 app.use("/auth", require("./routes/authRoutes"))
 app.use("/post", require("./routes/postRoutes"))
-app.use("/stories", require(`./routes/storiesRoutes`))
 app.use("/day", require("./routes/dayRoutes"))
 app.use("/admin", require("./routes/adminRoutes"))
-app.use("/location", require("./routes/locationRoutes"))
 app.use("/media", require("./routes/mediaRoutes"))
+// app.use("/location", require("./routes/locationRoutes"))
+// app.use("/stories", require(`./routes/storiesRoutes`))
 app.use("/", require("./routes/searchRoutes"))
 app.use("/", require("./routes/userRoutes"))
 

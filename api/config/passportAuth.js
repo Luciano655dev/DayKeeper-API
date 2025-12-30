@@ -1,13 +1,14 @@
 const GoogleStrategy = require("passport-google-oauth20").Strategy
 const LocalStrategy = require("passport-local").Strategy
+const bcrypt = require("bcryptjs")
 const User = require("../models/User")
-const register = require(`../services/auth/register`)
+const upsertGoogleUser = require("../services/auth/upsertGoogleUser")
+
 const {
   google: { clientId, clientSecret },
 } = require("../../config")
 
 module.exports = function (passport) {
-  // google auth
   passport.use(
     new GoogleStrategy(
       {
@@ -17,49 +18,29 @@ module.exports = function (passport) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await User.findOne({
-            $or: [
-              { email: profile.emails[0].value },
-              { google_id: profile.id },
-            ],
-          })
-
-          if (user) {
-            return done(null, user)
-          } else {
-            const response = await register({
-              name: profile.displayName.split(` `).join(``),
-              google_id: profile.id,
-              email: profile.emails[0].value,
-              profile_picture: profile.photos[0].value,
-            })
-
-            done(null, response.user)
-          }
+          const user = await upsertGoogleUser(profile)
+          return done(null, user)
         } catch (err) {
-          done(err, false)
+          return done(err, false)
         }
       }
     )
   )
 
-  // Local Auth
   passport.use(
     new LocalStrategy(
-      {
-        usernameField: "name",
-        passwordField: "password",
-      },
+      { usernameField: "name", passwordField: "password" },
       async (email, password, done) => {
         try {
-          /*
-            All the validations are done at the Middleware
-          */
-
           const user = await User.findOne({ $or: [{ name: email }, { email }] })
-
-          if (!user)
+          if (!user || !user.password) {
             return done(null, false, { message: "Incorrect email or password" })
+          }
+
+          const ok = await bcrypt.compare(password, user.password)
+          if (!ok) {
+            return done(null, false, { message: "Incorrect email or password" })
+          }
 
           return done(null, user)
         } catch (error) {
@@ -68,17 +49,4 @@ module.exports = function (passport) {
       }
     )
   )
-
-  passport.serializeUser((user, done) => {
-    done(null, user._id)
-  })
-
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const user = await User.findById(id)
-      done(null, user)
-    } catch (err) {
-      done(err, null)
-    }
-  })
 }

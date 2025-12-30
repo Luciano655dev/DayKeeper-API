@@ -26,7 +26,7 @@ const likePost = async (props) => {
     if (likeRelation) {
       // remove like
       await PostLikes.deleteOne({ userId: loggedUser._id, postId: post._id })
-      return custom("Post unliked successfully", 200, { post })
+      return custom("Post unliked successfully", { post })
     }
 
     // add like
@@ -36,7 +36,7 @@ const likePost = async (props) => {
       postUserId: post.user_info._id,
     })
     await newPostLikeRelation.save()
-    return custom("Post liked successfully", 200, { post })
+    return custom("Post liked successfully", { post })
   } catch (error) {
     console.error(error)
     throw new Error(error.message)
