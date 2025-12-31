@@ -1,40 +1,89 @@
 const User = require("../../models/User")
+const crypto = require("crypto")
+
 const {
   errors: { notFound, unauthorized, fieldNotFilledIn, invalidValue },
   success: { custom },
 } = require("../../../constants/index")
 
+function hashCode(code) {
+  return crypto.createHash("sha256").update(code).digest("hex")
+}
+
 const confirmEmail = async (props) => {
-  const { email, verificationCode } = props
+  let { email, verificationCode } = props
 
   if (!verificationCode || !email) return fieldNotFilledIn("Token or Email")
 
-  try {
-    const user = await User.findOne({ email })
+  // normalize
+  email = email.trim().toLowerCase()
+  verificationCode = verificationCode.toString().trim()
 
-    if (!user) return notFound(`user`)
+  // hash incoming code to compare with stored hash
+  const codeHash = hashCode(verificationCode)
 
-    // Delete the old code
-    if (user.verification_code !== verificationCode) {
-      user.verification_code = undefined
-      user.verification_time = undefined
-      await user.save()
+  // Find user (normalized email)
+  const user = await User.findOne({ email })
+  if (!user) return notFound("user")
 
-      return invalidValue(`Verification code`)
-    }
-
-    if (user.verification_time < Date.now())
-      return unauthorized(`confirm email`, `time expired`)
-
-    user.verified_email = true
-    user.verification_code = undefined
-    user.verification_time = undefined
-    await user.save()
-
-    return custom(`${user.name}'s email confirmed successfully`)
-  } catch (error) {
-    throw new Error(error.mesage)
+  // If already verified, you can just return success (optional)
+  if (user.verified_email) {
+    return custom(`${user.name}'s email is already confirmed`)
   }
+
+  // If no code stored (never requested / already cleared)
+  if (!user.verification_code_hash || !user.verification_expires_at) {
+    return invalidValue("Verification code")
+  }
+
+  // Expired
+  if (user.verification_expires_at.getTime() < Date.now()) {
+    // clear expired code
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $unset: {
+          verification_code_hash: 1,
+          verification_expires_at: 1,
+        },
+      }
+    )
+
+    return unauthorized("confirm email", "time expired")
+  }
+
+  // Wrong code
+  if (user.verification_code_hash !== codeHash) {
+    // OPTIONAL SECURITY CHOICE:
+    // Your old code deleted the token on any wrong attempt.
+    // That’s harsh (fat-finger = locked out), but if you want the same behavior,
+    // keep this $unset. If you want better UX, remove this unset and add attempt limits.
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $unset: {
+          verification_code_hash: 1,
+          verification_expires_at: 1,
+        },
+      }
+    )
+
+    return invalidValue("Verification code")
+  }
+
+  // Correct code -> verify atomically
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: { verified_email: true },
+      $unset: {
+        verification_code_hash: 1,
+        verification_expires_at: 1,
+      },
+    }
+  )
+
+  return custom(`${user.name}'s email confirmed successfully`)
 }
 
 module.exports = confirmEmail

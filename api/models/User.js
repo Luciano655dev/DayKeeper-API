@@ -48,11 +48,19 @@ const userSchema = mongoose.Schema({
     index: true,
   },
 
-  verification_code: {
+  verification_code_hash: {
     type: String,
     required: false,
   },
-  verification_time: {
+  verification_expires_at: {
+    type: Date,
+    required: false,
+  },
+  reset_code_hash: {
+    type: String,
+    required: false,
+  },
+  reset_expires_at: {
     type: Date,
     required: false,
   },

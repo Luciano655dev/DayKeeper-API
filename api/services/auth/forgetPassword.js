@@ -1,35 +1,58 @@
-const User = require('../../models/User')
-const { sendPasswordResetEmail } = require('../../utils/emailHandler')
+const User = require("../../models/User")
+const crypto = require("crypto")
+const { sendPasswordResetEmail } = require("../../utils/emailHandler")
+
 const {
   auth: { resetPasswordExpiresTime },
-  errors: { notFound },
-  success: { custom }
-} = require('../../../constants/index')
+  success: { custom },
+} = require("../../../constants/index")
+
+function make6DigitCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+function hashCode(code) {
+  return crypto.createHash("sha256").update(code).digest("hex")
+}
 
 const forgetPassword = async (props) => {
-  const { email } = props
+  let { email } = props
+  email = (email || "").trim().toLowerCase()
 
-  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
-  const verificationCodeTime = Date.now() + resetPasswordExpiresTime
+  // Always return the same message (avoid enumeration)
+  const genericMsg =
+    "If an account with that email exists, a password reset email has been sent."
 
   try {
-    const user = await User.findOneAndUpdate({ email }, {
-      $set: {
-        verification_code: verificationCode,
-        verification_time: verificationCodeTime
+    const user = await User.findOne({ email })
+    if (!user || !user.verified_email) {
+      // Do not reveal if user exists
+      console.log(email)
+      return custom(genericMsg)
+    }
+
+    const code = make6DigitCode()
+    const codeHash = hashCode(code)
+    const expiresAt = new Date(Date.now() + resetPasswordExpiresTime)
+
+    // Store hash + expiry (atomic)
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          reset_code_hash: codeHash,
+          reset_expires_at: expiresAt,
+        },
       }
-    }, { new: true })
+    )
 
-    if (!user)
-      return notFound('User')
+    // Best-effort email (don’t fail the request if provider is down)
+    sendPasswordResetEmail(email, code).catch(() => null)
+    console.log(`Reset Password Code: ${code}`)
 
-    await user.save()
-
-    // Enviar email de redefinição de senha
-    await sendPasswordResetEmail(email, verificationCode)
-
-    return custom("A password reset email has been sent to your registered email address" )
+    return custom(genericMsg)
   } catch (error) {
+    console.log("error")
     throw new Error(error.message)
   }
 }

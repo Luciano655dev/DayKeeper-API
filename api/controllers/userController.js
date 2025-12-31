@@ -63,7 +63,7 @@ const updateUserController = async (req, res) => {
     const { code, message, user } = await updateUser({
       ...req.body,
       file: req.file,
-      loggedUser: req.user,
+      loggedUser: req.loggedUserDoc || req.user,
     })
 
     return res.status(code).json({ message, user })

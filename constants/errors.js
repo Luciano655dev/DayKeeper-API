@@ -24,11 +24,9 @@ module.exports = {
       }
     },
     fieldNotFilledIn: (field) => {
-      switch (field) {
-        case `all`:
-          return "Fit in all fields"
-        default:
-          return `${field} needs to be filled in`
+      return {
+        code: 400,
+        message: `${field} is not filled in`,
       }
     },
     unauthorized: (action, reason) => {

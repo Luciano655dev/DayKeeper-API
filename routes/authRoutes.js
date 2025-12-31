@@ -10,6 +10,7 @@ const {
   logout,
   userData,
   confirmEmail,
+  resendCode,
   forgetPassword,
   resetPassword,
 } = require("../api/controllers/authController")
@@ -24,6 +25,7 @@ router.post("/register", userRegisterValidation, register)
 router.post("/confirm_email", confirmEmail)
 router.post("/forget_password", forgetPassword)
 router.post("/reset_password", resetPassword)
+router.post("/resend_code", resendCode)
 
 router.get("/user", checkTokenMW, userData)
 

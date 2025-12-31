@@ -7,6 +7,7 @@ const register = require("../services/auth/register")
 const refresh = require("../services/auth/refresh")
 const logout = require("../services/auth/logout")
 const confirmEmail = require("../services/auth/confirmEmail")
+const resendVerificationCode = require("../services/auth/resendVerificationCode")
 const forgetPassword = require("../services/auth/forgetPassword")
 const resetPassword = require("../services/auth/resetPassword")
 const getUserData = require("../services/auth/getUserData")
@@ -49,6 +50,7 @@ const refreshController = async (req, res) => {
 
     return res.status(code).json({ message, ...props })
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: serverError(error.message) })
   }
 }
@@ -68,6 +70,20 @@ const logoutController = async (req, res) => {
 const confirmEmailController = async (req, res) => {
   try {
     const { code, message } = await confirmEmail(req.body)
+
+    return res.status(code).json({ message })
+  } catch (error) {
+    return res.status(500).json({ message: serverError(error.message) })
+  }
+}
+
+// resend verification code
+const resendCodeController = async (req, res) => {
+  try {
+    const { code, message } = await resendVerificationCode(
+      { ...req.body },
+      req.body?.type // "verify" (verifyEmail) || "reset" (resetPassword)
+    )
 
     return res.status(code).json({ message })
   } catch (error) {
@@ -124,6 +140,7 @@ module.exports = {
   logout: logoutController,
   userData: userDataController,
   confirmEmail: confirmEmailController,
+  resendCode: resendCodeController,
   forgetPassword: forgetPasswordController,
   resetPassword: resetPasswordController,
 }

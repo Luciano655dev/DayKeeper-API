@@ -1,67 +1,54 @@
 const User = require("../../../api/models/User")
-const { sendVerificationEmail } = require("../../../api/utils/emailHandler")
 const bcrypt = require("bcryptjs")
+const resendCode = require("../../../api/services/auth/resendVerificationCode")
 
 const {
   errors: { serverError },
-} = require(`../../../constants/index`)
-const {
-  auth: { registerCodeExpiresTime },
 } = require("../../../constants/index")
 
-const userValidation = async (req, res, next) => {
-  // userInput is email or username
-  const { name: userInput, password } = req.body
-
+const userLoginValidation = async (req, res, next) => {
   try {
-    /* Input validations */
-    if (!userInput || !password)
+    const { email: userInputRaw, password } = req.body
+
+    if (!userInputRaw || !password) {
       return res
         .status(400)
-        .json({ message: `name or password is not filled in` })
+        .json({ message: "Email/username and password are required" })
+    }
 
-    /* User validation */
+    if (typeof userInputRaw !== "string" || typeof password !== "string") {
+      return res.status(400).json({ message: "Invalid input" })
+    }
+
+    const userInput = userInputRaw.trim()
+    const inputLower = userInput.toLowerCase()
+
+    // find by email (lowercased) OR by name (exact)
     const user = await User.findOne({
-      $or: [{ name: userInput }, { email: userInput }],
+      $or: [{ email: inputLower }, { name: userInput }],
     })
-    if (!user) return res.status(404).json({ message: `User not found` })
 
-    /* Email validation */
+    // Avoid user enumeration (don’t reveal user not found)
+    if (!user || !user.password) {
+      return res.status(401).json({ message: "Incorrect email or password" })
+    }
+
+    const ok = await bcrypt.compare(password, user.password)
+    if (!ok) {
+      return res.status(401).json({ message: "Incorrect email or password" })
+    }
+
+    // password is correct, now we can resend if unverified
     if (!user.verified_email) {
-      // new 6 digit code
-      const verificationCode = Math.floor(
-        100000 + Math.random() * 900000
-      ).toString()
-      const verificationCodeTime = Date.now() + registerCodeExpiresTime
+      resendCode({ email: user.email }).catch(() => null)
 
-      await User.updateOne(
-        { _id: user._id },
-        {
-          $set: {
-            verification_code: verificationCode,
-            verification_time: verificationCodeTime,
-          },
-        }
-      )
-
-      await sendVerificationEmail(
-        user.name,
-        user.email,
-        user.profile_picture.url,
-        verificationCode
-      )
-
-      console.log(verificationCode)
       return res.status(403).json({
-        message:
-          "Your account is not active yet, we have just sent you a new confirmation email",
+        code: "EMAIL_NOT_VERIFIED",
+        message: "Email not verified. A new confirmation code has been sent.",
       })
     }
 
-    // check if password match
-    const checkPassword = await bcrypt.compare(password, user.password)
-    if (!checkPassword)
-      return res.status(401).json({ message: "Invalid Password" })
+    req.body.email = user.email
 
     return next()
   } catch (error) {
@@ -69,4 +56,4 @@ const userValidation = async (req, res, next) => {
   }
 }
 
-module.exports = userValidation
+module.exports = userLoginValidation
