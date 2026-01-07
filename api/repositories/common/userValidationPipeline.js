@@ -1,7 +1,4 @@
-const isFollowingPipeline = require("./user/isFollowingPipeline")
-
-const userValidationPipeline = (mainUser) => [
-  ...isFollowingPipeline(mainUser),
+const userValidationPipeline = () => [
   {
     $match: {
       $and: [
@@ -10,10 +7,7 @@ const userValidationPipeline = (mainUser) => [
           $or: [
             { private: false },
             {
-              $and: [
-                { private: true },
-                { $expr: { $gt: [{ $size: "$isFollowing_relationship" }, 0] } },
-              ],
+              $and: [{ private: true }, { isFollowing: true }],
             },
           ],
         },

@@ -1,19 +1,18 @@
-const userInfoPipeline = require("../../common/userInfoPipeline")
 const mongoose = require("mongoose")
+const userInfoPipeline = require("../../common/userInfoPipeline")
+
+function buildUserMatch(userInput) {
+  const or = [{ name: userInput }]
+
+  if (mongoose.Types.ObjectId.isValid(userInput)) {
+    or.push({ _id: new mongoose.Types.ObjectId(userInput) })
+  }
+
+  return { $or: or }
+}
 
 const getUserPipeline = (userInput, mainUser) => [
-  {
-    $match: {
-      $or: [
-        { name: userInput },
-        {
-          _id: mongoose.Types.ObjectId.isValid(userInput)
-            ? new mongoose.Types.ObjectId(userInput)
-            : "",
-        },
-      ],
-    },
-  },
+  { $match: buildUserMatch(userInput) },
   ...userInfoPipeline(mainUser),
 ]
 

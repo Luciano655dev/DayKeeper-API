@@ -32,7 +32,7 @@ router.get("/user", checkTokenMW, userData)
 router.post(
   "/login",
   userLoginValidation,
-  passport.authenticate("local", { session: false }),
+  passport.authenticate("local"),
   login
 )
 
@@ -43,13 +43,12 @@ router.get(
   "/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
-    session: false,
   })
 )
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "/" }),
+  passport.authenticate("google", { failureRedirect: "/" }),
   async (req, res) => {
     const {
       signAccessToken,

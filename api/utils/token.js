@@ -1,8 +1,9 @@
 const jwt = require("jsonwebtoken")
 const crypto = require("crypto")
 const RefreshToken = require("../models/RefreshToken")
+const { secret } = require("../../config")
 
-const ACCESS_TTL_SECONDS = 10 // 15 minutes
+const ACCESS_TTL_SECONDS = 60 * 15 // 15 minutes
 const REFRESH_TTL_DAYS = 30
 
 function signAccessToken(user) {
@@ -11,7 +12,7 @@ function signAccessToken(user) {
       sub: user._id.toString(),
       roles: user.roles || ["user"],
     },
-    process.env.JWT_ACCESS_SECRET,
+    secret,
     {
       expiresIn: ACCESS_TTL_SECONDS,
       issuer: "daykeeper",

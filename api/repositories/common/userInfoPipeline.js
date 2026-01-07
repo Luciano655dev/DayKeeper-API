@@ -8,6 +8,7 @@ const {
 const userInfoPipeline = (mainUser) => [
   ...followInfoPipeline(mainUser),
   ...userValidationPipeline(mainUser),
+
   {
     $addFields: {
       created_at: {
@@ -19,9 +20,8 @@ const userInfoPipeline = (mainUser) => [
       },
     },
   },
-  {
-    $project: hideUserData,
-  },
+
+  { $project: hideUserData },
 ]
 
 module.exports = userInfoPipeline

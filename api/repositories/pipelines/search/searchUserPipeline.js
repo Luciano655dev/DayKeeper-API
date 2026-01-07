@@ -1,10 +1,10 @@
-const userValidationPipeline = require("../../common/userValidationPipeline")
+const userInfoPipeline = require("../../common/userInfoPipeline")
 
 const searchUserPipeline = (searchQuery, mainUser) => [
   {
     $match: { name: { $regex: new RegExp(searchQuery, "i") } },
   },
-  ...userValidationPipeline(mainUser),
+  ...userInfoPipeline(mainUser),
 ]
 
 module.exports = searchUserPipeline

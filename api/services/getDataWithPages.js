@@ -1,3 +1,7 @@
+// getDataWithPages.js
+
+const { Types } = require("mongoose")
+
 const Post = require("../models/Post")
 const User = require("../models/User")
 const Storie = require("../models/Storie")
@@ -15,28 +19,62 @@ const DayEvent = require("../models/DayEvent")
 const DayNote = require("../models/DayNote")
 const DayTask = require("../models/DayTask")
 
-const { maxPageSize: defaultMaxPageSie } = require("../../constants/index")
+const { maxPageSize: DEFAULT_MAX_PAGE_SIZE } = require("../../constants/index")
+
+function toObjectIdOrNull(id) {
+  try {
+    if (!id) return null
+    if (id instanceof Types.ObjectId) return id
+    if (Types.ObjectId.isValid(id)) return new Types.ObjectId(id)
+    return null
+  } catch {
+    return null
+  }
+}
+
+const MODEL_BY_TYPE = {
+  Post,
+  Storie,
+  User,
+  Follower: Followers,
+  CloseFriend,
+  Block: Blocks,
+  PostLikes,
+  PostComments,
+  CommentLikes,
+  StorieLikes,
+  StorieViews,
+  Report,
+  BanHistory,
+  DayNote,
+  DayTask,
+  DayEvent,
+}
 
 const getDataWithPages = async (
-  { type, pipeline, order, following, page, maxPageSize },
+  { type, pipeline = [], order = "recent", following, page = 1, maxPageSize },
   mainUser
 ) => {
-  page = Number(page)
-  maxPageSize = Number(maxPageSize)
+  // ---------- sanitize paging ----------
+  let p = Number(page)
+  let size = Number(maxPageSize)
 
-  if (isNaN(page)) page = 1
-  if (isNaN(maxPageSize)) maxPageSize = defaultMaxPageSie
+  if (!Number.isFinite(p) || p < 1) p = 1
+  if (!Number.isFinite(size) || size < 1) size = DEFAULT_MAX_PAGE_SIZE
+  size = Math.min(size, DEFAULT_MAX_PAGE_SIZE)
 
-  const skipCount = (page - 1) * maxPageSize
-  let newPipeline = [...pipeline]
+  const skipCount = (p - 1) * size
+  const mainUserId = toObjectIdOrNull(mainUser?._id)
+  const basePipeline = Array.isArray(pipeline) ? [...pipeline] : []
 
-  // ========== FOLLOWING ==========
-  let canApplyFollowing = type == `Post` || type == `User`
-  if (canApplyFollowing && following) {
+  // ---------- FOLLOWING filter ----------
+  const canApplyFollowing = type === "Post" || type === "User"
+
+  if (canApplyFollowing && following && mainUserId) {
     const userIdField = type === "Post" ? "user_info._id" : "_id"
 
     if (following === "following") {
-      newPipeline.push({
+      basePipeline.push({
         $lookup: {
           from: "followers",
           let: { userId: `$${userIdField}` },
@@ -45,20 +83,25 @@ const getDataWithPages = async (
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$followerId", mainUser._id] },
+                    { $eq: ["$followerId", mainUserId] },
                     { $eq: ["$followingId", "$$userId"] },
                   ],
                 },
               },
             },
+            { $limit: 1 },
           ],
           as: "following_info",
         },
       })
 
-      newPipeline.push({ $match: { "following_info.0": { $exists: true } } })
-    } else if (following === "friends") {
-      newPipeline.push({
+      basePipeline.push({
+        $match: { "following_info.0": { $exists: true } },
+      })
+    }
+
+    if (following === "friends") {
+      basePipeline.push({
         $lookup: {
           from: "followers",
           let: { userId: `$${userIdField}` },
@@ -67,18 +110,19 @@ const getDataWithPages = async (
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$followerId", mainUser._id] },
+                    { $eq: ["$followerId", mainUserId] },
                     { $eq: ["$followingId", "$$userId"] },
                   ],
                 },
               },
             },
+            { $limit: 1 },
           ],
           as: "following_info",
         },
       })
 
-      newPipeline.push({
+      basePipeline.push({
         $lookup: {
           from: "followers",
           let: { userId: `$${userIdField}` },
@@ -87,18 +131,19 @@ const getDataWithPages = async (
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$followingId", mainUser._id] },
+                    { $eq: ["$followingId", mainUserId] },
                     { $eq: ["$followerId", "$$userId"] },
                   ],
                 },
               },
             },
+            { $limit: 1 },
           ],
           as: "followers_info",
         },
       })
 
-      newPipeline.push({
+      basePipeline.push({
         $match: {
           $and: [
             { "following_info.0": { $exists: true } },
@@ -109,109 +154,66 @@ const getDataWithPages = async (
     }
   }
 
-  // ========== SORT ===========
-  let sortPipeline
+  // ---------- SORT ----------
+  let sortStage
   switch (order) {
     case "relevant":
-      sortPipeline = {
-        $sort: { created_at: -1, relevance: -1, timeZoneMatch: -1, _id: 1 },
+      sortStage = {
+        $sort: { created_at: -1, relevance: -1, timeZoneMatch: -1, _id: -1 },
       }
       break
     case "recent_ban":
-      sortPipeline = { $sort: { ban_date: 1, _id: 1 } }
+      sortStage = { $sort: { ban_date: -1, _id: -1 } }
       break
     case "recent":
-    default: // default is 'recent'
-      sortPipeline = { $sort: { created_at: -1, timeZoneMatch: -1, _id: 1 } }
+    default:
+      sortStage = { $sort: { created_at: -1, timeZoneMatch: -1, _id: -1 } }
       break
   }
 
+  // ---------- MODEL ----------
+  const Model = MODEL_BY_TYPE[type]
+  if (!Model) throw new Error(`Invalid type: ${type}`)
+
   try {
-    // ========== AGGREGATION ==========
     const aggregationPipeline = [
       {
         $facet: {
           data: [
-            ...newPipeline,
-            sortPipeline,
+            ...basePipeline,
+            sortStage,
             { $skip: skipCount },
-            { $limit: maxPageSize },
+            { $limit: size },
           ],
-          totalCount: [...newPipeline, { $count: "total" }],
+          totalCount: [...basePipeline, { $count: "total" }],
         },
       },
-      { $unwind: "$totalCount" },
+      {
+        $addFields: {
+          totalCount: {
+            $ifNull: [{ $arrayElemAt: ["$totalCount.total", 0] }, 0],
+          },
+        },
+      },
     ]
 
-    let Model
-    switch (type) {
-      case "Post":
-        Model = Post
-        break
-      case "Storie":
-        Model = Storie
-        break
-      case "User":
-        Model = User
-        break
-      case "Follower":
-        Model = Followers
-        break
-      case "CloseFriend":
-        Model = CloseFriend
-        break
-      case "Block":
-        Model = Blocks
-        break
-      case "PostLikes":
-        Model = PostLikes
-        break
-      case "PostComments":
-        Model = PostComments
-        break
-      case "CommentLikes":
-        Model = CommentLikes
-        break
-      case "StorieLikes":
-        Model = StorieLikes
-        break
-      case "StorieViews":
-        Model = StorieViews
-        break
-      case "Report":
-        Model = Report
-        break
-      case "BanHistory":
-        Model = BanHistory
-        break
-      case "DayNote":
-        Model = DayNote
-        break
-      case "DayTask":
-        Model = DayTask
-        break
-      case "DayEvent":
-        Model = DayEvent
-        break
-      default:
-        throw new Error(`Invalid type: ${type}`)
-    }
-
     const result = await Model.aggregate(aggregationPipeline)
-    const { data, totalCount } = result[0] || { data: [], totalCount: 0 }
+    const row = result?.[0] || {}
+    const data = row.data || []
+    const totalCount = row.totalCount || 0
 
-    const totalPages = Math.ceil(totalCount.total / maxPageSize) || 0
+    const totalPages = totalCount ? Math.ceil(totalCount / size) : 0
 
     return {
       data,
-      page,
+      page: p,
       pageSize: data.length,
-      maxPageSize,
+      maxPageSize: size,
       totalPages,
-      totalCount: totalCount.total,
+      totalCount,
     }
   } catch (error) {
-    throw new Error(error.message)
+    throw new Error(error?.message || "Aggregation error")
   }
 }
 

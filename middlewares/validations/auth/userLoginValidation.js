@@ -49,7 +49,6 @@ const userLoginValidation = async (req, res, next) => {
     }
 
     req.body.email = user.email
-
     return next()
   } catch (error) {
     return res.status(500).json({ message: serverError(error.message).message })

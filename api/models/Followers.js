@@ -15,6 +15,12 @@ const followersSchema = mongoose.Schema({
   },
 })
 
+followersSchema.index({ followerId: 1 })
+followersSchema.index({ followingId: 1 })
+followersSchema.index({ followerId: 1, followingId: 1 }, { unique: true })
+followersSchema.index({ followerId: 1, followingId: 1, requested: 1 })
+followersSchema.index({ followingId: 1, requested: 1 })
+
 const Followers = mongoose.model("Followers", followersSchema, "followers")
 
 module.exports = Followers
