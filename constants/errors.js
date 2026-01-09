@@ -56,6 +56,13 @@ module.exports = {
         message: "you have already done this action",
       }
     },
+    duplicatedValue: (value, props = {}) => {
+      return {
+        code: 409,
+        message: `${value} is already in use`,
+        ...props,
+      }
+    },
     custom: (message, props, code) => {
       return {
         code: code || 400,

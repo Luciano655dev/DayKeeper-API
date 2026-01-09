@@ -5,20 +5,34 @@ const { differenceInCalendarDays } = require("date-fns")
 const updateStrike = async (loggedUser) => {
   try {
     const lastPost = await Post.findOne({ user: loggedUser._id })
-      .sort({ created_at: -1 })
-      .select("created_at")
+      .sort({ createdAt: -1 })
+      .select("createdAt")
       .lean()
 
-    const lastPostDate = lastPost?.created_at
-    let currentStrike = loggedUser.currentStrike
-    let maxStrike = loggedUser.maxStrike
+    let currentStrike = loggedUser.currentStrike || 0
+    let maxStrike = loggedUser.maxStrike || 0
 
-    if (
-      lastPostDate &&
-      differenceInCalendarDays(new Date(), lastPostDate) >= 1
-    ) {
-      currentStrike = loggedUser.currentStrike + 1
-      if (currentStrike > maxStrike) maxStrike = currentStrike
+    if (!lastPost) {
+      // first ever post
+      currentStrike = 1
+    } else {
+      const daysDiff = differenceInCalendarDays(
+        new Date(),
+        new Date(lastPost.createdAt)
+      )
+
+      if (daysDiff === 1) {
+        // continued streak
+        currentStrike += 1
+      } else if (daysDiff > 1) {
+        // broken streak
+        currentStrike = 1
+      }
+      // daysDiff === 0 → same day, do nothing
+    }
+
+    if (currentStrike > maxStrike) {
+      maxStrike = currentStrike
     }
 
     await User.updateOne(

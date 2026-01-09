@@ -7,6 +7,7 @@ const {
   user: { defaultPfp, defaultTimeZone },
   auth: { registerCodeExpiresTime },
   success: { created },
+  errors: { duplicatedValue },
 } = require("../../../constants/index")
 
 function hashCode(code) {
@@ -49,7 +50,6 @@ const register = async (props) => {
     verified_email: false,
     password: passwordHash,
     created_at: Date.now(),
-    google_id: null,
 
     verification_code_hash: verificationCodeHash,
     verification_expires_at: verificationExpiresAt,
@@ -60,9 +60,10 @@ const register = async (props) => {
   } catch (err) {
     if (err && (err.code === 11000 || err.code === 11001)) {
       const dupField = Object.keys(err.keyPattern || {})[0]
-      if (dupField === "email") throw new Error("Email already in use")
-      if (dupField === "name") throw new Error("Username already in use")
-      throw new Error("Duplicate value")
+      if (dupField === "email") return duplicatedValue("Email")
+      if (dupField === "name") return duplicatedValue("Username")
+      console.log(err)
+      return duplicatedValue("Something")
     }
     throw err
   }

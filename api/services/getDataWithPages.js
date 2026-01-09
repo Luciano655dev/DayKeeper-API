@@ -1,5 +1,3 @@
-// getDataWithPages.js
-
 const { Types } = require("mongoose")
 
 const Post = require("../models/Post")
@@ -159,7 +157,7 @@ const getDataWithPages = async (
   switch (order) {
     case "relevant":
       sortStage = {
-        $sort: { created_at: -1, relevance: -1, timeZoneMatch: -1, _id: -1 },
+        $sort: { relevance: -1, created_at: -1, timeZoneMatch: -1, _id: -1 },
       }
       break
     case "recent_ban":
