@@ -3,46 +3,61 @@ const {
   user: { defaultTimeZone },
 } = require("../../../../../constants/index")
 
-const eventInfoPipeline = (mainUser) => [
-  ...dayElementValidationPipeline(mainUser),
-  {
-    $addFields: {
-      dateStart: {
-        $dateToString: {
-          format: "%Y-%m-%d %H:%M:%S",
-          date: "$dateStart",
-          timezone: mainUser.timeZone || defaultTimeZone,
+const eventInfoPipeline = (mainUser) => {
+  const tz = mainUser?.timeZone || defaultTimeZone
+
+  return [
+    ...dayElementValidationPipeline(mainUser),
+
+    {
+      $addFields: {
+        dateStartLocal: {
+          $dateToString: {
+            format: "%Y-%m-%d %H:%M:%S",
+            date: "$dateStart",
+            timezone: tz,
+          },
         },
-      },
-      dateEnd: {
-        $dateToString: {
-          format: "%Y-%m-%d %H:%M:%S",
-          date: "$dateEnd",
-          timezone: mainUser.timeZone || defaultTimeZone,
+        dateEndLocal: {
+          $dateToString: {
+            format: "%Y-%m-%d %H:%M:%S",
+            date: "$dateEnd",
+            timezone: tz,
+          },
         },
-      },
-      created_at: {
-        $dateToString: {
-          format: "%Y-%m-%d %H:%M:%S",
-          date: "$created_at",
-          timezone: mainUser.timeZone || defaultTimeZone,
+        createdAtLocal: {
+          $dateToString: {
+            format: "%Y-%m-%d %H:%M:%S",
+            date: "$createdAt",
+            timezone: tz,
+          },
         },
       },
     },
-  },
-  {
-    $project: {
-      _id: 1,
-      title: 1,
-      description: 1,
-      dateStart: 1,
-      dateEnd: 1,
-      location: 1,
-      user: 1,
-      user_info: 1,
-      created_at: 1,
+
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        description: 1,
+        privacy: 1,
+
+        // raw dates (best for client logic)
+        dateStart: 1,
+        dateEnd: 1,
+        createdAt: 1,
+
+        // display helpers
+        dateStartLocal: 1,
+        dateEndLocal: 1,
+        createdAtLocal: 1,
+
+        location: 1,
+        user: 1,
+        user_info: 1,
+      },
     },
-  },
-]
+  ]
+}
 
 module.exports = eventInfoPipeline

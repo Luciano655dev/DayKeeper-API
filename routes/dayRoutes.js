@@ -5,19 +5,16 @@ const {
   editEvent,
   deleteEvent,
   getEvent,
-  searchEvents,
 
   createNote,
   editNote,
   deleteNote,
   getNote,
-  searchNotes,
 
   createTask,
   editTask,
   deleteTask,
   getTask,
-  searchTasks,
 } = require("../api/controllers/dayController")
 
 // Middlewares
@@ -35,21 +32,18 @@ const editTaskValidation = require("../middlewares/validations/day/tasks/editTas
 router.post("/event", checkTokenMW, createEventValidation, createEvent)
 router.put("/event/:eventId", checkTokenMW, editEventValidation, editEvent)
 router.delete("/event/:eventId", checkTokenMW, deleteEvent)
-router.get("/event/search", checkTokenMW, searchEvents)
 router.get("/event/:eventId", checkTokenMW, getEvent)
 
 // Note Router
 router.post("/note", checkTokenMW, createNoteValidation, createNote)
 router.put("/note/:noteId", checkTokenMW, editNoteValidation, editNote)
 router.delete("/note/:noteId", checkTokenMW, deleteNote)
-router.get("/note/search", checkTokenMW, searchNotes)
 router.get("/note/:noteId", checkTokenMW, getNote)
 
 // Task Router
 router.post("/task", checkTokenMW, createTaskValidation, createTask)
 router.put("/task/:taskId", checkTokenMW, editTaskValidation, editTask)
 router.delete("/task/:taskId", checkTokenMW, deleteTask)
-router.get("/task/search", checkTokenMW, searchTasks)
 router.get("/task/:taskId", checkTokenMW, getTask)
 
 module.exports = router

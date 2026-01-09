@@ -13,6 +13,9 @@ const blocksSchema = mongoose.Schema({
   },
 })
 
+// indexes
+blocksSchema.index({ blockId: 1, blockedId: 1 }, { unique: true })
+
 const Blocks = mongoose.model("Blocks", blocksSchema, "blocks")
 
 module.exports = Blocks

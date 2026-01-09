@@ -1,6 +1,12 @@
 const Followers = require("../../models/Followers")
 const getDataWithPages = require("../getDataWithPages")
-const { searchPostPipeline, searchUserPipeline } = require("../../repositories")
+const {
+  searchPostPipeline,
+  searchUserPipeline,
+  searchEventPipeline,
+  searchNotePipeline,
+  searchTaskPipeline,
+} = require("../../repositories")
 
 const {
   success: { fetched },
@@ -17,7 +23,9 @@ const search = async (props) => {
   const searchQuery = props.q || ""
   const order = props.order || "relevant"
   const following = props.following
-  const type = props.type || "Post"
+  let type = props?.type
+  if (type != "User" && type != "Event" && type != "Note" && type != "Task")
+    type == "Post"
 
   const loggedUser = props.user
 
@@ -26,13 +34,37 @@ const search = async (props) => {
       followerId: loggedUser._id,
     })
 
+    // Specific Filters
+    const now = new Date()
+    let filterPipe = {}
+    const filter = props.filter || ""
+    if (type == "Event") {
+      if (filter === "upcoming") filterPipe = { dateStart: { $gt: now } }
+      if (filter === "past") filterPipe = { dateStart: { $lt: now } }
+      if (filter === "ongoing")
+        filterPipe = { dateStart: { $lte: now }, dateEnd: { $gte: now } }
+    }
+
+    if (type === "Note" || type === "Task") {
+      if (filter === "upcoming") filterPipe = { date: { $gt: now } }
+      if (filter === "past") filterPipe = { date: { $lt: now } }
+    }
+
+    const pipeline =
+      type === "Post"
+        ? searchPostPipeline(searchQuery, loggedUser)
+        : type === "User"
+        ? searchUserPipeline(searchQuery, loggedUser)
+        : type === "Event"
+        ? searchEventPipeline(searchQuery, filterPipe, loggedUser, loggedUser)
+        : type === "Task"
+        ? searchTaskPipeline(searchQuery, filterPipe, loggedUser, loggedUser)
+        : searchNotePipeline(searchQuery, filterPipe, loggedUser, loggedUser)
+
     const response = await getDataWithPages(
       {
         type,
-        pipeline:
-          type == "Post"
-            ? searchPostPipeline(searchQuery, loggedUser)
-            : searchUserPipeline(searchQuery, loggedUser),
+        pipeline,
         order,
         following,
         page,

@@ -1,49 +1,68 @@
-const DayEvent = require("../../../models/DayEvent")
 const mongoose = require("mongoose")
+const DayEvent = require("../../../models/DayEvent")
 
 const {
-  errors: { invalidValue },
+  errors: { invalidValue, notFound, unauthorized },
   success: { updated },
 } = require("../../../../constants/index")
 
 const editEvent = async (props) => {
   const {
     eventId,
-
     title,
     description,
     dateStart,
     dateEnd,
-    placeId, // location
+    location,
     privacy,
     loggedUser,
-  } = props
+  } = props || {}
+
+  if (!loggedUser?._id) {
+    return unauthorized("Unauthorized", "Login required", 401)
+  }
+
+  if (!eventId || !mongoose.Types.ObjectId.isValid(eventId)) {
+    return invalidValue("Event ID")
+  }
 
   try {
-    if (!mongoose.Types.ObjectId.isValid(eventId))
-      return invalidValue("Event ID")
+    const updateData = {}
 
-    const updateData = {
-      ...(title && { title }),
-      ...(description && { description }),
-      ...(dateStart && { dateStart }),
-      ...(dateEnd && { dateEnd }),
-      ...(privacy && { privacy }),
-      ...(placeId && { placeId }),
-      user: loggedUser._id,
+    if (Object.prototype.hasOwnProperty.call(props, "title"))
+      updateData.title = title
+    if (Object.prototype.hasOwnProperty.call(props, "description"))
+      updateData.description = description
+    if (Object.prototype.hasOwnProperty.call(props, "privacy"))
+      updateData.privacy = privacy
+    if (Object.prototype.hasOwnProperty.call(props, "location"))
+      updateData.location = location
+    if (Object.prototype.hasOwnProperty.call(props, "dateStart"))
+      updateData.dateStart = dateStart
+    if (Object.prototype.hasOwnProperty.call(props, "dateEnd"))
+      updateData.dateEnd = dateEnd
+
+    if (Object.keys(updateData).length === 0) {
+      return invalidValue("No fields to update")
     }
 
-    await DayEvent.findByIdAndUpdate(
-      eventId,
+    const doc = await DayEvent.findOneAndUpdate(
+      { _id: eventId, user: loggedUser._id },
+      { $set: updateData },
       {
-        $set: updateData,
-      },
-      { new: true }
+        new: true,
+        runValidators: true, // IMPORTANT
+      }
     )
 
-    return updated(`Day Event`)
+    if (!doc) {
+      // dont exist OR not owned
+      return notFound("Event")
+    }
+
+    return updated("Day Event", { data: doc })
   } catch (error) {
-    throw new Error(error.message)
+    throw error
   }
 }
 

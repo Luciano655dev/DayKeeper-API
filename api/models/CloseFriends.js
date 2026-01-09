@@ -11,6 +11,9 @@ const closeFriendsSchema = mongoose.Schema({
   },
 })
 
+// indexes
+closeFriendsSchema.index({ userId: 1, closeFriendId: 1 }, { unique: true })
+
 const CloseFriends = mongoose.model(
   "CloseFriends",
   closeFriendsSchema,

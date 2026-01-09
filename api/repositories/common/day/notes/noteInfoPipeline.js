@@ -3,37 +3,40 @@ const {
   user: { defaultTimeZone },
 } = require("../../../../../constants/index")
 
-const eventInfoPipeline = (mainUser) => [
-  ...dayElementValidationPipeline(mainUser),
-  {
-    $addFields: {
-      date: {
-        $dateToString: {
-          format: "%Y-%m-%d %H:%M:%S",
-          date: "$date",
-          timezone: mainUser.timeZone || defaultTimeZone,
-        },
-      },
-      created_at: {
-        $dateToString: {
-          format: "%Y-%m-%d %H:%M:%S",
-          date: "$created_at",
-          timezone: mainUser.timeZone || defaultTimeZone,
-        },
-      },
-    },
-  },
-  {
-    $project: {
-      _id: true,
-      date: true,
-      text: true,
-      privacy: true,
-      created_at: true,
-      user: true,
-      user_info: true,
-    },
-  },
-]
+const noteInfoPipeline = (mainUser) => {
+  const tz = mainUser?.timeZone || defaultTimeZone
 
-module.exports = eventInfoPipeline
+  return [
+    ...dayElementValidationPipeline(mainUser),
+
+    {
+      $addFields: {
+        dateLocal: {
+          $dateToString: {
+            format: "%Y-%m-%d %H:%M:%S",
+            date: "$date",
+            timezone: tz,
+          },
+        },
+      },
+    },
+
+    {
+      $project: {
+        _id: 1,
+        text: 1,
+        privacy: 1,
+        user: 1,
+        user_info: 1,
+
+        date: 1,
+        created_at: 1,
+
+        // for display
+        dateLocal: 1,
+      },
+    },
+  ]
+}
+
+module.exports = noteInfoPipeline

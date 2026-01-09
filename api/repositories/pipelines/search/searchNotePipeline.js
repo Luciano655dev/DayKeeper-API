@@ -1,23 +1,29 @@
-const noteInfoPipeline = require("../../common/day/notes/noteInfoPipeline")
 const mongoose = require("mongoose")
+const noteInfoPipeline = require("../../common/day/notes/noteInfoPipeline")
 
-const searchNotePipeline = (searchQuery, filterPipe, user, mainUser) => [
-  ...noteInfoPipeline(mainUser),
-  {
-    $match: {
-      $and: [
-        { "user_info._id": new mongoose.Types.ObjectId(user._id) },
+function escapeRegex(input = "") {
+  return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
 
-        filterPipe,
-      ],
+const searchNotePipeline = (searchQuery, filterPipe, user, mainUser) => {
+  const q = (searchQuery || "").trim().slice(0, 64)
+  const safe = escapeRegex(q)
+  const regex = safe ? new RegExp(safe, "i") : null
 
-      // search
-      $or: [
-        { text: { $regex: new RegExp(searchQuery, "i") } },
-        { date: { $regex: new RegExp(searchQuery, "i") } },
-      ],
+  const userId = new mongoose.Types.ObjectId(user._id)
+
+  return [
+    {
+      $match: {
+        user: userId,
+        ...(filterPipe && Object.keys(filterPipe).length ? filterPipe : {}),
+        ...(regex ? { text: { $regex: regex } } : {}),
+      },
     },
-  },
-]
+
+    { $sort: { date: -1, _id: -1 } },
+    ...noteInfoPipeline(mainUser),
+  ]
+}
 
 module.exports = searchNotePipeline

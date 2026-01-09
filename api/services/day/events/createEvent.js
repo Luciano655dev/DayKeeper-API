@@ -1,5 +1,5 @@
-const { parse } = require("date-fns")
-const convertTimeZone = require(`../../../utils/convertTimeZone`)
+const { parseISO, isValid } = require("date-fns")
+const convertTimeZone = require("../../../utils/convertTimeZone")
 const DayEvent = require("../../../models/DayEvent")
 
 const {
@@ -10,41 +10,67 @@ const {
 const createEvent = async (props) => {
   const {
     title,
-    description,
+    description = "",
     privacy,
     dateStart,
-    dateEnd, // HH:mm:ss
-    placeId, // location
+    dateEnd,
+    placeId = null,
     loggedUser,
-  } = props
+  } = props || {}
 
-  try {
-    const timeZone = loggedUser?.timeZone || defaultTimeZone
-
-    const newEvent = new DayEvent({
-      title,
-      description,
-      dateStart,
-      dateEnd,
-      placeId,
-      privacy,
-      user: loggedUser._id,
-    })
-
-    await newEvent.save()
-
-    return created(`Day Event`, {
-      data: {
-        ...newEvent._doc,
-        dateStart: convertTimeZone(dateStart, timeZone),
-        dateEnd: convertTimeZone(dateEnd, timeZone),
-        created_at: convertTimeZone(new Date(), timeZone),
-      },
-    })
-  } catch (error) {
-    console.error(error)
-    throw new Error(error.message)
+  if (!loggedUser?._id) {
+    throw new Error("Unauthorized")
   }
+
+  if (!title || typeof title !== "string" || title.trim().length < 1) {
+    throw new Error("Title is required")
+  }
+
+  if (!dateStart || !dateEnd) {
+    throw new Error("dateStart and dateEnd are required")
+  }
+
+  // Prefer ISO strings from client. If you use another format, change parsing here.
+  const start = parseISO(dateStart)
+  const end = parseISO(dateEnd)
+
+  if (!isValid(start) || !isValid(end)) {
+    throw new Error("Invalid dateStart or dateEnd format (expected ISO string)")
+  }
+
+  if (end < start) {
+    throw new Error("dateEnd must be after dateStart")
+  }
+
+  const timeZone = loggedUser?.timeZone || defaultTimeZone
+
+  // Store UTC dates in Mongo (Date objects are stored as UTC internally)
+  const doc = {
+    title: title.trim(),
+    description,
+    privacy,
+    dateStart: start,
+    dateEnd: end,
+    placeId,
+    user: loggedUser._id,
+    created_at: new Date(),
+  }
+
+  const newEvent = await DayEvent.create(doc)
+
+  const obj = newEvent.toObject()
+
+  return created("Day Event", {
+    data: {
+      ...obj,
+      dateStart: convertTimeZone(obj.dateStart, timeZone),
+      dateEnd: convertTimeZone(obj.dateEnd, timeZone),
+      created_at: convertTimeZone(
+        obj.createdAt || obj.created_at || obj.createdAt,
+        timeZone
+      ),
+    },
+  })
 }
 
 module.exports = createEvent

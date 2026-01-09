@@ -1,83 +1,86 @@
 const hideUserData = require("../../hideProject/hideUserData")
 
-const eventValidationPipeline = (mainUser) => [
+const dayElementValidationPipeline = (mainUser) => [
   {
     $lookup: {
       from: "users",
-      let: { userId: { $toObjectId: "$user" } },
+      let: { userId: "$user" },
       pipeline: [
-        {
-          $match: {
-            $expr: { $eq: ["$_id", "$$userId"] },
-          },
-        },
-        {
-          $project: hideUserData,
-        },
+        { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+        { $project: hideUserData },
       ],
       as: "user_info",
     },
   },
-  {
-    $unwind: "$user_info",
-  },
+  { $unwind: { path: "$user_info", preserveNullAndEmptyArrays: false } },
+
+  // following relationship
   {
     $lookup: {
       from: "followers",
-      let: { followingId: "$user_info._id" },
+      let: { eventUserId: "$user_info._id" },
       pipeline: [
         {
           $match: {
             $expr: {
               $and: [
                 { $eq: ["$followerId", mainUser._id] },
-                { $eq: ["$followingId", "$$followingId"] },
+                { $eq: ["$followingId", "$$eventUserId"] },
               ],
             },
           },
         },
+        { $project: { _id: 1 } },
       ],
       as: "following_info",
     },
   },
+
+  // block relationship
   {
     $lookup: {
       from: "blocks",
-      let: { blockedId: "$user_info._id" },
+      let: { eventUserId: "$user_info._id" },
       pipeline: [
         {
           $match: {
             $expr: {
               $and: [
                 { $eq: ["$blockId", mainUser._id] },
-                { $eq: ["$blockedId", "$$blockedId"] },
+                { $eq: ["$blockedId", "$$eventUserId"] },
               ],
             },
           },
         },
+        { $project: { _id: 1 } },
       ],
       as: "block_info",
     },
   },
+
+  // close friends relationship
   {
     $lookup: {
       from: "closeFriends",
-      let: { postUserId: "$user_info._id" },
+      let: { eventUserId: "$user_info._id" },
       pipeline: [
         {
           $match: {
             $expr: {
               $and: [
-                { $eq: ["$userId", "$$postUserId"] },
+                { $eq: ["$userId", "$$eventUserId"] },
                 { $eq: ["$closeFriendId", mainUser._id] },
               ],
             },
           },
         },
+        { $project: { _id: 1 } },
       ],
       as: "isInCloseFriends",
     },
   },
+
+  // access control
   {
     $match: {
       $and: [
@@ -92,12 +95,13 @@ const eventValidationPipeline = (mainUser) => [
             },
             {
               $and: [
-                { privacy: "close friends" },
+                { privacy: "close friends" }, // change to "close_friends" if you normalize
                 { "isInCloseFriends.0": { $exists: true } },
               ],
             },
           ],
         },
+
         {
           $or: [
             { "user_info.private": false },
@@ -109,4 +113,4 @@ const eventValidationPipeline = (mainUser) => [
   },
 ]
 
-module.exports = eventValidationPipeline
+module.exports = dayElementValidationPipeline

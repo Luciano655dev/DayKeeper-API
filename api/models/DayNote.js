@@ -1,23 +1,44 @@
 const mongoose = require("mongoose")
 
-const dayNoteSchema = mongoose.Schema({
-  date: Date,
-  text: String,
-  privacy: {
-    type: String,
-    enum: ["public", "private", "close friends"],
-    default: "public",
+const dayNoteSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+
+    date: {
+      type: Date,
+      required: true,
+      index: true,
+    },
+
+    text: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 1,
+      maxlength: 5000,
+    },
+
+    privacy: {
+      type: String,
+      enum: ["public", "private", "close friends"],
+      default: "public",
+      index: true,
+    },
   },
-  created_at: {
-    type: Date,
-    default: Date.now,
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  },
-})
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+)
+
+// indexes
+dayNoteSchema.index({ user: 1, date: 1 })
+dayNoteSchema.index({ user: 1, privacy: 1, date: 1 })
 
 const DayNote = mongoose.model("DayNote", dayNoteSchema, "dayNote")
-
 module.exports = DayNote

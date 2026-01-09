@@ -1,30 +1,33 @@
+const mongoose = require("mongoose")
 const DayTask = require("../../../models/DayTask")
-const getTask = require("./getTask")
 
 const {
-  errors: { notFound, unauthorized },
+  errors: { notFound, unauthorized, invalidValue },
   success: { deleted },
 } = require("../../../../constants/index")
 
 const deleteTask = async (props) => {
-  const { taskId, loggedUser } = props
+  const { taskId, loggedUser } = props || {}
+
+  if (!loggedUser?._id) {
+    return unauthorized("Unauthorized", "Login required", 401)
+  }
+
+  if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
+    return invalidValue("Task ID")
+  }
 
   try {
-    const task = await getTask({ taskId, loggedUser })
-    if (!task || task?.code != 200) return notFound("Task")
+    const doc = await DayTask.findOneAndDelete({
+      _id: taskId,
+      user: loggedUser._id,
+    }).select("_id")
 
-    if (!task.data.user.equals(loggedUser._id))
-      return unauthorized(
-        "You can't delete this task",
-        "only the person who creted this task can delete it"
-      )
+    if (!doc) return notFound("Task")
 
-    await DayTask.findOneAndDelete({ _id: taskId })
-
-    return deleted(`Day Task`)
+    return deleted("Day Task")
   } catch (error) {
-    console.error(error)
-    throw new Error(error.message)
+    throw error
   }
 }
 

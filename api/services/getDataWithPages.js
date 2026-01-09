@@ -1,22 +1,5 @@
 const { Types } = require("mongoose")
 
-const Post = require("../models/Post")
-const User = require("../models/User")
-const Storie = require("../models/Storie")
-const Followers = require("../models/Followers")
-const Blocks = require("../models/Blocks")
-const CloseFriend = require("../models/CloseFriends")
-const PostLikes = require("../models/PostLikes")
-const PostComments = require("../models/PostComments")
-const CommentLikes = require("../models/CommentLikes")
-const StorieLikes = require("../models/StorieLikes")
-const StorieViews = require("../models/StorieViews")
-const Report = require("../models/Report")
-const BanHistory = require("../models/BanHistory")
-const DayEvent = require("../models/DayEvent")
-const DayNote = require("../models/DayNote")
-const DayTask = require("../models/DayTask")
-
 const { maxPageSize: DEFAULT_MAX_PAGE_SIZE } = require("../../constants/index")
 
 function toObjectIdOrNull(id) {
@@ -30,23 +13,24 @@ function toObjectIdOrNull(id) {
   }
 }
 
+const DEFAULT_MODEL = "Post"
 const MODEL_BY_TYPE = {
-  Post,
-  Storie,
-  User,
-  Follower: Followers,
-  CloseFriend,
-  Block: Blocks,
-  PostLikes,
-  PostComments,
-  CommentLikes,
-  StorieLikes,
-  StorieViews,
-  Report,
-  BanHistory,
-  DayNote,
-  DayTask,
-  DayEvent,
+  Post: require("../models/Post"),
+  Storie: require("../models/Storie"),
+  User: require("../models/User"),
+  Follower: require("../models/Followers"),
+  CloseFriend: require("../models/CloseFriends"),
+  Block: require("../models/Blocks"),
+  PostLikes: require("../models/PostLikes"),
+  PostComments: require("../models/PostComments"),
+  CommentLikes: require("../models/CommentLikes"),
+  StorieLikes: require("../models/StorieLikes"),
+  StorieViews: require("../models/StorieViews"),
+  Report: require("../models/Report"),
+  BanHistory: require("../models/BanHistory"),
+  Note: require("../models/DayNote"),
+  Task: require("../models/DayTask"),
+  Event: require("../models/DayEvent"),
 }
 
 const getDataWithPages = async (
@@ -170,8 +154,8 @@ const getDataWithPages = async (
   }
 
   // ---------- MODEL ----------
-  const Model = MODEL_BY_TYPE[type]
-  if (!Model) throw new Error(`Invalid type: ${type}`)
+  let Model = MODEL_BY_TYPE[type]
+  if (!Model) Model = MODEL_BY_TYPE[DEFAULT_MODEL]
 
   try {
     const aggregationPipeline = [

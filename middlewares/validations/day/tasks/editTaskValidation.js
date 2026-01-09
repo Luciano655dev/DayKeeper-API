@@ -14,8 +14,6 @@ const editTaskValidation = async (req, res, next) => {
   // Validations
   if (title && title?.length > maxTitleLength)
     return res.status(413).json({ message: "Task Title is too long" })
-  if (value && value != true && value != false)
-    return res.status(400).json({ message: "Task Value is invalid" })
 
   const date = req.body.date ? new Date(req.body.date) : null
   if (date && !isValid(date))
