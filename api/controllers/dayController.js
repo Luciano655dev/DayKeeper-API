@@ -1,3 +1,5 @@
+const getUserDay = require("../services/day/getUserDay")
+
 // Events
 const createEvent = require("../services/day/events/createEvent")
 const editEvent = require("../services/day/events/editEvent")
@@ -15,6 +17,24 @@ const createTask = require("../services/day/tasks/createTask")
 const editTask = require("../services/day/tasks/editTask")
 const deleteTask = require("../services/day/tasks/deleteTask")
 const getTask = require("../services/day/tasks/getTask")
+
+const dayController = async (req, res, next) => {
+  try {
+    const name = req.params.name
+    const dateStr =
+      typeof req.query.date === "string" ? req.query.date.trim() : null
+
+    const result = await getUserDay({
+      name,
+      dateStr,
+      loggedUser: req.user,
+    })
+
+    return res.status(result.code || 200).json(result)
+  } catch (err) {
+    next(err)
+  }
+}
 
 // ========== EVENT CONTROLLERS ==========
 const createEventController = async (req, res) => {
@@ -170,6 +190,8 @@ const getTaskController = async (req, res) => {
 }
 
 module.exports = {
+  getUserDay: dayController,
+
   createEvent: createEventController,
   editEvent: editEventController,
   deleteEvent: deleteEventController,

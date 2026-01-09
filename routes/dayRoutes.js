@@ -1,6 +1,8 @@
 const express = require("express")
 const router = express.Router()
 const {
+  getUserDay,
+
   createEvent,
   editEvent,
   deleteEvent,
@@ -26,8 +28,6 @@ const editNoteValidation = require("../middlewares/validations/day/notes/editNot
 const createTaskValidation = require("../middlewares/validations/day/tasks/createTaskValidation")
 const editTaskValidation = require("../middlewares/validations/day/tasks/editTaskValidation")
 
-// Routes (/day)
-
 // Event Router
 router.post("/event", checkTokenMW, createEventValidation, createEvent)
 router.put("/event/:eventId", checkTokenMW, editEventValidation, editEvent)
@@ -45,5 +45,8 @@ router.post("/task", checkTokenMW, createTaskValidation, createTask)
 router.put("/task/:taskId", checkTokenMW, editTaskValidation, editTask)
 router.delete("/task/:taskId", checkTokenMW, deleteTask)
 router.get("/task/:taskId", checkTokenMW, getTask)
+
+// Routes (/day)
+router.get("/:name", checkTokenMW, getUserDay)
 
 module.exports = router

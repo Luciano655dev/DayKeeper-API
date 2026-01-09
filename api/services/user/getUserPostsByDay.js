@@ -1,0 +1,61 @@
+const User = require("../../models/User")
+const Post = require("../../models/Post")
+
+const { getUserPostsByDayPipeline } = require("../../repositories/index")
+const { getDayRangeDDMMYYYY, getTodayRange } = require("../../utils/dayRange")
+const getDataWithPages = require("../getDataWithPages")
+
+const {
+  user: { defaultTimeZone },
+  errors: { notFound, unauthorized },
+  success: { fetched },
+} = require("../../../constants/index")
+
+const isDDMMYYYY = (v) => typeof v === "string" && /^\d{2}-\d{2}-\d{4}$/.test(v)
+
+const getUserPostsByDay = async (props) => {
+  const { name, dateStr, loggedUser, order, page, maxPageSize } = props || {}
+
+  if (!loggedUser?._id) {
+    return unauthorized("Unauthorized", "Login required", 401)
+  }
+
+  const targetUser = await User.findOne({ name }).select("_id name")
+  if (!targetUser) return notFound("User")
+
+  const tz = loggedUser?.timeZone || defaultTimeZone
+  let usedDateStr = null
+  let range = null
+
+  if (isDDMMYYYY(dateStr)) {
+    const tryRange = getDayRangeDDMMYYYY(dateStr, tz)
+    if (tryRange) {
+      usedDateStr = dateStr
+      range = tryRange
+    }
+  }
+
+  if (!range) {
+    range = getTodayRange(tz)
+    usedDateStr = null
+  }
+
+  const posts = await getDataWithPages({
+    type: "Post",
+    pipeline: getUserPostsByDayPipeline({
+      mainUser: loggedUser,
+      targetUserId: targetUser._id,
+      start: range.start,
+      end: range.end,
+    }),
+    order,
+    page,
+    maxPageSize,
+  })
+
+  return fetched("posts", {
+    ...posts,
+  })
+}
+
+module.exports = getUserPostsByDay

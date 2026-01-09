@@ -3,6 +3,7 @@ const {
 } = require("../../constants/index")
 const getUser = require("../services/user/getUser")
 const getUserPosts = require("../services/user/getUserPosts")
+const getUserPostsByDay = require("../services/user/getUserPostsByDay")
 const updateUser = require("../services/user/updateUser")
 const reseteProfilePicture = require("../services/user/resetProfilePicture")
 const deleteUser = require("../services/user/deleteUser")
@@ -53,6 +54,23 @@ const getUserPostsController = async (req, res) => {
 
     return res.status(code).json({ ...response })
   } catch (error) {
+    return res.status(500).json({ message: serverError(String(error)) })
+  }
+}
+
+const getUserPostsByDayController = async (req, res) => {
+  const { name, date } = req.params
+
+  try {
+    const { code, message, data } = await getUserPostsByDay({
+      name,
+      dateStr: date,
+      loggedUser: req.user,
+    })
+
+    return res.status(code).json({ message, data })
+  } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: serverError(String(error)) })
   }
 }
@@ -300,6 +318,7 @@ const getBlockedUsersController = async (req, res) => {
 module.exports = {
   getUser: getUserController,
   getUserPosts: getUserPostsController,
+  getUserPostsByDay: getUserPostsByDayController,
   updateUser: updateUserController,
   reseteProfilePicture: reseteProfilePictureController,
   deleteUser: deleteUserController,

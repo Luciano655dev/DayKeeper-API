@@ -6,12 +6,12 @@ const {
 } = require("../../../constants/index")
 
 const getUserPosts = async (props) => {
-  const { page, maxPageSize, order, name, loggedUser } = props
+  const { page, maxPageSize, order, name, dateStr = null, loggedUser } = props
 
   try {
     const response = await getDataWithPages({
       type: "Post",
-      pipeline: userPostsPipeline(loggedUser, name),
+      pipeline: userPostsPipeline(loggedUser, name, { dateStr }),
       order,
       page,
       maxPageSize,
@@ -20,7 +20,7 @@ const getUserPosts = async (props) => {
     return fetched(`user's posts`, { response })
   } catch (error) {
     console.error(error)
-    throw new Error(`${error}`)
+    throw error
   }
 }
 

@@ -3,6 +3,7 @@ const router = express.Router()
 const {
   getUser,
   getUserPosts,
+  getUserPostsByDay,
   updateUser,
   reseteProfilePicture,
   deleteUser,
@@ -77,6 +78,7 @@ router.post("/:name/report", checkTokenMW, checkBannedUserMW, reportUser)
 
 // posts
 router.get("/:name/posts", checkTokenMW, checkValidUserMW, getUserPosts)
+router.get("/:name/posts/:date", checkTokenMW, getUserPostsByDay)
 
 // GET USER
 router.get("/:name", checkTokenMW, getUser)
