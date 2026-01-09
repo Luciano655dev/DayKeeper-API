@@ -17,6 +17,7 @@ const {
   editTask,
   deleteTask,
   getTask,
+  getDailyTasks,
 } = require("../api/controllers/dayController")
 
 // Middlewares
@@ -45,6 +46,18 @@ router.post("/task", checkTokenMW, createTaskValidation, createTask)
 router.put("/task/:taskId", checkTokenMW, editTaskValidation, editTask)
 router.delete("/task/:taskId", checkTokenMW, deleteTask)
 router.get("/task/:taskId", checkTokenMW, getTask)
+
+// Daily Tasks (templates)
+router.get(
+  "/dailyTasks",
+  checkTokenMW,
+  (req, res, next) => {
+    req.params.name = req.user.name
+    return next()
+  },
+  getDailyTasks
+)
+router.get("/:name/dailyTasks", checkTokenMW, getDailyTasks)
 
 // Routes (/day)
 router.get("/:name", checkTokenMW, getUserDay)

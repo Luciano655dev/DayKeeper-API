@@ -17,16 +17,29 @@ const createTask = require("../services/day/tasks/createTask")
 const editTask = require("../services/day/tasks/editTask")
 const deleteTask = require("../services/day/tasks/deleteTask")
 const getTask = require("../services/day/tasks/getTask")
+const getDailyTasks = require("../services/day/tasks/getDailyTasks")
+
+// helpers
+function parsePositiveInt(value, fallback) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return fallback
+  const i = Math.floor(n)
+  return i > 0 ? i : fallback
+}
+
+function clampInt(n, min, max) {
+  return Math.max(min, Math.min(max, n))
+}
 
 const dayController = async (req, res, next) => {
   try {
     const name = req.params.name
-    const dateStr =
+    const date =
       typeof req.query.date === "string" ? req.query.date.trim() : null
 
     const result = await getUserDay({
       name,
-      dateStr,
+      dateStr: date,
       loggedUser: req.user,
     })
 
@@ -188,6 +201,28 @@ const getTaskController = async (req, res) => {
     return res.status(500).json({ error })
   }
 }
+const getDailyTasksController = async (req, res) => {
+  try {
+    const name = req.params.name
+
+    // sanitize paging
+    const page = req.query?.page || 1
+    const maxPageSize = req.query?.maxPageSize || 10
+
+    const result = await getDailyTasks({
+      name,
+      page,
+      maxPageSize,
+      loggedUser: req.user,
+    })
+
+    // keep your result format
+    return res.status(result.code || 200).json(result)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error })
+  }
+}
 
 module.exports = {
   getUserDay: dayController,
@@ -206,4 +241,5 @@ module.exports = {
   editTask: editTaskController,
   deleteTask: deleteTaskController,
   getTask: getTaskController,
+  getDailyTasks: getDailyTasksController,
 }

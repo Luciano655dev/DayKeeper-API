@@ -21,21 +21,25 @@ const {
 const getUserDay = async (props) => {
   const { name, dateStr, loggedUser } = props || {}
 
-  const cleanDateStr =
-    typeof dateStr === "string" && /^\d{2}-\d{2}-\d{4}$/.test(dateStr)
-      ? dateStr
-      : dateStr
-      ? null
-      : null
+  const tz = loggedUser?.timeZone || defaultTimeZone
 
-  if (dateStr && !cleanDateStr) {
-    return invalidValue("Date must be DD-MM-YYYY")
-  }
+  const isValidDateStr =
+    typeof dateStr === "string" && /^\d{2}-\d{2}-\d{4}$/.test(dateStr)
+
+  // get "today" in user's timezone
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }))
+
+  const todayDateStr = [
+    String(now.getDate()).padStart(2, "0"),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    now.getFullYear(),
+  ].join("-")
+
+  const cleanDateStr = isValidDateStr ? dateStr : todayDateStr
 
   const targetUser = await User.findOne({ name }).select("_id name")
   if (!targetUser) return notFound("User")
 
-  const tz = loggedUser?.timeZone || defaultTimeZone
   const targetUserId = new mongoose.Types.ObjectId(targetUser._id)
 
   const userAgg = await User.aggregate(

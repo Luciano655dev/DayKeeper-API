@@ -18,6 +18,7 @@ const searchTaskPipeline = (searchQuery, filterPipe, user, mainUser) => {
         user: userId,
         ...(filterPipe && Object.keys(filterPipe).length ? filterPipe : {}),
         ...(regex ? { title: { $regex: regex } } : {}),
+        daily: { $ne: true },
       },
     },
 

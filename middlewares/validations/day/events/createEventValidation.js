@@ -1,51 +1,70 @@
-const { parse, isValid, isBefore } = require("date-fns")
+const { isValid, isBefore } = require("date-fns")
 const getPlaceById = require("../../../../api/services/location/getPlaceById")
 
 const {
   day: {
-    event: { maxEventTitleLength, maxEventDescriptionLength },
+    event: {
+      maxEventTitleLength: MAX_TITLE_LENGTH,
+      maxEventDescriptionLength: MAX_DESCRIPTION_LENGTH,
+    },
   },
 } = require("../../../../constants/index")
 
+const ALLOWED_PRIVACY = ["public", "private", "close friends"]
+
 const createEvent = async (req, res, next) => {
-  const {
-    title,
-    description,
-    privacy,
-    placeId, // location
-  } = req.body
+  const { title, description, privacy, placeId } = req.body
 
-  // Validations
-  if (description?.length > maxEventDescriptionLength)
-    return res.status(413).json({ message: "Event Description is too long" })
-  if (title?.length > maxEventTitleLength)
+  // Title (required)
+  if (typeof title !== "string" || title.trim().length < 1) {
+    return res.status(400).json({ message: "Event Title is required" })
+  }
+  if (title.trim().length > MAX_TITLE_LENGTH) {
     return res.status(413).json({ message: "Event Title is too long" })
+  }
 
+  // Description (optional, but if present must be valid)
+  if (description !== undefined && description !== null) {
+    if (typeof description !== "string") {
+      return res.status(400).json({ message: "Invalid Event Description" })
+    }
+    if (description.trim().length < 1) {
+      return res
+        .status(400)
+        .json({ message: "Event Description cannot be empty" })
+    }
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      return res.status(413).json({ message: "Event Description is too long" })
+    }
+  }
+
+  // Dates (required)
   const dateStart = new Date(req.body.dateStart)
   const dateEnd = new Date(req.body.dateEnd)
-  if (
-    !isValid(new Date(dateStart)) ||
-    !isValid(new Date(dateEnd)) ||
-    !isBefore(dateStart, dateEnd)
-  )
-    return res.status(400).json({ message: "Invalid Date" })
 
-  // Privacy
-  switch (privacy) {
-    case "public":
-    case "private":
-    case "close friends":
-    case undefined:
-      break
-    default:
-      return res.status(404).json({ message: "Invalid privacy value" })
+  if (!isValid(dateStart) || !isValid(dateEnd)) {
+    return res.status(400).json({ message: "Invalid Date" })
+  }
+  if (!isBefore(dateStart, dateEnd)) {
+    return res.status(400).json({ message: "dateStart must be before dateEnd" })
+  }
+
+  // Privacy (optional)
+  if (privacy !== undefined && !ALLOWED_PRIVACY.includes(privacy)) {
+    return res.status(400).json({ message: "Invalid privacy value" })
   }
 
   try {
+    // Place check (optional)
     if (placeId) {
       const placeById = await getPlaceById({ placeId })
-      if (!placeById || placeById?.status != 200)
-        return res.status(placeById.code).json({ message: placeById.message })
+
+      // keep your service contract (code/status/message)
+      if (!placeById || (placeById?.status != 200 && placeById?.code != 200)) {
+        return res
+          .status(placeById?.code || 400)
+          .json({ message: placeById?.message || "Invalid placeId" })
+      }
     }
 
     return next()

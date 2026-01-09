@@ -41,40 +41,48 @@ const hideStorieData = require("./hideProject/hideStorieData")
 const hideGeneralData = require(`./hideProject/hideGeneralData`)
 
 module.exports = {
+  // HIDE
   hideUserData,
   hidePostData,
   hideStorieData,
   hideGeneralData,
 
-  getUserDayPipeline,
-
+  // STORIES
   userStoriesPipeline,
-  searchPostPipeline,
-  searchUserPipeline,
   userPostsPipeline,
   reportedElementPipeline,
+  feedPostPipeline,
 
+  // SEARCH
+  searchPostPipeline,
+  searchUserPipeline,
   searchEventPipeline,
   searchNotePipeline,
   searchTaskPipeline,
-  feedPostPipeline,
 
+  // BANS
   bannedElementPipeline,
   banHistoryMadeByAdmin,
   elementBanHistoryPipeline,
 
+  // USER RELATED
   getUserPostsByDayPipeline,
+  getUserDayPipeline,
   getUserPipeline,
   getFollowersPipeline,
   getFollowingPipeline,
   getFollowRequestsPipeline,
   getCloseFriendsPipeline,
   getBlockedUsersPipeline,
+
+  // POST RELATED
   getPostPipeline,
   getPostLikesPipeline,
   getPostCommentsPipeline,
   getAveragePostLikesPipeline,
   getCommentLikesPipeline,
+
+  // Stories
   getStoriePipeline,
   getTodayStoriesPipeline,
   getStorieLikesPipeline,

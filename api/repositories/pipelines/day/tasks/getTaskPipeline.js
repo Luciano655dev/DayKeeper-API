@@ -1,10 +1,10 @@
 const taskInfoPipeline = require("../../../common/day/tasks/taskInfoPipeline")
 const mongoose = require("mongoose")
 
-const getTaskPipeline = (noteId, mainUser) => [
+const getTaskPipeline = (taskId, mainUser) => [
   {
     $match: {
-      _id: new mongoose.Types.ObjectId(noteId),
+      _id: new mongoose.Types.ObjectId(taskId),
     },
   },
   ...taskInfoPipeline(mainUser),

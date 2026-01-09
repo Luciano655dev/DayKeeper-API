@@ -1,43 +1,83 @@
 const getTask = require("../../../../api/services/day/tasks/getTask")
 const mongoose = require("mongoose")
 const { isValid } = require("date-fns")
+
 const {
   day: {
     task: { maxTitleLength },
   },
 } = require("../../../../constants/index")
 
+const ALLOWED_PRIVACY = ["public", "private", "close friends"]
+
 const editTaskValidation = async (req, res, next) => {
   const { taskId } = req.params
-  const { title, value, privacy } = req.body
+  const { title, privacy } = req.body
 
-  // Validations
-  if (title && title?.length > maxTitleLength)
-    return res.status(413).json({ message: "Task Title is too long" })
+  // Support old "value" field and new "completed"
+  const hasCompleted =
+    Object.prototype.hasOwnProperty.call(req.body, "completed") ||
+    Object.prototype.hasOwnProperty.call(req.body, "value")
 
-  const date = req.body.date ? new Date(req.body.date) : null
-  if (date && !isValid(date))
-    return res.status(400).json({ message: "Date is Invalid" })
+  const completed =
+    typeof req.body.completed === "boolean"
+      ? req.body.completed
+      : typeof req.body.value === "boolean"
+      ? req.body.value
+      : undefined
 
-  if (!mongoose.Types.ObjectId.isValid(taskId))
+  // TaskId validation
+  if (!mongoose.Types.ObjectId.isValid(taskId)) {
     return res.status(400).json({ message: "The Task ID is Invalid" })
+  }
 
-  // Privacy
-  if (privacy)
-    switch (privacy) {
-      case "public":
-      case "private":
-      case "close friends":
-      case undefined:
-        break
-      default:
-        return res.status(404).json({ message: "Invalid privacy value" })
+  // Title validation (optional)
+  if (Object.prototype.hasOwnProperty.call(req.body, "title")) {
+    if (typeof title !== "string" || title.trim().length < 1) {
+      return res.status(400).json({ message: "Invalid Title" })
     }
+    if (title.trim().length > maxTitleLength) {
+      return res.status(413).json({ message: "Task Title is too long" })
+    }
+  }
+
+  // Privacy validation (optional)
+  if (Object.prototype.hasOwnProperty.call(req.body, "privacy")) {
+    if (privacy !== undefined && !ALLOWED_PRIVACY.includes(privacy)) {
+      return res.status(400).json({ message: "Invalid privacy value" })
+    }
+  }
+
+  // Date validation (optional)
+  const hasDate = Object.prototype.hasOwnProperty.call(req.body, "date")
+  const date = hasDate && req.body.date ? new Date(req.body.date) : null
+
+  if (hasDate && req.body.date && (!date || !isValid(date))) {
+    return res.status(400).json({ message: "Date is Invalid" })
+  }
 
   try {
-    const task = await getTask({ taskId, loggedUser: req.user })
-    if (task.code != 200)
+    const taskRes = await getTask({ taskId, loggedUser: req.user })
+    if (taskRes?.code != 200) {
       return res.status(404).json({ message: "Task not Found" })
+    }
+
+    const task = taskRes?.data || taskRes?.task || taskRes
+
+    // If it's a DAILY TEMPLATE, block invalid edits
+    if (task?.daily === true) {
+      if (hasDate) {
+        return res
+          .status(400)
+          .json({ message: "Daily task templates cannot have a date" })
+      }
+
+      if (hasCompleted && completed === true) {
+        return res
+          .status(400)
+          .json({ message: "Daily task templates cannot be completed" })
+      }
+    }
 
     return next()
   } catch (error) {

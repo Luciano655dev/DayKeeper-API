@@ -7,46 +7,68 @@ const {
   success: { updated },
 } = require("../../../../constants/index")
 
+const ALLOWED_PRIVACY = ["public", "private", "close friends"]
+
 const editTask = async (props) => {
   const { taskId, completed, title, date, privacy, loggedUser } = props || {}
 
-  if (!loggedUser?._id) {
-    return unauthorized("Unauthorized", "Login required", 401)
-  }
-
-  if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
-    return invalidValue("Task ID")
-  }
-
   try {
+    const existing = await DayTask.findOne({
+      _id: taskId,
+      user: loggedUser._id,
+    })
+    if (!existing) return notFound("Task")
+
     const updateData = {}
 
-    if (Object.prototype.hasOwnProperty.call(props, "title"))
-      updateData.title = title
-    if (Object.prototype.hasOwnProperty.call(props, "completed"))
-      updateData.completed = completed
-    if (Object.prototype.hasOwnProperty.call(props, "date"))
-      updateData.date = date
-    if (Object.prototype.hasOwnProperty.call(props, "privacy"))
+    // --- title ---
+    if (Object.prototype.hasOwnProperty.call(props, "title")) {
+      if (typeof title !== "string" || title.trim().length < 1) {
+        return invalidValue("Title")
+      }
+      updateData.title = title.trim()
+    }
+
+    // --- privacy ---
+    if (Object.prototype.hasOwnProperty.call(props, "privacy")) {
+      if (privacy !== undefined && !ALLOWED_PRIVACY.includes(privacy)) {
+        return invalidValue("Privacy")
+      }
       updateData.privacy = privacy
+    }
+
+    // --- completed ---
+    if (Object.prototype.hasOwnProperty.call(props, "completed")) {
+      if (typeof completed !== "boolean") {
+        return invalidValue("Completed")
+      }
+
+      // Templates can never be completed
+      if (existing.daily === true && completed === true) {
+        return invalidValue("Completed")
+      }
+
+      updateData.completed = completed
+    }
+
+    // --- date ---
     if (Object.prototype.hasOwnProperty.call(props, "date")) {
-      // parse ISO
+      // Templates should not have a date
+      if (existing.daily === true) {
+        return invalidValue("Date")
+      }
+
       const d = typeof date === "string" ? parseISO(date) : new Date(date)
       if (!isValid(d)) return invalidValue("Date")
       updateData.date = d
     }
 
+    // nothing to update
     if (Object.keys(updateData).length === 0) {
       return invalidValue("No fields to update")
     }
 
-    if (
-      Object.prototype.hasOwnProperty.call(updateData, "completed") &&
-      typeof updateData.completed !== "boolean"
-    ) {
-      return invalidValue("Completed")
-    }
-
+    // Apply update
     const doc = await DayTask.findOneAndUpdate(
       { _id: taskId, user: loggedUser._id },
       { $set: updateData },

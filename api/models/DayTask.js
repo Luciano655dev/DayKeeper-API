@@ -26,7 +26,14 @@ const dayTaskSchema = new mongoose.Schema(
 
     date: {
       type: Date,
-      required: true,
+      index: true,
+    },
+
+    daily: { type: Boolean, default: false, index: true, required: false }, // true = template
+    template: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DayTask",
+      default: null,
       index: true,
     },
 
@@ -47,6 +54,11 @@ const dayTaskSchema = new mongoose.Schema(
 dayTaskSchema.index({ user: 1, date: 1 })
 dayTaskSchema.index({ user: 1, completed: 1, date: 1 })
 dayTaskSchema.index({ user: 1, privacy: 1, date: 1 })
+dayTaskSchema.index({ user: 1, daily: 1 })
+dayTaskSchema.index(
+  { user: 1, dayKey: 1, template: 1 },
+  { unique: true, partialFilterExpression: { template: { $type: "objectId" } } }
+)
 
 const DayTask = mongoose.model("DayTask", dayTaskSchema, "dayTask")
 module.exports = DayTask

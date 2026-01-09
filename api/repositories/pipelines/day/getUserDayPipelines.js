@@ -5,31 +5,70 @@ const taskInfoPipeline = require("../../common/day/tasks/taskInfoPipeline")
 const noteInfoPipeline = require("../../common/day/notes/noteInfoPipeline")
 const eventInfoPipeline = require("../../common/day/events/eventInfoPipeline")
 
-function buildDayMatchStage(fieldName, tz, dateStr) {
-  const dayStartExpr = dateStr
+function buildDayMatchStage(tz, dateStr, opts = {}) {
+  const {
+    // single timestamp field name (tasks/notes/events old schema)
+    singleField = "date",
+    // range field names (events new schema)
+    rangeStartField = "dateStart",
+    rangeEndField = "dateEnd",
+  } = opts
+
+  // parse dateStr (DD-MM-YYYY) but fallback to $$NOW if invalid/null
+  const baseDateExpr = dateStr
     ? {
-        $dateTrunc: {
-          date: {
+        $ifNull: [
+          {
             $dateFromString: {
-              dateString: dateStr, // DD-MM-YYYY
+              dateString: dateStr,
               format: "%d-%m-%Y",
               timezone: tz,
               onError: null,
               onNull: null,
             },
           },
-          unit: "day",
-          timezone: tz,
-        },
+          "$$NOW",
+        ],
       }
-    : { $dateTrunc: { date: "$$NOW", unit: "day", timezone: tz } }
+    : "$$NOW"
 
+  const dayStart = {
+    $dateTrunc: { date: baseDateExpr, unit: "day", timezone: tz },
+  }
+
+  const dayEnd = {
+    $dateAdd: { startDate: dayStart, unit: "day", amount: 1 },
+  }
+
+  // If doc has dateStart (range schema): overlap match
+  // overlap condition: start < dayEnd AND (end or start) >= dayStart
+  // If doc has date (single schema): date in [dayStart, dayEnd)
   return {
     $match: {
       $expr: {
-        $eq: [
-          { $dateTrunc: { date: `$${fieldName}`, unit: "day", timezone: tz } },
-          dayStartExpr,
+        $or: [
+          // single timestamp docs (date)
+          {
+            $and: [
+              { $ne: [`$${singleField}`, null] },
+              { $gte: [`$${singleField}`, dayStart] },
+              { $lt: [`$${singleField}`, dayEnd] },
+            ],
+          },
+
+          // range docs (dateStart/dateEnd)
+          {
+            $and: [
+              { $ne: [`$${rangeStartField}`, null] },
+              { $lt: [`$${rangeStartField}`, dayEnd] },
+              {
+                $gte: [
+                  { $ifNull: [`$${rangeEndField}`, `$${rangeStartField}`] },
+                  dayStart,
+                ],
+              },
+            ],
+          },
         ],
       },
     },
@@ -46,7 +85,11 @@ function getUserInfoAggPipeline({ targetUserId, loggedUser }) {
 function getUserDayTasksAggPipeline({ targetUserId, loggedUser, tz, dateStr }) {
   return [
     { $match: { user: new mongoose.Types.ObjectId(targetUserId) } },
-    buildDayMatchStage("date", tz, dateStr),
+    buildDayMatchStage(tz, dateStr, {
+      singleField: "date",
+      rangeStartField: "dateStart",
+      rangeEndField: "dateEnd",
+    }),
     ...taskInfoPipeline(loggedUser),
     { $sort: { date: -1, _id: -1 } },
   ]
@@ -55,7 +98,9 @@ function getUserDayTasksAggPipeline({ targetUserId, loggedUser, tz, dateStr }) {
 function getUserDayNotesAggPipeline({ targetUserId, loggedUser, tz, dateStr }) {
   return [
     { $match: { user: new mongoose.Types.ObjectId(targetUserId) } },
-    buildDayMatchStage("date", tz, dateStr),
+    buildDayMatchStage(tz, dateStr, {
+      singleField: "date",
+    }),
     ...noteInfoPipeline(loggedUser),
     { $sort: { date: -1, _id: -1 } },
   ]
@@ -69,7 +114,9 @@ function getUserDayEventsAggPipeline({
 }) {
   return [
     { $match: { user: new mongoose.Types.ObjectId(targetUserId) } },
-    buildDayMatchStage("dateStart", tz, dateStr),
+    buildDayMatchStage(tz, dateStr, {
+      singleField: "date",
+    }),
     ...eventInfoPipeline(loggedUser),
     { $sort: { dateStart: -1, _id: -1 } },
   ]
