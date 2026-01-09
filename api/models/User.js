@@ -31,8 +31,8 @@ const userSchema = mongoose.Schema({
   google_id: { type: String, index: true, sparse: true, unique: true },
 
   // Post strikes, like Duolingo
-  currentStrike: { type: Number, default: 0 },
-  maxStrike: { type: Number, default: 0 },
+  currentStreak: { type: Number, default: 0 },
+  maxStreak: { type: Number, default: 0 },
 
   device_tokens: [
     {

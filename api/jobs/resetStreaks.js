@@ -1,90 +1,83 @@
 const cron = require("node-cron")
-const User = require("../models/User") // Import User model
-const { startOfDay, subDays } = require("date-fns")
+const User = require("../models/User")
 
-const resetStrikes = async () => {
+const {
+  user: { defaultTimeZone },
+} = require("../../constants/index")
+
+// Resets streaks for users whose streak is broken in *their own timezone*.
+// Condition: currentStreak > 0 AND streakLastDay < yesterdayKey (in user TZ)
+async function resetBrokenStreaks() {
   try {
-    const today = startOfDay(new Date())
-    const yesterday = subDays(today, 1)
-
     const pipeline = [
       {
-        $match: { currentStrike: { $gt: 0 } },
-      },
-      {
-        $lookup: {
-          from: "posts",
-          localField: "_id",
-          foreignField: "userId",
-          as: "posts",
+        $match: {
+          currentStreak: { $gt: 0 },
+          streakLastDay: { $type: "string" }, // must exist + be string "yyyy-MM-dd"
         },
       },
       {
         $addFields: {
-          postsYesterday: {
-            $filter: {
-              input: "$posts",
-              as: "post",
-              cond: {
-                $and: [
-                  { $gte: ["$$post.created_at", yesterday] },
-                  { $lt: ["$$post.created_at", today] },
-                ],
-              },
-            },
-          },
-          postsToday: {
-            $filter: {
-              input: "$posts",
-              as: "post",
-              cond: {
-                $gte: ["$$post.created_at", today],
-              },
-            },
-          },
+          _tz: { $ifNull: ["$timeZone", defaultTimeZone] },
         },
       },
       {
         $addFields: {
-          hasPostedYesterday: { $gt: [{ $size: "$postsYesterday" }, 0] },
-          hasPostedToday: { $gt: [{ $size: "$postsToday" }, 0] },
+          todayKey: {
+            $dateToString: {
+              date: "$$NOW",
+              format: "%Y-%m-%d",
+              timezone: "$_tz",
+            },
+          },
+          yesterdayKey: {
+            $dateToString: {
+              date: {
+                $dateSubtract: {
+                  startDate: "$$NOW",
+                  unit: "day",
+                  amount: 1,
+                },
+              },
+              format: "%Y-%m-%d",
+              timezone: "$_tz",
+            },
+          },
         },
       },
+      // streak is broken if lastDay is older than yesterday in their TZ
       {
         $match: {
-          hasPostedYesterday: false,
-          hasPostedToday: false,
+          $expr: { $lt: ["$streakLastDay", "$yesterdayKey"] },
         },
       },
-      {
-        $project: {
-          _id: 1,
-          hasPostedYesterday: 1,
-          hasPostedToday: 1,
-        },
-      },
+      { $project: { _id: 1 } },
     ]
 
     const usersToReset = await User.aggregate(pipeline)
 
-    if (usersToReset.length > 0) {
-      const userIds = usersToReset.map((user) => user._id)
-
-      await User.updateMany(
-        { _id: { $in: userIds } },
-        { $set: { currentStrike: 0 } }
-      )
-
-      console.log(`Strike reset for ${usersToReset.length} users.`)
-    } else {
-      console.log("All strikes are up to date. No resets needed.")
+    if (!usersToReset.length) {
+      console.log("No broken streaks to reset.")
+      return
     }
-  } catch (error) {
-    console.error("Error resetting strikes:", error.message)
+
+    const ids = usersToReset.map((u) => u._id)
+
+    const res = await User.updateMany(
+      { _id: { $in: ids } },
+      { $set: { currentStreak: 0 } }
+    )
+
+    console.log(
+      `Reset currentStreak=0 for ${ids.length} users (matched: ${res.matchedCount}, modified: ${res.modifiedCount}).`
+    )
+  } catch (err) {
+    console.error("Error resetting broken streaks:", err)
   }
 }
 
-cron.schedule("59 23 * * *", () => {
-  console.log("Running strike reset job...")
-  resetStrikes()
+// Run hourly (minute 5). Hourly avoids timezone edge cases.
+cron.schedule("5 * * * *", () => {
+  console.log("Running broken streak reset job...")
+  resetBrokenStreaks()
 })

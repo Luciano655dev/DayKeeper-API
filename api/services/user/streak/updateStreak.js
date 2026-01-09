@@ -1,54 +1,70 @@
-const Post = require("../../../models/Post")
 const User = require("../../../models/User")
-const { differenceInCalendarDays } = require("date-fns")
+const { formatInTimeZone } = require("date-fns-tz")
+const { parseISO, differenceInCalendarDays } = require("date-fns")
 
-const updateStrike = async (loggedUser) => {
-  try {
-    const lastPost = await Post.findOne({ user: loggedUser._id })
-      .sort({ createdAt: -1 })
-      .select("createdAt")
-      .lean()
+const {
+  user: { defaultTimeZone },
+} = require("../../../../constants/index")
 
-    let currentStrike = loggedUser.currentStrike || 0
-    let maxStrike = loggedUser.maxStrike || 0
+function dayKeyNow(timeZone) {
+  return formatInTimeZone(new Date(), timeZone, "yyyy-MM-dd")
+}
 
-    if (!lastPost) {
-      // first ever post
-      currentStrike = 1
-    } else {
-      const daysDiff = differenceInCalendarDays(
-        new Date(),
-        new Date(lastPost.createdAt)
-      )
+const updateStreak = async (loggedUser) => {
+  const timeZone = loggedUser?.timeZone || defaultTimeZone
+  const todayKey = dayKeyNow(timeZone)
 
-      if (daysDiff === 1) {
-        // continued streak
-        currentStrike += 1
-      } else if (daysDiff > 1) {
-        // broken streak
-        currentStrike = 1
-      }
-      // daysDiff === 0 → same day, do nothing
-    }
+  const lastKey = loggedUser.streakLastDay || null
+  const current = Number(loggedUser.currentStreak || 0)
+  const max = Number(loggedUser.maxStreak || 0)
 
-    if (currentStrike > maxStrike) {
-      maxStrike = currentStrike
-    }
+  // first post ever (streak-wise)
+  if (!lastKey) {
+    const nextCurrent = 1
+    const nextMax = Math.max(max, nextCurrent)
 
     await User.updateOne(
       { _id: loggedUser._id },
       {
         $set: {
-          currentStrike,
-          maxStrike,
+          currentStreak: nextCurrent,
+          maxStreak: nextMax,
+          streakLastDay: todayKey,
         },
       }
     )
-
-    return { currentStrike, maxStrike }
-  } catch (error) {
-    throw new Error(`Error updating strike: ${error.message}`)
+    return { currentStreak: nextCurrent, maxStreak: nextMax }
   }
+
+  // already posted today (don’t change streak)
+  if (lastKey === todayKey) {
+    return { currentStreak: current, maxStreak: max }
+  }
+
+  // compare day difference in calendar-days
+  const daysDiff = differenceInCalendarDays(
+    parseISO(todayKey),
+    parseISO(lastKey)
+  )
+
+  let nextCurrent
+  if (daysDiff === 1) nextCurrent = current + 1 // continued
+  else nextCurrent = 1 // missed 1+ full days => reset to 1 on new post
+
+  const nextMax = Math.max(max, nextCurrent)
+
+  await User.updateOne(
+    { _id: loggedUser._id },
+    {
+      $set: {
+        currentStreak: nextCurrent,
+        maxStreak: nextMax,
+        streakLastDay: todayKey,
+      },
+    }
+  )
+
+  return { currentStreak: nextCurrent, maxStreak: nextMax }
 }
 
-module.exports = updateStrike
+module.exports = updateStreak

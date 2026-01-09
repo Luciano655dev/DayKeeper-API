@@ -12,41 +12,45 @@ const {
 const createPost = async (req) => {
   const { data, emotion, privacy } = req.body
   const loggedUser = req.user
-  const placesIds = req?.body?.placesIds?.split(",") || []
-  const mediaDocs = req?.mediaDocs
+
+  const mediaDocs = Array.isArray(req.mediaDocs) ? req.mediaDocs : []
+  // const placesIds = (req?.body?.placesIds ? String(req.body.placesIds) : "").split(",").map((s) => s.trim()).filter(Boolean)\
 
   try {
-    if (placesIds && placesIds.length > 0 && mediaDocs.length > 0) {
-      for (let i in mediaDocs) {
-        if (!placesIds[i]) continue
+    /*
+    NOTE: NOT WORKING RIGHT NOW
+    if (placesIds.length > 0 && mediaDocs.length > 0) {
+      await Promise.all(
+        mediaDocs.map(async (m, i) => {
+          const placeId = placesIds[i]
+          if (!placeId) return
 
-        const placeById = await getPlaceById({ placeId: placesIds[i] })
-        if (placeById.code !== 200) continue
+          const placeById = await getPlaceById({ placeId })
+          if (placeById?.code !== 200) return
 
-        mediaDocs[i].placeId = placesIds[i]
-        await mediaDocs[i].save()
-      }
+          m.placeId = placeId
+          await m.save()
+        })
+      )
     }
+    */
+
+    const allMediaPublic = mediaDocs.length
+      ? mediaDocs.every((m) => m.status === "public")
+      : true
 
     const post = await Post.create({
       date: new Date(),
       data,
       emotion,
       privacy,
-      status: mediaDocs
-        ? mediaDocs.reduce((acc, media) => {
-            return acc && media.status === "public"
-          }, true)
-          ? "public"
-          : "pending"
-        : "public",
-      media: mediaDocs ? mediaDocs.map((m) => m._id) : [],
+      status: allMediaPublic ? "public" : "pending",
+      media: mediaDocs.map((m) => m._id),
       user: loggedUser._id,
       created_at: new Date(),
     })
 
-    // Link media to the post
-    if (mediaDocs)
+    if (mediaDocs.length) {
       await Promise.all(
         mediaDocs.map((media) =>
           Media.findByIdAndUpdate(media._id, {
@@ -54,16 +58,15 @@ const createPost = async (req) => {
           })
         )
       )
+    }
 
-    /* Update streak */
     await updateStreak(loggedUser)
 
     return created("post", { post })
   } catch (error) {
-    for (let mediaDoc of req.mediaDocs || []) {
-      await deleteFile({ key: mediaDoc.key })
+    for (let mediaDoc of mediaDocs) {
+      await deleteFile({ key: mediaDoc.key }).catch(() => null)
     }
-
     console.error("Error creating post:", error)
     return serverError(error)
   }
