@@ -3,12 +3,18 @@ const bcrypt = require("bcryptjs")
 const deleteFile = require("../../../api/utils/deleteFile")
 
 const {
-  auth: { maxEmailLength, maxBioLength, maxUsernameLength, maxPasswordLength },
+  auth: {
+    maxEmailLength,
+    maxBioLength,
+    maxUsernameLength,
+    maxPasswordLength,
+    maxDisplayNameLength,
+  },
   errors: { serverError },
 } = require("../../../constants/index")
 
 const userValidation = async (req, res, next) => {
-  let { username, email, password, bio, lastPassword } = req.body
+  let { username, displayName, email, password, bio, lastPassword } = req.body
 
   const handleBadRequest = (status, message) => {
     if (req.file) deleteFile({ key: req.file.key })
@@ -18,12 +24,16 @@ const userValidation = async (req, res, next) => {
   try {
     // normalize
     username = typeof username === "string" ? username.trim() : undefined
+    displayName =
+      typeof displayName === "string" ? displayName.trim() : undefined
+    if (displayName === "") displayName = undefined
+
     email = typeof email === "string" ? email.trim().toLowerCase() : undefined
     bio = typeof bio === "string" ? bio : undefined
 
     // load fresh user with password (don’t trust req.user snapshot)
     const loggedUser = await User.findById(req.user._id).select(
-      "email username password profile_picture private"
+      "email username displayName password profile_picture private"
     )
     if (!loggedUser) return handleBadRequest(404, "User not found")
 
@@ -44,6 +54,10 @@ const userValidation = async (req, res, next) => {
 
     if (username && username.length > maxUsernameLength) {
       return handleBadRequest(413, "Username is too long")
+    }
+
+    if (displayName && displayName.length > maxDisplayNameLength) {
+      return handleBadRequest(413, "Display name is too long")
     }
 
     if (password) {
@@ -71,8 +85,9 @@ const userValidation = async (req, res, next) => {
       if (exists) return handleBadRequest(409, "Username is already being used")
     }
 
-    req.loggedUserDoc = loggedUser
+    // displayName is NOT unique => no "exists" check
 
+    req.loggedUserDoc = loggedUser
     return next()
   } catch (error) {
     return handleBadRequest(500, serverError(error.message).message)

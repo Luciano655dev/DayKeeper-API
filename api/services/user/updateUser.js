@@ -20,11 +20,20 @@ function hashCode(code) {
   return crypto.createHash("sha256").update(code).digest("hex")
 }
 
-const updateUser = async (params) => {
-  let { username, email, password, bio, file, loggedUser } = params
+function normalizeOptionalString(v, { lower = false } = {}) {
+  if (typeof v !== "string") return undefined
+  const t = v.trim()
+  if (!t) return undefined
+  return lower ? t.toLowerCase() : t
+}
 
-  username = typeof username === "string" ? username.trim() : undefined
-  email = typeof email === "string" ? email.trim().toLowerCase() : undefined
+const updateUser = async (params) => {
+  let { username, displayName, email, password, bio, file, loggedUser } = params
+
+  // normalize
+  username = normalizeOptionalString(username)
+  displayName = normalizeOptionalString(displayName)
+  email = normalizeOptionalString(email, { lower: true })
   bio = typeof bio === "string" ? bio : undefined
 
   const privateNext =
@@ -33,12 +42,14 @@ const updateUser = async (params) => {
       ? params.private === "true"
       : !!loggedUser.private
 
-  // Load fresh from DB (don’t trust token snapshot)
+  // get logged user
   let user = loggedUser
   if (!user?.save) user = await User.findById(loggedUser._id)
 
   const emailChanged = !!email && email !== user.email
-  const nameChanged = !!username && username !== user.username
+  const usernameChanged = !!username && username !== user.username
+  const displayNameChanged =
+    !!displayName && displayName !== (user.displayName || "")
 
   // Keep old picture key so we can delete it AFTER successful update
   const oldPictureKey = user.profile_picture?.key
@@ -70,12 +81,14 @@ const updateUser = async (params) => {
   }
 
   const set = {
-    username: username || user.username,
+    username: user.username,
+    displayName: user.displayName || user.username, // nice default
     bio: bio ?? user.bio ?? "",
     private: privateNext,
   }
 
-  if (nameChanged) set.username = username
+  if (usernameChanged) set.username = username
+  if (displayNameChanged) set.displayName = displayName
   if (passwordHash) set.password = passwordHash
 
   if (file) {
@@ -105,6 +118,8 @@ const updateUser = async (params) => {
       const dupField = Object.keys(err.keyPattern || {})[0]
       if (dupField === "email") throw new Error("Email already in use")
       if (dupField === "username") throw new Error("Username already in use")
+      if (dupField === "displayName")
+        throw new Error("Display name already in use")
       throw new Error("Duplicate value")
     }
     throw err
@@ -127,8 +142,9 @@ const updateUser = async (params) => {
   // Best-effort email verification send
   if (emailChanged) {
     const pfpUrl = updatedUser.profile_picture?.url || defaultPfp?.url
+    const friendlyName = updatedUser.displayName || updatedUser.username
     sendVerificationEmail(
-      updatedUser.username,
+      friendlyName,
       updatedUser.email,
       pfpUrl,
       verificationCode

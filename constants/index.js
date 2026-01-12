@@ -52,6 +52,8 @@ module.exports = {
     maxUsernameLength: 40,
     maxEmailLength: 320,
     maxPasswordLength: 50,
+    maxBioLength: 1000,
+    maxDisplayNameLength: 40,
   },
   location: {
     maxSearchLength: 50,

@@ -40,6 +40,7 @@ const register = async (props) => {
 
   const user = new User({
     username,
+    displayName: username,
     email,
     bio: "",
     timeZone: timeZone || defaultTimeZone,
