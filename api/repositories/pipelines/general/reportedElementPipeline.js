@@ -4,40 +4,28 @@ const hideStorieData = require("../../hideProject/hideStorieData")
 
 const reportedElementPipeline = (type = "user") => [
   {
-    // type == "user", "post" or "storie"
-    $match: {
-      $and: [
-        {
-          entity_type: type,
-        },
-      ],
-    },
-  },
-  {
     $lookup: {
       from: `${type}s`,
-      localField: "entity_id",
+      localField: "referenceId",
       foreignField: "_id",
       as: "entity_info",
       pipeline: [
         {
           $project:
-            type == "user"
+            type === "user"
               ? hideUserData
-              : type == "post"
+              : type === "post"
               ? hidePostData
               : hideStorieData,
         },
       ],
     },
   },
-  {
-    $unwind: "$entity_info",
-  },
+  { $unwind: "$entity_info" },
   {
     $replaceRoot: {
       newRoot: {
-        $mergeObjects: [{ entity_id: "$entity_id" }, "$entity_info"],
+        $mergeObjects: [{ referenceId: "$referenceId" }, "$entity_info"],
       },
     },
   },

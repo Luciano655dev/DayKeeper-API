@@ -18,6 +18,15 @@ module.exports = {
     maxCommentLength: 500,
   },
   user: {
+    forbiddenUsernames: [
+      "auth",
+      "post",
+      "day",
+      "search",
+      "day",
+      "webhooks",
+      "media",
+    ],
     defaultPfp: {
       name: "Doggo.jpg",
       key: "Doggo.jpg",

@@ -1,5 +1,6 @@
 const getDataWithPages = require(`../getDataWithPages`)
 const { reportedElementPipeline } = require(`../../repositories`)
+const Report = require("../../models/Report")
 const {
   success: { fetched },
 } = require(`../../../constants/index`)

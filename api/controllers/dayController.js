@@ -20,17 +20,6 @@ const getTask = require("../services/day/tasks/getTask")
 const getDailyTasks = require("../services/day/tasks/getDailyTasks")
 
 // helpers
-function parsePositiveInt(value, fallback) {
-  const n = Number(value)
-  if (!Number.isFinite(n)) return fallback
-  const i = Math.floor(n)
-  return i > 0 ? i : fallback
-}
-
-function clampInt(n, min, max) {
-  return Math.max(min, Math.min(max, n))
-}
-
 const dayController = async (req, res, next) => {
   try {
     const name = req.params.name
