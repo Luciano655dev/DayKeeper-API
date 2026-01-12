@@ -51,7 +51,7 @@ const commentPost = async (props) => {
         )
 
         gif = {
-          name: gif.data.data.title,
+          title: gif.data.data.title,
           id: gif.data.data.id,
           url: gif.data.data.images.original.url,
         }

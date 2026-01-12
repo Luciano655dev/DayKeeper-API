@@ -22,12 +22,12 @@ const getDailyTasks = require("../services/day/tasks/getDailyTasks")
 // helpers
 const dayController = async (req, res, next) => {
   try {
-    const name = req.params.name
+    const username = req.params.username
     const date =
       typeof req.query.date === "string" ? req.query.date.trim() : null
 
     const result = await getUserDay({
-      name,
+      username,
       dateStr: date,
       loggedUser: req.user,
     })
@@ -192,14 +192,14 @@ const getTaskController = async (req, res) => {
 }
 const getDailyTasksController = async (req, res) => {
   try {
-    const name = req.params.name
+    const username = req.params.username
 
     // sanitize paging
     const page = req.query?.page || 1
     const maxPageSize = req.query?.maxPageSize || 10
 
     const result = await getDailyTasks({
-      name,
+      username,
       page,
       maxPageSize,
       loggedUser: req.user,

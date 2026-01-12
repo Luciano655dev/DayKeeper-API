@@ -13,7 +13,7 @@ const {
 } = require("../../../../constants/index")
 
 const deleteBannedUser = async (props) => {
-  const { name: userInput, loggedUser, message } = props
+  const { username: userInput, loggedUser, message } = props
 
   try {
     const user = await findUser({ userInput })
@@ -59,9 +59,9 @@ const deleteBannedUser = async (props) => {
 
     // bannedUser.ban_message
     await sendUserDeletionEmail({
-      username: user.name,
+      username: user.username,
       email: user.email,
-      adminUsername: adminUser.name,
+      adminUsername: adminUser.username,
       reason: latestBan.ban_message,
       message,
     })

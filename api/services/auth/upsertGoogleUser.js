@@ -16,7 +16,7 @@ module.exports = async function upsertGoogleUser(profile) {
   if (user) {
     if (!user.google_id) user.google_id = googleId
     if (photo && (!user.profile_picture || !user.profile_picture.url)) {
-      user.profile_picture = { url: photo, name: "google_pfp", key: "" }
+      user.profile_picture = { url: photo, title: "google_pfp", key: "" }
     }
     if (user.verified_email === false) user.verified_email = true
     await user.save()
@@ -24,12 +24,12 @@ module.exports = async function upsertGoogleUser(profile) {
   }
 
   user = await User.create({
-    name: displayName,
+    username: displayName,
     email,
     bio: "",
     timeZone: defaultTimeZone,
     profile_picture: photo
-      ? { url: photo, name: "google_pfp", key: "google_pfp" }
+      ? { url: photo, title: "google_pfp", key: "google_pfp" }
       : defaultPfp,
     private: false,
     roles: ["user"],

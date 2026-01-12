@@ -6,12 +6,19 @@ const {
 } = require("../../../constants/index")
 
 const getUserPosts = async (props) => {
-  const { page, maxPageSize, order, name, dateStr = null, loggedUser } = props
+  const {
+    page,
+    maxPageSize,
+    order,
+    username,
+    dateStr = null,
+    loggedUser,
+  } = props
 
   try {
     const response = await getDataWithPages({
       type: "Post",
-      pipeline: userPostsPipeline(loggedUser, name, { dateStr }),
+      pipeline: userPostsPipeline(loggedUser, username, { dateStr }),
       order,
       page,
       maxPageSize,

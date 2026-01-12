@@ -15,7 +15,7 @@ function hashCode(code) {
 }
 
 const register = async (props) => {
-  let { name: username, email, password, timeZone } = props
+  let { username, email, password, timeZone } = props
 
   if (!password) {
     throw new Error("Password is required for local registration")
@@ -39,7 +39,7 @@ const register = async (props) => {
   const passwordHash = await bcrypt.hash(password, 12)
 
   const user = new User({
-    name: username,
+    username,
     email,
     bio: "",
     timeZone: timeZone || defaultTimeZone,
@@ -61,7 +61,7 @@ const register = async (props) => {
     if (err && (err.code === 11000 || err.code === 11001)) {
       const dupField = Object.keys(err.keyPattern || {})[0]
       if (dupField === "email") return duplicatedValue("Email")
-      if (dupField === "name") return duplicatedValue("Username")
+      if (dupField === "username") return duplicatedValue("Username")
       console.log(err)
       return duplicatedValue("Something")
     }

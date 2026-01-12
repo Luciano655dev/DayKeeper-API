@@ -23,7 +23,7 @@ const checkAdminMW = require("../middlewares/checkAdminMW")
 
 router.delete("/report/:reportId", checkTokenMW, checkAdminMW, deleteReport)
 router.get(
-  "/banHistoryByAdmin/:name", // type = 'user' || 'post' || 'storie'
+  "/banHistoryByAdmin/:username", // type = 'user' || 'post' || 'storie'
   checkTokenMW,
   checkAdminMW,
   getBanHistoryMadeByAdmin
@@ -38,8 +38,8 @@ router.get(
 )
 
 // User
-router.post("/:name", checkTokenMW, checkAdminMW, banOrUnbanUser)
-router.delete("/:name", checkTokenMW, checkAdminMW, deleteBannedUser)
+router.post("/:username", checkTokenMW, checkAdminMW, banOrUnbanUser)
+router.delete("/:username", checkTokenMW, checkAdminMW, deleteBannedUser)
 
 // Post
 router.post("/post/:postId", checkTokenMW, checkAdminMW, banOrUnbanPost)
@@ -47,13 +47,13 @@ router.delete("/post/:postId", checkTokenMW, checkAdminMW, deleteBannedPost)
 
 // Storie
 router.post(
-  "/storie/:name/:storieId",
+  "/storie/:username/:storieId",
   checkTokenMW,
   checkAdminMW,
   banOrUnbanStorie
 )
 router.delete(
-  "/storie/:name/:storieId",
+  "/storie/:username/:storieId",
   checkTokenMW,
   checkAdminMW,
   deleteBannedStorie

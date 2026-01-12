@@ -10,7 +10,7 @@ const {
 } = require("../../../../constants/index")
 
 const banOrUnbanUser = async (props) => {
-  const { name: userInput, message: reason, loggedUser } = props
+  const { username: userInput, message: reason, loggedUser } = props
 
   if (reason.length > maxReportMessageLength) return inputTooLong("Reason")
 
@@ -37,12 +37,12 @@ const banOrUnbanUser = async (props) => {
       await User.updateOne({ _id: user._id }, { banned: false })
 
       await sendUnbanEmail({
-        username: user.name,
+        username: user.username,
         email: user.email,
         reason,
       })
 
-      return custom(`${user.name} unbanned successfully`)
+      return custom(`${user.username} unbanned successfully`)
     }
 
     // Ban user
@@ -61,12 +61,12 @@ const banOrUnbanUser = async (props) => {
     await User.updateOne({ _id: user._id }, { banned: true })
 
     await sendBanEmail({
-      username: bannedUser.name,
+      username: bannedUser.username,
       email: bannedUser.email,
       reason,
     })
 
-    return custom(`${user.name} banned successfully`)
+    return custom(`${user.username} banned successfully`)
   } catch (error) {
     console.error(error)
     throw new Error(error.message)

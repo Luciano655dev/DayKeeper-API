@@ -52,14 +52,14 @@ router.get(
   "/dailyTasks",
   checkTokenMW,
   (req, res, next) => {
-    req.params.name = req.user.name
+    req.params.username = req.user.username
     return next()
   },
   getDailyTasks
 )
-router.get("/:name/dailyTasks", checkTokenMW, getDailyTasks)
+router.get("/:username/dailyTasks", checkTokenMW, getDailyTasks)
 
 // Routes (/day)
-router.get("/:name", checkTokenMW, getUserDay)
+router.get("/:username", checkTokenMW, getUserDay)
 
 module.exports = router

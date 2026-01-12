@@ -12,7 +12,7 @@ const {
 } = require("../../../constants/index")
 
 const getUserStories = async (props) => {
-  let { name: username, order, loggedUser, page, maxPageSize } = props
+  let { username, order, loggedUser, page, maxPageSize } = props
 
   try {
     const response = await getDataWithPages(

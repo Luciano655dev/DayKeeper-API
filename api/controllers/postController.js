@@ -14,7 +14,7 @@ const likeComment = require("../services/post/likeComment")
 const getCommentLikes = require("../services/post/getCommentLikes")
 const deleteComment = require("../services/post/deleteComment")
 
-// getPostByName
+// getPost
 const getPostController = async (req, res) => {
   try {
     const { code, message, data } = await getPost({

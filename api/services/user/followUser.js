@@ -15,10 +15,10 @@ const {
 } = require("../../../constants/index")
 
 const followUser = async (props) => {
-  const { name, loggedUser } = props
+  const { username, loggedUser } = props
 
   try {
-    const user = await User.findOne({ name })
+    const user = await User.findOne({ username })
     if (!user) return notFound("User")
 
     if (user._id.equals(loggedUser._id))
@@ -32,7 +32,7 @@ const followUser = async (props) => {
     /* Stop following */
     if (followRelation && !followRelation?.requested) {
       await Followers.deleteOne({ _id: followRelation._id })
-      return custom(`You unfollowed ${name}`)
+      return custom(`You unfollowed ${username}`)
     }
 
     /* To private users */
@@ -40,7 +40,7 @@ const followUser = async (props) => {
       if (followRelation && followRelation?.required) {
         /* Remove follow request */
         await Followers.deleteOne({ _id: followRelation._id })
-        return custom(`You have withdrawn your request to follow ${name}`)
+        return custom(`You have withdrawn your request to follow ${username}`)
       }
 
       /* Send follow request */
@@ -50,8 +50,11 @@ const followUser = async (props) => {
         requested: true,
       })
       await newFollowRelation.save()
-      sendNotification(user._id, newFollowRequestNotification(loggedUser.name))
-      return custom(`You sent a follow request to ${name}`)
+      sendNotification(
+        user._id,
+        newFollowRequestNotification(loggedUser.username)
+      )
+      return custom(`You sent a follow request to ${username}`)
     }
 
     const newFollowRelation = new Followers({
@@ -60,8 +63,8 @@ const followUser = async (props) => {
     })
     await newFollowRelation.save()
 
-    sendNotification(user._id, newFollowerNotification(loggedUser.name))
-    return custom(`You started following ${name}`)
+    sendNotification(user._id, newFollowerNotification(loggedUser.username))
+    return custom(`You started following ${username}`)
   } catch (error) {
     throw new Error(error.message)
   }

@@ -41,16 +41,16 @@ const banOrUnbanPost = async (props) => {
       await Post.updateOne({ _id: post._id }, { $set: { banned: false } })
 
       await sendPostUnbanEmail({
-        username: post.user_info.name,
+        username: post.user_info.username,
         email: post.user_info.email,
         date: post.date,
         id: post._id,
-        adminUsername: loggedUser.name,
+        adminUsername: loggedUser.username,
         reason,
       })
 
       return custom(
-        `${post.user_info.name}'s post from ${post.date} unbanned successfully`
+        `${post.user_info.username}'s post from ${post.date} unbanned successfully`
       )
     }
 
@@ -68,16 +68,16 @@ const banOrUnbanPost = async (props) => {
     await Post.updateOne({ _id: post._id }, { $set: { banned: false } })
 
     await sendPostBanEmail({
-      username: post.user_info.name,
+      username: post.user_info.username,
       email: post.user_info.email,
       date: post.date,
       id: post._id,
-      adminUsername: loggedUser.name,
+      adminUsername: loggedUser.username,
       reason,
     })
 
     return custom(
-      `${post.user_info.name}'s post from ${post.date} banned successfully`
+      `${post.user_info.username}'s post from ${post.date} banned successfully`
     )
   } catch (error) {
     console.error(error)

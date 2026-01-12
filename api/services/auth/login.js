@@ -12,7 +12,7 @@ const {
 function sanitizeUser(user) {
   return {
     id: user._id,
-    name: user.name,
+    username: user.username,
     email: user.email,
     profile_picture: user.profile_picture,
     roles: user.roles,
@@ -33,7 +33,7 @@ async function login(props) {
     userAgent,
   })
 
-  return custom(`${user?.name} logged successfully`, {
+  return custom(`${user?.username} logged successfully`, {
     props: {
       user: sanitizeUser(user),
       accessToken,

@@ -19,7 +19,7 @@ const {
 } = require("../../../constants/index")
 
 const getUserDay = async (props) => {
-  const { name, dateStr, loggedUser } = props || {}
+  const { username, dateStr, loggedUser } = props || {}
 
   const tz = loggedUser?.timeZone || defaultTimeZone
 
@@ -37,7 +37,7 @@ const getUserDay = async (props) => {
 
   const cleanDateStr = isValidDateStr ? dateStr : todayDateStr
 
-  const targetUser = await User.findOne({ name }).select("_id name")
+  const targetUser = await User.findOne({ username }).select("_id username")
   if (!targetUser) return notFound("User")
 
   const targetUserId = new mongoose.Types.ObjectId(targetUser._id)

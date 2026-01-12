@@ -2,7 +2,7 @@ require("dotenv").config()
 const mongoose = require("mongoose")
 
 const userSchema = mongoose.Schema({
-  name: {
+  username: {
     type: String,
     required: true,
     unique: true,
@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
     trim: true,
   },
   profile_picture: {
-    name: String,
+    title: String,
     key: String,
     url: String,
   },
@@ -67,6 +67,35 @@ const userSchema = mongoose.Schema({
 
   banned: { type: Boolean, default: false, required: false },
 })
+
+// Indexes
+userSchema.index(
+  { username: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      username: { $exists: true, $ne: null, $ne: "" },
+    },
+  }
+)
+userSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      email: { $exists: true, $ne: null, $ne: "" },
+    },
+  }
+)
+userSchema.index(
+  { google_id: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      google_id: { $exists: true, $ne: null },
+    },
+  }
+)
 
 const User = mongoose.model("User", userSchema)
 

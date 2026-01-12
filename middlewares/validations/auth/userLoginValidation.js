@@ -16,9 +16,10 @@ const userLoginValidation = async (req, res, next) => {
     const { email: userInputRaw, password } = req.body
 
     if (!userInputRaw || !password) {
+      // username
       return res
         .status(400)
-        .json({ message: "Email/username and password are required" })
+        .json({ message: "Email/Username and password are required" })
     }
 
     if (typeof userInputRaw !== "string" || typeof password !== "string") {
@@ -74,7 +75,7 @@ const userLoginValidation = async (req, res, next) => {
 
     // find by email (lowercased) OR username (exact)
     const user = await User.findOne({
-      $or: looksLikeEmail ? [{ email: inputLower }] : [{ name: userInput }],
+      $or: looksLikeEmail ? [{ email: inputLower }] : [{ username: userInput }],
     })
 
     // Avoid user enumeration

@@ -6,10 +6,10 @@ const {
 } = require("../../../constants/index")
 
 const removeFollower = async (props) => {
-  const { name, loggedUser } = props
+  const { username, loggedUser } = props
 
   try {
-    const followUser = await findUser({ userInput: name })
+    const followUser = await findUser({ userInput: username })
     if (!followUser) return notFound("User")
 
     const followRelation = await Followers.findOne({
@@ -31,7 +31,7 @@ const removeFollower = async (props) => {
       followingId: loggedUser._id,
     })
 
-    return custom(`${followUser.name}'s follow removed successfully`)
+    return custom(`${followUser.username}'s follow removed successfully`)
   } catch (error) {
     throw new Error(error.message)
   }

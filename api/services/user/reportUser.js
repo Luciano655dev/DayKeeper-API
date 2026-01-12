@@ -7,12 +7,12 @@ const {
 } = require("../../../constants/index")
 
 const reportUser = async (props) => {
-  const { name, reason, loggedUser } = props
+  const { username, reason, loggedUser } = props
 
   if (reason.length > maxReportReasonLength) return inputTooLong("Reason")
 
   try {
-    const user = await findUser({ userInput: name })
+    const user = await findUser({ userInput: username })
     if (!user) return notFound("User")
 
     const reportRelation = await Report.exists({
@@ -32,7 +32,7 @@ const reportUser = async (props) => {
       type: "user",
     })
 
-    return custom(`${name} Reported Successfully`, {
+    return custom(`${username} Reported Successfully`, {
       reason,
     })
   } catch (error) {

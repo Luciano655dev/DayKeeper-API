@@ -7,10 +7,10 @@ const {
 } = require("../../../constants/index")
 
 const addOrRemoveFromCloseFriends = async (props) => {
-  const { name, loggedUser } = props
+  const { username, loggedUser } = props
 
   try {
-    const user = await User.findOne({ name })
+    const user = await User.findOne({ username })
     if (!user) return notFound("User")
 
     if (user._id.equals(loggedUser._id))
@@ -24,7 +24,7 @@ const addOrRemoveFromCloseFriends = async (props) => {
     /* Remove from CF */
     if (closeFriendsRelation) {
       await CloseFriends.deleteOne({ _id: closeFriendsRelation._id })
-      return custom(`You removed ${name} from your Close Friends`)
+      return custom(`You removed ${username} from your Close Friends`)
     }
 
     /* Add to CF */
@@ -34,7 +34,7 @@ const addOrRemoveFromCloseFriends = async (props) => {
     })
     await newCloseFriendsRelation.save()
 
-    return custom(`You added ${name} to your Close Friends`)
+    return custom(`You added ${username} to your Close Friends`)
   } catch (error) {
     throw new Error(error.message)
   }

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 
 const mediaSchema = mongoose.Schema({
-  name: String,
+  title: String,
   key: String,
   type: String, // 'image' / 'video'
   url: String,

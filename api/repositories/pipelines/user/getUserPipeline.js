@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 const userInfoPipeline = require("../../common/userInfoPipeline")
 
 function buildUserMatch(userInput) {
-  const or = [{ name: userInput }]
+  const or = [{ username: userInput }]
 
   if (mongoose.Types.ObjectId.isValid(userInput)) {
     or.push({ _id: new mongoose.Types.ObjectId(userInput) })

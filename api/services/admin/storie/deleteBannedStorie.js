@@ -14,7 +14,7 @@ const {
 } = require(`../../../../constants/index`)
 
 const deleteBannedStorie = async (props) => {
-  const { name: userInput, storieId, message, loggedUser } = props
+  const { username: userInput, storieId, message, loggedUser } = props
 
   if (message.length > maxReportMessageLength) return inputTooLong(`Message`)
 
@@ -57,10 +57,10 @@ const deleteBannedStorie = async (props) => {
 
     sendStorieDeletionEmail({
       date: storie.date,
-      username: storie.user_info.name,
+      username: storie.user_info.username,
       email: storie.user_info.email,
       id: storie._id,
-      adminUsername: adminUser.name,
+      adminUsername: adminUser.username,
       reason: latestBan.ban_message,
       message,
     })

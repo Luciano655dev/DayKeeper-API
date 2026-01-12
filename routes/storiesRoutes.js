@@ -26,8 +26,8 @@ const handleMulterError = require("../middlewares/handleMulterError")
 
 // Routes
 router.get("/", checkTokenMW, getUserStoriesFeed) // get Main Stories Feed
-router.get("/:name", checkTokenMW, getTodayStories) // get today user stories
-router.get("/:name/all", checkTokenMW, getUserStories) // get All User Stories
+router.get("/:username", checkTokenMW, getTodayStories) // get today user stories
+router.get("/:username/all", checkTokenMW, getUserStories) // get All User Stories
 router.get("/:storieId/likes", checkTokenMW, getStorieLikes) // Get Storie Likes
 router.get("/:storieId/views", checkTokenMW, getStorieViews) // Get Storie Views
 router.get("/get/:storieId", checkTokenMW, getStorie) // get Storie

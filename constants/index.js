@@ -28,7 +28,7 @@ module.exports = {
       "media",
     ],
     defaultPfp: {
-      name: "Doggo.jpg",
+      title: "Doggo.jpg",
       key: "Doggo.jpg",
       url: "https://daykeeper.s3.amazonaws.com/Doggo.jpg",
       mimetype: "image/jpeg",

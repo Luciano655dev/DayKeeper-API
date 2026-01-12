@@ -14,7 +14,7 @@ async function createMediaDocsMW(req, res, next) {
         const type = file.mimetype.startsWith("video") ? "video" : "image"
 
         const doc = await Media.create({
-          name: file.originalname,
+          title: file.originalname,
           key: file.key,
           type,
           url: file.url,

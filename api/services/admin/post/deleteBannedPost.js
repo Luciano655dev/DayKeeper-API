@@ -60,10 +60,10 @@ const deleteBannedPosts = async (props) => {
 
     sendPostDeletionEmail({
       date: post.date,
-      username: post.user_info.name,
+      username: post.user_info.username,
       email: post.user_info.email,
       id: post._id,
-      adminUsername: adminUser.name,
+      adminUsername: adminUser.username,
       reason: latestBan.ban_message,
       message,
     })

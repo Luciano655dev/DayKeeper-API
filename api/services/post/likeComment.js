@@ -18,7 +18,7 @@ const likeComment = async (props) => {
     const fetchedUser = await User.findById(userId)
     if (!fetchedUser) return notFound("User")
     const userThatCommented = await getUser({
-      name: fetchedUser.name,
+      username: fetchedUser.username,
       loggedUser,
     })
     if (!userThatCommented) return notFound("User")

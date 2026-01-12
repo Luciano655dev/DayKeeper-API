@@ -28,7 +28,7 @@ const confirmEmail = async (props) => {
 
   // If already verified, you can just return success (optional)
   if (user.verified_email) {
-    return custom(`${user.name}'s email is already confirmed`)
+    return custom(`${user.username}'s email is already confirmed`)
   }
 
   // If no code stored (never requested / already cleared)
@@ -83,7 +83,7 @@ const confirmEmail = async (props) => {
     }
   )
 
-  return custom(`${user.name}'s email confirmed successfully`)
+  return custom(`${user.username}'s email confirmed successfully`)
 }
 
 module.exports = confirmEmail

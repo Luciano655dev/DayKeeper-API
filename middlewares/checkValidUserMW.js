@@ -6,11 +6,11 @@ const {
 } = require("../constants/index")
 
 async function checkValidUserMW(req, res, next) {
-  const { name } = req.params
+  const { username } = req.params
   const loggedUser = req.user
 
   try {
-    const user = await findUser({ userInput: name, hideData: false })
+    const user = await findUser({ userInput: username, hideData: false })
     if (!user) return res.status(404).json({ message: "User not found" })
 
     req.fetchedUser = user

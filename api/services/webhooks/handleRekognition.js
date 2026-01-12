@@ -76,7 +76,7 @@ const handleRekognition = async (req, res) => {
 
         if (user && !user?.banned)
           await banOrUnbanUser({
-            name: user.name,
+            username: user.username,
             message: inapropriateMediaBanMessage,
           })
       }

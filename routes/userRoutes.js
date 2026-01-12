@@ -47,9 +47,9 @@ router.put("/reset_profile_picture", checkTokenMW, reseteProfilePicture)
 router.delete("/user", checkTokenMW, deleteUser)
 
 // Follows
-router.get("/:name/followers", checkTokenMW, getFollowers)
-router.get("/:name/following", checkTokenMW, getFollowing)
-router.post("/:name/follow", checkTokenMW, checkValidUserMW, followUser)
+router.get("/:username/followers", checkTokenMW, getFollowers)
+router.get("/:username/following", checkTokenMW, getFollowing)
+router.post("/:username/follow", checkTokenMW, checkValidUserMW, followUser)
 router.post(
   "/:name/respond_follow",
   checkTokenMW,
@@ -73,14 +73,14 @@ router.post(
 router.get("/close_friends", checkTokenMW, getCloseFriends)
 
 // Interactions
-router.post("/:name/block", checkTokenMW, checkBannedUserMW, blockUser)
-router.post("/:name/report", checkTokenMW, checkBannedUserMW, reportUser)
+router.post("/:username/block", checkTokenMW, checkBannedUserMW, blockUser)
+router.post("/:username/report", checkTokenMW, checkBannedUserMW, reportUser)
 
 // posts
-router.get("/:name/posts", checkTokenMW, checkValidUserMW, getUserPosts)
-router.get("/:name/posts/:date", checkTokenMW, getUserPostsByDay)
+router.get("/:username/posts", checkTokenMW, checkValidUserMW, getUserPosts)
+router.get("/:username/posts/:date", checkTokenMW, getUserPostsByDay)
 
 // GET USER
-router.get("/:name", checkTokenMW, getUser)
+router.get("/:username", checkTokenMW, getUser)
 
 module.exports = router

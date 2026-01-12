@@ -21,9 +21,9 @@ function hashCode(code) {
 }
 
 const updateUser = async (params) => {
-  let { name, email, password, bio, file, loggedUser } = params
+  let { username, email, password, bio, file, loggedUser } = params
 
-  name = typeof name === "string" ? name.trim() : undefined
+  username = typeof username === "string" ? username.trim() : undefined
   email = typeof email === "string" ? email.trim().toLowerCase() : undefined
   bio = typeof bio === "string" ? bio : undefined
 
@@ -38,11 +38,11 @@ const updateUser = async (params) => {
   if (!user?.save) user = await User.findById(loggedUser._id)
 
   const emailChanged = !!email && email !== user.email
-  const nameChanged = !!name && name !== user.name
+  const nameChanged = !!username && username !== user.username
 
   // Keep old picture key so we can delete it AFTER successful update
   const oldPictureKey = user.profile_picture?.key
-  const oldPictureName = user.profile_picture?.name
+  const oldPictureTitle = user.profile_picture?.title
 
   // Hash password if provided
   let passwordHash
@@ -70,17 +70,17 @@ const updateUser = async (params) => {
   }
 
   const set = {
-    name: name || user.name,
+    username: username || user.username,
     bio: bio ?? user.bio ?? "",
     private: privateNext,
   }
 
-  if (nameChanged) set.name = name
+  if (nameChanged) set.username = username
   if (passwordHash) set.password = passwordHash
 
   if (file) {
     set.profile_picture = {
-      name: file.originalname,
+      title: file.originalname,
       key: file.key,
       url: file.url,
     }
@@ -104,7 +104,7 @@ const updateUser = async (params) => {
     if (err && (err.code === 11000 || err.code === 11001)) {
       const dupField = Object.keys(err.keyPattern || {})[0]
       if (dupField === "email") throw new Error("Email already in use")
-      if (dupField === "name") throw new Error("Username already in use")
+      if (dupField === "username") throw new Error("Username already in use")
       throw new Error("Duplicate value")
     }
     throw err
@@ -116,9 +116,9 @@ const updateUser = async (params) => {
   if (
     file &&
     oldPictureKey &&
-    oldPictureName &&
-    defaultPfp?.name &&
-    oldPictureName !== defaultPfp.name &&
+    oldPictureTitle &&
+    defaultPfp?.title &&
+    oldPictureTitle !== defaultPfp.title &&
     oldPictureKey !== file.key
   ) {
     deleteFile({ key: oldPictureKey }).catch?.(() => null)
@@ -128,7 +128,7 @@ const updateUser = async (params) => {
   if (emailChanged) {
     const pfpUrl = updatedUser.profile_picture?.url || defaultPfp?.url
     sendVerificationEmail(
-      updatedUser.name,
+      updatedUser.username,
       updatedUser.email,
       pfpUrl,
       verificationCode

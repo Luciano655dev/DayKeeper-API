@@ -20,7 +20,7 @@ const postCommentsSchema = mongoose.Schema({
   },
   comment: String,
   gif: {
-    name: String,
+    title: String,
     id: String,
     url: String,
   },

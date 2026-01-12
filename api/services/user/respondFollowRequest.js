@@ -6,10 +6,10 @@ const {
 } = require("../../../constants/index")
 
 const respondeFollowRequest = async (props) => {
-  const { name, response, loggedUser } = props
+  const { username, response, loggedUser } = props
 
   try {
-    const followUser = await findUser({ userInput: name })
+    const followUser = await findUser({ userInput: username })
     if (!followUser) return notFound("User")
 
     const followRelation = await Followers.findOne({
@@ -30,14 +30,14 @@ const respondeFollowRequest = async (props) => {
     /* DENIED */
     if (!response || response == "false") {
       await followRelation.remove()
-      return custom(`You denied ${followUser.name}'s request`)
+      return custom(`You denied ${followUser.username}'s request`)
     }
 
     /* ACCEPTED */
     followRelation.required = undefined
     await followRelation.save()
 
-    return custom(`You accepted ${followUser.name}'s request`)
+    return custom(`You accepted ${followUser.username}'s request`)
   } catch (error) {
     throw new Error(error.message)
   }

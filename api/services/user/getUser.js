@@ -6,7 +6,7 @@ const {
 } = require("../../../constants/index")
 
 const getUser = async (props) => {
-  const { name: userInput, loggedUser } = props
+  const { username: userInput, loggedUser } = props
 
   try {
     const user = await User.aggregate(getUserPipeline(userInput, loggedUser))

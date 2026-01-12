@@ -15,7 +15,7 @@ const reseteProfilePicture = async (props) => {
       return customErr("User profile picture is already the default")
 
     // deleteLastPFP
-    if (loggedUser.profile_picture.name != defaultPfp.name)
+    if (loggedUser.profile_picture.title != defaultPfp.title)
       deleteFile({ key: loggedUser.profile_picture.key })
 
     const updatedUser = await User.findByIdAndUpdate(loggedUser._id, {
@@ -25,7 +25,9 @@ const reseteProfilePicture = async (props) => {
     })
     await updatedUser.save()
 
-    return custom(`${loggedUser.name}'s profile picture reseted successfully`)
+    return custom(
+      `${loggedUser.username}'s profile picture reseted successfully`
+    )
   } catch (error) {
     throw new Error(error.message)
   }

@@ -1,11 +1,11 @@
 const postInfoPipeline = require("../../common/postInfoPipeline")
 const mongoose = require("mongoose")
 
-const userPostsPipeline = (mainUser, name) => {
-  const or = [{ "user_info.name": name }]
+const userPostsPipeline = (mainUser, username) => {
+  const or = [{ "user_info.username": username }]
 
-  if (mongoose.Types.ObjectId.isValid(name)) {
-    or.push({ "user_info._id": new mongoose.Types.ObjectId(name) })
+  if (mongoose.Types.ObjectId.isValid(username)) {
+    or.push({ "user_info._id": new mongoose.Types.ObjectId(username) })
   }
 
   return [...postInfoPipeline(mainUser), { $match: { $or: or } }]

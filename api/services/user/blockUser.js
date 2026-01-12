@@ -7,14 +7,14 @@ const {
 } = require("../../../constants/index")
 
 const blockUser = async (props) => {
-  const { name, loggedUser } = props
+  const { username, loggedUser } = props
 
   try {
-    const blockedUser = await findUser({ userInput: name })
+    const blockedUser = await findUser({ userInput: username })
 
     /* Validations */
     if (!blockedUser) return notFound("User")
-    if (blockedUser.name == loggedUser.name)
+    if (blockedUser.username == loggedUser.username)
       return customErr(`You can not block yourself`)
 
     /* Unblock */
@@ -28,7 +28,7 @@ const blockUser = async (props) => {
         blockId: loggedUser._id,
         blockedId: blockedUser._id,
       })
-      return custom(`${name} unblocked successfully`)
+      return custom(`${username} unblocked successfully`)
     }
 
     /* Block */
@@ -46,7 +46,7 @@ const blockUser = async (props) => {
       ],
     })
 
-    return custom(`${name} blocked successfully`)
+    return custom(`${username} blocked successfully`)
   } catch (error) {
     throw new Error(error.message)
   }

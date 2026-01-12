@@ -34,16 +34,16 @@ const banOrUnbanStorie = async (props) => {
       await newBanHistoryRelation.save()
 
       await sendStorieUnbanEmail({
-        username: storie.user_info.name,
+        username: storie.user_info.username,
         email: storie.user_info.email,
         date: storie.date,
         id: storie._id,
-        adminUsername: loggedUser.name,
+        adminUsername: loggedUser.username,
         reason,
       })
 
       return custom(
-        `${storie.user_info_info.name}'s Storie from ${storie.date} with the id "${storie._id}" unbanned successfully`
+        `${storie.user_info_info.username}'s Storie from ${storie.date} with the id "${storie._id}" unbanned successfully`
       )
     }
 
@@ -61,16 +61,16 @@ const banOrUnbanStorie = async (props) => {
     await newBanHistoryRelation.save()
 
     await sendStorieBanEmail({
-      username: storie.user_info.name,
+      username: storie.user_info.username,
       email: storie.user_info.email,
       date: storie.date,
       id: storie._id,
-      adminUsername: loggedUser.name,
+      adminUsername: loggedUser.username,
       reason,
     })
 
     return custom(
-      `${storie.user_info.name}'s Storie from ${storie.date} banned successfully`
+      `${storie.user_info.username}'s Storie from ${storie.date} banned successfully`
     )
   } catch (error) {
     throw new Error(error.message)

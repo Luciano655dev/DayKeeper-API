@@ -124,7 +124,7 @@ const getBanHistoryMadeByAdminController = async (req, res) => {
     const { code, message, response } = await getBanHistoryMadeByAdmin({
       page,
       maxPageSize,
-      name: req.params?.name,
+      username: req.params?.username,
       entity_type,
     })
 

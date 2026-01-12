@@ -8,14 +8,14 @@ const {
 } = require("../../../../constants/index")
 
 const getDailyTasks = async (props) => {
-  const { loggedUser, name, page, maxPageSize } = props || {}
+  const { loggedUser, username, page, maxPageSize } = props || {}
 
   try {
     let targetUser = loggedUser
 
     // Just you can see your daily tasks
-    if (name) {
-      targetUser = await User.findOne({ name })
+    if (username) {
+      targetUser = await User.findOne({ username })
       if (!targetUser) return notFound("User")
     }
 

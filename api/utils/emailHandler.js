@@ -12,7 +12,7 @@ const transporterOptions = {
 }
 
 async function sendVerificationEmail(
-  name,
+  username,
   email,
   imgSrc = "",
   verificationCode
@@ -27,7 +27,7 @@ async function sendVerificationEmail(
       html: `
       <p>${imgSrc}</p>
       <img src="${imgSrc}"></img>
-      <h1>Bem vindo(a) ao DayKeeper ${name}!</h1>
+      <h1>Bem vindo(a) ao DayKeeper ${username}!</h1>
 
       <h3>Seu código de verificação é: <strong>${verificationCode}</strong></h3>
 

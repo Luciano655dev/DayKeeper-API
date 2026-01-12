@@ -7,7 +7,7 @@ const {
 } = require(`../../../constants/index`)
 
 const getBanHistoryMadeByAdmin = async (props) => {
-  const { page, maxPageSize, name: userInput, entity_type } = props
+  const { page, maxPageSize, username: userInput, entity_type } = props
 
   try {
     const user = await findUser({ userInput })
@@ -21,7 +21,7 @@ const getBanHistoryMadeByAdmin = async (props) => {
       maxPageSize,
     })
 
-    return fetched(`banned ${entity_type}s by ${user.name}`, { response })
+    return fetched(`banned ${entity_type}s by ${user.username}`, { response })
   } catch (error) {
     throw new Error(error.message)
   }

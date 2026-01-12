@@ -11,7 +11,7 @@ const {
 } = require("../../../constants/index")
 
 const getStorie = async (props) => {
-  const { name: username, loggedUser } = props
+  const { username, loggedUser } = props
   try {
     // Get User
     let user = await User.aggregate(getUserPipeline(username, loggedUser))

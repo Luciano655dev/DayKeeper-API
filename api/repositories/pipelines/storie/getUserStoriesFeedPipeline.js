@@ -57,7 +57,7 @@ const getUserStoriesFeed = (mainUser, startOfDay, endOfDay) => [
   {
     $project: {
       _id: "$user._id",
-      name: "$user.name",
+      username: "$user.username",
       profile_picture: "$user.profile_picture",
       userViewed: 1,
       stories: {

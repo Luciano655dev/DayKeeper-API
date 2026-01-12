@@ -19,7 +19,7 @@ const getFollowRequests = require("../services/user/getFollowRequests")
 const addOrRemoveFromCloseFriends = require("../services/user/addOrRemoveFromCloseFriends")
 const getCloseFriends = require("../services/user/getCloseFriends")
 
-// getUserByName
+// getUser
 const getUserController = async (req, res) => {
   try {
     const { code, message, data } = await getUser({
@@ -41,11 +41,11 @@ const getUserPostsController = async (req, res) => {
       : 100
     : 1
   const order = req.query.order || "relevant"
-  const { name } = req.params
+  const { username } = req.params
 
   try {
     const { code, response } = await getUserPosts({
-      name,
+      username,
       order,
       maxPageSize,
       page,
@@ -59,11 +59,11 @@ const getUserPostsController = async (req, res) => {
 }
 
 const getUserPostsByDayController = async (req, res) => {
-  const { name, date } = req.params
+  const { username, date } = req.params
 
   try {
     const { code, message, data } = await getUserPostsByDay({
-      name,
+      username,
       dateStr: date,
       loggedUser: req.user,
     })

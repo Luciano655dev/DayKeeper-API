@@ -11,7 +11,7 @@ const {
 } = require("../../../constants/index")
 
 const getFollowing = async (props) => {
-  const { name: username, page, maxPageSize, loggedUser } = props
+  const { username, page, maxPageSize, loggedUser } = props
 
   try {
     const user = await User.aggregate(getUserPipeline(username, loggedUser))

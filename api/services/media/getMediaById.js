@@ -13,7 +13,7 @@ const getMediaById = async (props) => {
 
   try {
     const media = await Media.findById(mediaId)
-    const mediaUser = await getUser({ name: media?.user || "", loggedUser })
+    const mediaUser = await getUser({ username: media?.user || "", loggedUser })
     if (!media || !mediaUser) return notFound("Media")
 
     return fetched("Media", { media })

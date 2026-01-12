@@ -1,6 +1,6 @@
 module.exports = {
   errorGif: {
-    name: "404",
+    title: "404",
     id: "",
     url: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzc0OGh3NWQxbTdqcjZqaDZudXQyMHM3b3VpdXF4czczaGl4bHZicyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8L0Pky6C83SzkzU55a/giphy.gif",
   },

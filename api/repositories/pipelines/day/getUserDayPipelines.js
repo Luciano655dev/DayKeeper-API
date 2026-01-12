@@ -7,9 +7,7 @@ const eventInfoPipeline = require("../../common/day/events/eventInfoPipeline")
 
 function buildDayMatchStage(tz, dateStr, opts = {}) {
   const {
-    // single timestamp field name (tasks/notes/events old schema)
     singleField = "date",
-    // range field names (events new schema)
     rangeStartField = "dateStart",
     rangeEndField = "dateEnd",
   } = opts

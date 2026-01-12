@@ -14,13 +14,14 @@ const {
 const isDDMMYYYY = (v) => typeof v === "string" && /^\d{2}-\d{2}-\d{4}$/.test(v)
 
 const getUserPostsByDay = async (props) => {
-  const { name, dateStr, loggedUser, order, page, maxPageSize } = props || {}
+  const { username, dateStr, loggedUser, order, page, maxPageSize } =
+    props || {}
 
   if (!loggedUser?._id) {
     return unauthorized("Unauthorized", "Login required", 401)
   }
 
-  const targetUser = await User.findOne({ name }).select("_id name")
+  const targetUser = await User.findOne({ username }).select("_id username")
   if (!targetUser) return notFound("User")
 
   const tz = loggedUser?.timeZone || defaultTimeZone

@@ -5,7 +5,7 @@ const { listTimeZones } = require("timezone-support")
 const {
   auth: { maxEmailLength, maxUsernameLength, maxPasswordLength },
   errors: { serverError },
-  user: { forbiddenUsernames }, // 👈 import this
+  user: { forbiddenUsernames },
 } = require("../../../constants/index")
 
 const TIMEZONES = new Set(listTimeZones())
@@ -18,7 +18,7 @@ const USERNAME_REGEX = /^[a-z0-9._]+$/
 
 const userRegisterValidation = async (req, res, next) => {
   try {
-    let { name: username, email, password, timeZone } = req.body
+    let { username, email, password, timeZone } = req.body
 
     // required fields
     if (!username || !email || !password) {
@@ -31,7 +31,7 @@ const userRegisterValidation = async (req, res, next) => {
     username = String(username).trim()
     email = String(email).trim().toLowerCase()
 
-    req.body.name = username
+    req.body.username = username
     req.body.email = email
 
     /* ---------------- EMAIL ---------------- */
@@ -94,7 +94,7 @@ const userRegisterValidation = async (req, res, next) => {
     /* ---------------- EXISTING USER ---------------- */
 
     const existing = await User.findOne({
-      $or: [{ name: username }, { email }],
+      $or: [{ username }, { email }],
     }).select("_id")
 
     if (existing) {

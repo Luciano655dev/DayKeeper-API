@@ -2,7 +2,7 @@ const userInfoPipeline = require("../../common/userInfoPipeline")
 
 const searchUserPipeline = (searchQuery, mainUser) => [
   {
-    $match: { name: { $regex: new RegExp(searchQuery, "i") } },
+    $match: { username: { $regex: new RegExp(searchQuery, "i") } },
   },
   ...userInfoPipeline(mainUser),
 ]

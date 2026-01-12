@@ -8,7 +8,7 @@ const {
 } = require("../../../constants/index")
 
 const userValidation = async (req, res, next) => {
-  let { name: username, email, password, bio, lastPassword } = req.body
+  let { username, email, password, bio, lastPassword } = req.body
 
   const handleBadRequest = (status, message) => {
     if (req.file) deleteFile({ key: req.file.key })
@@ -23,7 +23,7 @@ const userValidation = async (req, res, next) => {
 
     // load fresh user with password (don’t trust req.user snapshot)
     const loggedUser = await User.findById(req.user._id).select(
-      "email name password profile_picture private"
+      "email username password profile_picture private"
     )
     if (!loggedUser) return handleBadRequest(404, "User not found")
 
@@ -66,8 +66,8 @@ const userValidation = async (req, res, next) => {
       if (exists) return handleBadRequest(409, "Email is already being used")
     }
 
-    if (username && username !== loggedUser.name) {
-      const exists = await User.findOne({ name: username }).select("_id")
+    if (username && username !== loggedUser.username) {
+      const exists = await User.findOne({ username }).select("_id")
       if (exists) return handleBadRequest(409, "Username is already being used")
     }
 

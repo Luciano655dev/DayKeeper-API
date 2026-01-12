@@ -1,6 +1,6 @@
 const storieInfoPipeline = require("../../common/storieInfoPipeline")
 
-const userStoriesPipeline = (name, mainUser) => [
+const userStoriesPipeline = (username, mainUser) => [
   {
     $lookup: {
       from: "users",
@@ -22,7 +22,7 @@ const userStoriesPipeline = (name, mainUser) => [
   },
   {
     $match: {
-      "user_info.name": name,
+      "user_info.username": username,
       user: mainUser._id,
     },
   },

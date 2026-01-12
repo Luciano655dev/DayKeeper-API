@@ -37,7 +37,7 @@ const resendCode = async (props, type = "verify") => {
   // ===== VERIFY EMAIL FLOW =====
   if (type === "verify") {
     if (user.verified_email) {
-      return custom(`${user.name}'s email is already confirmed`)
+      return custom(`${user.username}'s email is already confirmed`)
     }
 
     // Optional anti-spam:
@@ -60,7 +60,9 @@ const resendCode = async (props, type = "verify") => {
     )
 
     const pfpUrl = user.profile_picture?.url || defaultPfp?.url || undefined
-    sendVerificationEmail(user.name, user.email, pfpUrl, code).catch(() => null)
+    sendVerificationEmail(user.username, user.email, pfpUrl, code).catch(
+      () => null
+    )
 
     return custom(`Verification code resent to ${user.email}`)
   }
