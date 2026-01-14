@@ -25,7 +25,6 @@ const getUserPostsByDay = async (props) => {
   if (!targetUser) return notFound("User")
 
   const tz = loggedUser?.timeZone || defaultTimeZone
-  let usedDateStr = null
   let range = null
 
   if (isDDMMYYYY(dateStr)) {

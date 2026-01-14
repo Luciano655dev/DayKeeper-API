@@ -1,35 +1,23 @@
 const cron = require("node-cron")
 const User = require("../models/User")
+const Post = require("../models/Post")
 
 const {
   user: { defaultTimeZone },
 } = require("../../constants/index")
 
-// Resets streaks for users whose streak is broken in *their own timezone*.
-// Condition: currentStreak > 0 AND streakLastDay < yesterdayKey (in user TZ)
 async function resetBrokenStreaks() {
   try {
     const pipeline = [
-      {
-        $match: {
-          currentStreak: { $gt: 0 },
-          streakLastDay: { $type: "string" }, // must exist + be string "yyyy-MM-dd"
-        },
-      },
-      {
-        $addFields: {
-          _tz: { $ifNull: ["$timeZone", defaultTimeZone] },
-        },
-      },
+      // only users who currently have a streak
+      { $match: { currentStreak: { $gt: 0 } } },
+
+      // resolve timezone
+      { $addFields: { _tz: { $ifNull: ["$timeZone", defaultTimeZone] } } },
+
+      // compute yesterdayKey in user's timezone (YYYY-MM-DD)
       {
         $addFields: {
-          todayKey: {
-            $dateToString: {
-              date: "$$NOW",
-              format: "%Y-%m-%d",
-              timezone: "$_tz",
-            },
-          },
           yesterdayKey: {
             $dateToString: {
               date: {
@@ -45,12 +33,60 @@ async function resetBrokenStreaks() {
           },
         },
       },
-      // streak is broken if lastDay is older than yesterday in their TZ
+
+      // get latest post for each user
       {
-        $match: {
-          $expr: { $lt: ["$streakLastDay", "$yesterdayKey"] },
+        $lookup: {
+          from: Post.collection.name, // usually "posts"
+          let: { uid: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$user", "$$uid"] } } },
+            { $sort: { created_at: -1 } },
+            { $limit: 1 },
+            { $project: { _id: 0, lastPostAt: "$created_at" } },
+          ],
+          as: "lastPost",
         },
       },
+
+      // extract lastPostAt
+      {
+        $addFields: {
+          lastPostAt: { $ifNull: [{ $first: "$lastPost.lastPostAt" }, null] },
+        },
+      },
+
+      // convert lastPostAt -> lastPostKey in user's timezone (YYYY-MM-DD)
+      {
+        $addFields: {
+          lastPostKey: {
+            $cond: [
+              { $eq: ["$lastPostAt", null] },
+              null,
+              {
+                $dateToString: {
+                  date: "$lastPostAt",
+                  format: "%Y-%m-%d",
+                  timezone: "$_tz",
+                },
+              },
+            ],
+          },
+        },
+      },
+
+      // broken if lastPostKey is older than yesterdayKey OR user has no posts
+      {
+        $match: {
+          $expr: {
+            $or: [
+              { $eq: ["$lastPostKey", null] },
+              { $lt: ["$lastPostKey", "$yesterdayKey"] },
+            ],
+          },
+        },
+      },
+
       { $project: { _id: 1 } },
     ]
 
@@ -76,8 +112,8 @@ async function resetBrokenStreaks() {
   }
 }
 
-// Run hourly (minute 5). Hourly avoids timezone edge cases.
-cron.schedule("5 * * * *", () => {
+// every hourly at minute 5
+cron.schedule("5 * * * *", async () => {
   console.log("Running broken streak reset job...")
-  resetBrokenStreaks()
+  await resetBrokenStreaks()
 })

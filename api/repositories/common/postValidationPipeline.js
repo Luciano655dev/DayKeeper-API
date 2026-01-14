@@ -31,13 +31,7 @@ const postValidationPipeline = (mainUser) => {
         },
         pipeline: [
           { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
-          // optional: keep only needed fields
-          {
-            $project: {
-              password: 0,
-              device_tokens: 0,
-            },
-          },
+          { $project: { password: 0, device_tokens: 0 } },
         ],
         as: "user_info",
       },
@@ -79,7 +73,6 @@ const postValidationPipeline = (mainUser) => {
                       },
                     ],
                   },
-                  // Only public media
                   { $eq: ["$status", "public"] },
                 ],
               },
@@ -112,7 +105,7 @@ const postValidationPipeline = (mainUser) => {
       },
     },
 
-    // Block relationship
+    // Block relationship (me -> them)
     {
       $lookup: {
         from: "blocks",
@@ -131,6 +124,28 @@ const postValidationPipeline = (mainUser) => {
           { $limit: 1 },
         ],
         as: "block_info",
+      },
+    },
+
+    // Block relationship (them -> me)
+    {
+      $lookup: {
+        from: "blocks",
+        let: { postUserId: "$user_info._id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$blockId", "$$postUserId"] },
+                  { $eq: ["$blockedId", mainUserId] },
+                ],
+              },
+            },
+          },
+          { $limit: 1 },
+        ],
+        as: "blocked_by_owner_info",
       },
     },
 
@@ -162,25 +177,23 @@ const postValidationPipeline = (mainUser) => {
           // Not blocked by me
           { "block_info.0": { $exists: false } },
 
+          // Not blocked by post owner  ✅ NEW
+          { "blocked_by_owner_info.0": { $exists: false } },
+
           // Post owner not banned
           { "user_info.banned": { $ne: true } },
 
-          // Post must be public
+          // Post must be public (status)
           { status: "public" },
 
           // Post privacy rules
           {
             $or: [
-              // public OR missing privacy = public
               { privacy: "public" },
               { privacy: { $exists: false } },
-
-              // private: only owner can see
               {
                 $and: [{ privacy: "private" }, { "user_info._id": mainUserId }],
               },
-
-              // close friends: only if viewer is in close friends list
               {
                 $and: [
                   { privacy: "close friends" },
@@ -190,13 +203,11 @@ const postValidationPipeline = (mainUser) => {
             ],
           },
 
-          // If the user is private, require following (treat missing as not-private)
+          // If the user is private, require following
           {
             $or: [
               { "user_info.private": { $ne: true } },
               { "following_info.0": { $exists: true } },
-
-              // owner can always see their own even if private
               { "user_info._id": mainUserId },
             ],
           },

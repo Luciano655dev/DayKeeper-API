@@ -36,7 +36,6 @@ const likeComment = async (props) => {
       userId,
       postId: post._id,
     })
-    console.log(userThatCommented)
 
     if (!comment) return notFound("Comment")
 

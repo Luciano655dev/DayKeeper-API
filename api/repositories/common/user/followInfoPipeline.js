@@ -56,9 +56,11 @@ const followInfoPipeline = (mainUser) => {
       },
     },
 
-    // relationship booleans
+    // relationship booleans + same user
     {
       $addFields: {
+        _sameUser: { $eq: ["$_id", mainUser._id] },
+
         _followByMe: {
           $gt: [
             {
@@ -78,6 +80,7 @@ const followInfoPipeline = (mainUser) => {
             0,
           ],
         },
+
         _followsMe: {
           $gt: [
             {
@@ -103,17 +106,24 @@ const followInfoPipeline = (mainUser) => {
     // keep your public fields
     {
       $addFields: {
-        isFollowing: "$_followByMe",
+        // if it's me, force false so UI doesn't show "Following" on myself
+        isFollowing: {
+          $cond: ["$_sameUser", false, "$_followByMe"],
+        },
 
         follow_info: {
           $switch: {
             branches: [
               {
+                case: "$_sameUser",
+                then: "same_user",
+              },
+              {
                 case: { $and: ["$_followByMe", "$_followsMe"] },
                 then: "friends",
               },
               {
-                // keep same naming you had: if I follow them -> "follower"
+                // if I follow them -> "follower"
                 case: "$_followByMe",
                 then: "follower",
               },
@@ -135,6 +145,7 @@ const followInfoPipeline = (mainUser) => {
         _followRels: 0,
         _followByMe: 0,
         _followsMe: 0,
+        _sameUser: 0,
       },
     },
   ]

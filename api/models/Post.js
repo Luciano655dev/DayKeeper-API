@@ -29,6 +29,9 @@ const postSchema = mongoose.Schema({
   banned: { type: Boolean, required: false },
 })
 
+// indexes
+postSchema.index({ user: 1, created_at: 1 })
+
 const Post = mongoose.model("Post", postSchema)
 
 module.exports = Post

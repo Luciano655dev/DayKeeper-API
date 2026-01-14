@@ -8,7 +8,6 @@ const {
 
 const addOrRemoveFromCloseFriends = async (props) => {
   const { username, loggedUser } = props
-
   try {
     const user = await User.findOne({ username })
     if (!user) return notFound("User")

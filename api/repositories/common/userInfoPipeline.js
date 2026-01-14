@@ -1,5 +1,6 @@
 const userValidationPipeline = require("./userValidationPipeline")
 const followInfoPipeline = require("./user/followInfoPipeline")
+const isInCloseFriends = require("./user/isInCloseFriends")
 const hideUserData = require("../hideProject/hideUserData")
 const {
   user: { defaultTimeZone },
@@ -8,6 +9,7 @@ const {
 const userInfoPipeline = (mainUser) => [
   ...followInfoPipeline(mainUser),
   ...userValidationPipeline(mainUser),
+  ...isInCloseFriends(mainUser),
 
   {
     $addFields: {

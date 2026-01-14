@@ -1,5 +1,5 @@
 const { Types } = require("mongoose")
-const postValidationPipeline = require("../../common/postValidationPipeline")
+const postInfoPipeline = require("../../common/postInfoPipeline")
 const {
   user: { defaultTimeZone },
 } = require("../../../../constants/index")
@@ -27,13 +27,12 @@ const feedPostPipeline = (
   const wantRelevanceSort =
     orderMode === "relevant" || orderMode === "follow_first"
 
-  // One shared "day start" expression we can reuse
   const dayStartExpr = dateStr
     ? {
         $dateTrunc: {
           date: {
             $dateFromString: {
-              dateString: dateStr, // DD-MM-YYYY
+              dateString: dateStr,
               format: "%d-%m-%Y",
               timezone: tz,
               onError: null,
@@ -46,7 +45,6 @@ const feedPostPipeline = (
       }
     : { $dateTrunc: { date: "$$NOW", unit: "day", timezone: tz } }
 
-  // Match posts that are on that day (in the viewer timezone)
   const dayMatchStage = {
     $match: {
       $expr: {
@@ -58,21 +56,15 @@ const feedPostPipeline = (
     },
   }
 
-  // Shared "can viewer see this item" match for notes/tasks/events
   const visibilityExpr = {
     $or: [
-      // owner sees all
       { $eq: ["$user", "$$viewerId"] },
-
-      // public OR missing privacy
       {
         $or: [
           { $eq: ["$privacy", "public"] },
           { $eq: [{ $type: "$privacy" }, "missing"] },
         ],
       },
-
-      // close friends
       {
         $and: [
           { $eq: ["$privacy", "close friends"] },
@@ -83,8 +75,8 @@ const feedPostPipeline = (
   }
 
   return [
-    // adds: user_info, following_info, block_info, isInCloseFriends, etc (and filters out blocked/banned/private rules)
-    ...postValidationPipeline(mainUser),
+    // ✅ postValidation + likes/comments + relevance + userLiked etc
+    ...postInfoPipeline(mainUser),
 
     // only the requested day (or today)
     dayMatchStage,
@@ -103,94 +95,17 @@ const feedPostPipeline = (
         ]
       : []),
 
-    // ---- likes info
-    {
-      $lookup: {
-        from: "postLikes",
-        let: { postId: "$_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
-          {
-            $group: {
-              _id: null,
-              totalLikes: { $sum: 1 },
-              userLiked: {
-                $sum: {
-                  $cond: [{ $eq: ["$userId", mainUserId] }, 1, 0],
-                },
-              },
-            },
-          },
-        ],
-        as: "like_info",
-      },
-    },
-    { $unwind: { path: "$like_info", preserveNullAndEmptyArrays: true } },
-
-    // ---- comments info
-    {
-      $lookup: {
-        from: "postComments",
-        let: { postId: "$_id" },
-        pipeline: [
-          { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
-          {
-            $group: {
-              _id: null,
-              totalComments: { $sum: 1 },
-              userCommented: {
-                $push: {
-                  $cond: [
-                    { $eq: ["$userId", mainUserId] },
-                    {
-                      comment: "$comment",
-                      gif: "$gif",
-                      created_at: "$created_at",
-                    },
-                    false,
-                  ],
-                },
-              },
-            },
-          },
-        ],
-        as: "comment_info",
-      },
-    },
-    { $unwind: { path: "$comment_info", preserveNullAndEmptyArrays: true } },
-
-    // ---- per-post computed fields
-    {
-      $addFields: {
-        likes: { $ifNull: ["$like_info.totalLikes", 0] },
-        userLiked: { $gt: ["$like_info.userLiked", 0] },
-
-        comments: { $ifNull: ["$comment_info.totalComments", 0] },
-        userCommented: { $ifNull: ["$comment_info.userCommented", false] },
-
-        relevance: {
-          $add: [
-            { $ifNull: ["$like_info.totalLikes", 0] },
-            { $ifNull: ["$comment_info.totalComments", 0] },
-          ],
-        },
-
-        timeZoneMatch: 1,
-      },
-    },
-
     // order posts inside each user BEFORE grouping
     ...(wantRelevanceSort
       ? [{ $sort: { "user_info._id": 1, relevance: -1, date: 1, _id: -1 } }]
       : [{ $sort: { "user_info._id": 1, date: -1, _id: 1 } }]),
 
-    // ---- group by user (this is your “user day card”)
+    // group by user
     {
       $group: {
         _id: "$user_info._id",
         user_info: { $first: "$user_info" },
 
-        // viewer follows this user OR it's the viewer
         isFollowing: {
           $max: {
             $cond: [
@@ -206,7 +121,6 @@ const feedPostPipeline = (
           },
         },
 
-        // viewer is in close friends (for this user's content)
         isCloseFriend: {
           $max: {
             $cond: [
@@ -226,6 +140,7 @@ const feedPostPipeline = (
             date: "$date",
             data: "$data",
             emotion: "$emotion",
+            privacy: "$privacy",
             media: "$media",
 
             likes: "$likes",
@@ -239,7 +154,6 @@ const feedPostPipeline = (
       },
     },
 
-    // ---- add day boundaries (same day as the feed)
     { $addFields: { dayStart: dayStartExpr } },
     {
       $addFields: {
@@ -249,7 +163,7 @@ const feedPostPipeline = (
       },
     },
 
-    // ---- notes count
+    // notes count
     {
       $lookup: {
         from: "dayNote",
@@ -286,7 +200,7 @@ const feedPostPipeline = (
       },
     },
 
-    // ---- tasks count
+    // tasks count
     {
       $lookup: {
         from: "dayTask",
@@ -323,7 +237,7 @@ const feedPostPipeline = (
       },
     },
 
-    // ---- events count (events whose dateStart falls within the day)
+    // events count
     {
       $lookup: {
         from: "dayEvent",
@@ -360,12 +274,10 @@ const feedPostPipeline = (
       },
     },
 
-    // ---- getDataWithPages sorting + extra stats
+    // paging sort + extra stats
     {
       $addFields: {
-        // paging sort fields
         created_at: "$latestPostAt",
-
         relevance:
           orderMode === "follow_first"
             ? {
@@ -384,7 +296,6 @@ const feedPostPipeline = (
 
         timeZoneMatch: 1,
 
-        // extra stats you asked for
         postsCount: { $size: "$posts" },
         lastPostTime: {
           $dateToString: {
@@ -396,12 +307,11 @@ const feedPostPipeline = (
       },
     },
 
-    // remove temp fields (no mixing project styles)
     {
       $unset: ["note_count", "task_count", "event_count", "dayStart", "dayEnd"],
     },
 
-    // ---- final shape (INCLUSION ONLY)
+    // final shape
     {
       $project: {
         _id: 1,
@@ -439,7 +349,7 @@ const feedPostPipeline = (
                 },
               },
               content: "$$p.data",
-              emotion: "$$p.emotion",
+              privacy: "$$p.privacy",
               media: "$$p.media",
 
               likes: "$$p.likes",

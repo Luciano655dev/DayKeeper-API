@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const PRIVACY = ["public", "private", "close_friends"]
+const PRIVACY = ["public", "private", "close friends"]
 
 const dayEventSchema = new mongoose.Schema(
   {

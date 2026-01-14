@@ -65,7 +65,7 @@ router.delete(
 
 // Close Friends
 router.post(
-  "/close_friends/:name",
+  "/close_friends/:username",
   checkTokenMW,
   checkValidUserMW,
   addOrRemoveFromCloseFriends
