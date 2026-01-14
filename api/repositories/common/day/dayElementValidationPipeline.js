@@ -31,12 +31,13 @@ const dayElementValidationPipeline = (mainUser) => [
           },
         },
         { $project: { _id: 1 } },
+        { $limit: 1 },
       ],
       as: "following_info",
     },
   },
 
-  // block relationship
+  // block relationship (me -> them)
   {
     $lookup: {
       from: "blocks",
@@ -53,8 +54,32 @@ const dayElementValidationPipeline = (mainUser) => [
           },
         },
         { $project: { _id: 1 } },
+        { $limit: 1 },
       ],
       as: "block_info",
+    },
+  },
+
+  // block relationship (them -> me)
+  {
+    $lookup: {
+      from: "blocks",
+      let: { eventUserId: "$user_info._id" },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ["$blockId", "$$eventUserId"] },
+                { $eq: ["$blockedId", mainUser._id] },
+              ],
+            },
+          },
+        },
+        { $project: { _id: 1 } },
+        { $limit: 1 },
+      ],
+      as: "blocked_by_owner_info",
     },
   },
 
@@ -75,6 +100,7 @@ const dayElementValidationPipeline = (mainUser) => [
           },
         },
         { $project: { _id: 1 } },
+        { $limit: 1 },
       ],
       as: "isInCloseFriends",
     },
@@ -84,28 +110,45 @@ const dayElementValidationPipeline = (mainUser) => [
   {
     $match: {
       $and: [
+        // hide if I blocked them
         { "block_info.0": { $exists: false } },
+
+        // hide if they blocked me
+        { "blocked_by_owner_info.0": { $exists: false } },
+
         { "user_info.banned": { $ne: true } },
 
+        // privacy rules
         {
           $or: [
             { $or: [{ privacy: "public" }, { privacy: { $exists: false } }] },
+
+            // private: only owner can see
             {
               $and: [{ privacy: "private" }, { "user_info._id": mainUser._id }],
             },
+
+            // close friends: owner OR close friend can see
             {
               $and: [
-                { privacy: "close friends" }, // change to "close_friends" if you normalize
-                { "isInCloseFriends.0": { $exists: true } },
+                { privacy: "close friends" },
+                {
+                  $or: [
+                    { "user_info._id": mainUser._id },
+                    { "isInCloseFriends.0": { $exists: true } },
+                  ],
+                },
               ],
             },
           ],
         },
 
+        // if user is private, require following, but owner can always see
         {
           $or: [
-            { "user_info.private": false },
+            { "user_info.private": { $ne: true } },
             { "following_info.0": { $exists: true } },
+            { "user_info._id": mainUser._id },
           ],
         },
       ],

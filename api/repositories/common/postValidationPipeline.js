@@ -15,7 +15,6 @@ const postValidationPipeline = (mainUser) => {
   const mainUserId = toObjectIdOrNull(mainUser?._id)
 
   return [
-    // Join post owner (user_info)
     {
       $lookup: {
         from: "users",
@@ -177,7 +176,7 @@ const postValidationPipeline = (mainUser) => {
           // Not blocked by me
           { "block_info.0": { $exists: false } },
 
-          // Not blocked by post owner  ✅ NEW
+          // Not blocked by post owner
           { "blocked_by_owner_info.0": { $exists: false } },
 
           // Post owner not banned
@@ -186,18 +185,27 @@ const postValidationPipeline = (mainUser) => {
           // Post must be public (status)
           { status: "public" },
 
-          // Post privacy rules
+          // post privacy rules
           {
             $or: [
               { privacy: "public" },
               { privacy: { $exists: false } },
+
+              // private: only owner can see
               {
                 $and: [{ privacy: "private" }, { "user_info._id": mainUserId }],
               },
+
+              // close friends: owner OR close friend can see
               {
                 $and: [
                   { privacy: "close friends" },
-                  { "isInCloseFriends.0": { $exists: true } },
+                  {
+                    $or: [
+                      { "user_info._id": mainUserId },
+                      { "isInCloseFriends.0": { $exists: true } },
+                    ],
+                  },
                 ],
               },
             ],
