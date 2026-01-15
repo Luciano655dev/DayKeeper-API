@@ -1,8 +1,6 @@
 const express = require("express")
 const router = express.Router()
 const {
-  getUserDay,
-
   createEvent,
   editEvent,
   deleteEvent,
@@ -63,8 +61,5 @@ router.get(
   getDailyTasks
 )
 router.get("/:username/dailyTasks", checkTokenMW, getDailyTasks)
-
-// Routes (/day)
-router.get("/:username", checkTokenMW, getUserDay)
 
 module.exports = router

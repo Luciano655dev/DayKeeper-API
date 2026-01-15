@@ -9,7 +9,6 @@ const banHistoryMadeByAdmin = require("./pipelines/admin/bansHistoryMadeByAdminP
 const elementBanHistoryPipeline = require("./pipelines/admin/elementBanHistoryPipeline")
 
 const getUserPipeline = require("./pipelines/user/getUserPipeline")
-const getUserDayPipeline = require("./pipelines/day/getUserDayPipelines")
 const getFollowersPipeline = require("./pipelines/user/getFollowersPipeline")
 const getFollowingPipeline = require("./pipelines/user/getFollowingPipeline")
 const getFollowRequestsPipeline = require("./pipelines/user/getFollowRequestsPipeline")
@@ -76,7 +75,6 @@ module.exports = {
 
   // USER RELATED
   getUserPostsByDayPipeline,
-  getUserDayPipeline,
   getUserPipeline,
   getFollowersPipeline,
   getFollowingPipeline,
