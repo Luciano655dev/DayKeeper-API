@@ -4,15 +4,22 @@ const { feedPostPipeline } = require("../../repositories/index.js")
 
 const {
   success: { fetched },
+  maxPageSize: DEFAULT_MAXPAGESIZE,
+  maxPostsPerUser: DEFAULT_MAXPOSTSPERUSER,
 } = require("../../../constants/index")
 
 const feed = async (props) => {
   const page = Number(props.page) || 1
   const maxPageSize = props.maxPageSize
-    ? Number(props.maxPageSize) <= 100
+    ? Number(props.maxPageSize) <= DEFAULT_MAXPAGESIZE
       ? Number(props.maxPageSize)
-      : 100
-    : 10
+      : DEFAULT_MAXPAGESIZE
+    : DEFAULT_MAXPAGESIZE
+  const maxPostsPerUser = props.maxPageSize
+    ? Number(props.maxPageSize) <= DEFAULT_MAXPOSTSPERUSER
+      ? Number(props.maxPageSize)
+      : DEFAULT_MAXPOSTSPERUSER
+    : DEFAULT_MAXPOSTSPERUSER
 
   const orderMode = (props.order || "recent").toLowerCase()
   const orderForPaging =
@@ -33,7 +40,12 @@ const feed = async (props) => {
     const response = await getDataWithPages(
       {
         type: "Post",
-        pipeline: feedPostPipeline(loggedUser, { scope, dateStr, orderMode }),
+        pipeline: feedPostPipeline(loggedUser, {
+          scope,
+          dateStr,
+          orderMode,
+          maxPostsPerUser,
+        }),
         orderForPaging,
         page,
         maxPageSize,

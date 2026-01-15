@@ -1,19 +1,21 @@
-const User = require("../../models/User")
-const Post = require("../../models/Post")
+const User = require("../../../models/User")
 
-const { getUserPostsByDayPipeline } = require("../../repositories/index")
-const { getDayRangeDDMMYYYY, getTodayRange } = require("../../utils/dayRange")
-const getDataWithPages = require("../getDataWithPages")
+const { getTasksByDatePipeline } = require("../../../repositories/index")
+const {
+  getDayRangeDDMMYYYY,
+  getTodayRange,
+} = require("../../../utils/dayRange")
+const getDataWithPages = require("../../getDataWithPages")
 
 const {
   user: { defaultTimeZone },
   errors: { notFound, unauthorized },
   success: { fetched },
-} = require("../../../constants/index")
+} = require("../../../../constants/index")
 
 const isDDMMYYYY = (v) => typeof v === "string" && /^\d{2}-\d{2}-\d{4}$/.test(v)
 
-const getUserPostsByDay = async (props) => {
+const getTasksByDate = async (props) => {
   const { username, dateStr, loggedUser, order, page, maxPageSize } =
     props || {}
 
@@ -26,6 +28,7 @@ const getUserPostsByDay = async (props) => {
 
   const tz = loggedUser?.timeZone || defaultTimeZone
   let range = null
+  let usedDateStr = null
 
   if (isDDMMYYYY(dateStr)) {
     const tryRange = getDayRangeDDMMYYYY(dateStr, tz)
@@ -40,9 +43,9 @@ const getUserPostsByDay = async (props) => {
     usedDateStr = null
   }
 
-  const posts = await getDataWithPages({
-    type: "Post",
-    pipeline: getUserPostsByDayPipeline({
+  const tasks = await getDataWithPages({
+    type: "Task",
+    pipeline: getTasksByDatePipeline({
       mainUser: loggedUser,
       targetUserId: targetUser._id,
       start: range.start,
@@ -53,9 +56,12 @@ const getUserPostsByDay = async (props) => {
     maxPageSize,
   })
 
-  return fetched("posts", {
-    props: posts,
+  return fetched("tasks", {
+    props: {
+      ...tasks,
+      usedDate: usedDateStr,
+    },
   })
 }
 
-module.exports = getUserPostsByDay
+module.exports = getTasksByDate

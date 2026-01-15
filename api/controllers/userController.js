@@ -60,15 +60,25 @@ const getUserPostsController = async (req, res) => {
 
 const getUserPostsByDayController = async (req, res) => {
   const { username, date } = req.params
+  const page = Number(req.query.page) || 1
+  const maxPageSize = req.query.maxPageSize
+    ? Number(req.query.maxPageSize) <= 100
+      ? Number(req.query.maxPageSize)
+      : 100
+    : 1
+  const order = req.query.order || "relevant"
 
   try {
-    const { code, message, data } = await getUserPostsByDay({
+    const { code, message, props } = await getUserPostsByDay({
       username,
       dateStr: date,
+      page,
+      maxPageSize,
+      order,
       loggedUser: req.user,
     })
 
-    return res.status(code).json({ message, data })
+    return res.status(code).json({ message, ...props })
   } catch (error) {
     console.log(error)
     return res.status(500).json({ message: serverError(String(error)) })

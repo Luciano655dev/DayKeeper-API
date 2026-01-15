@@ -5,12 +5,14 @@ const createEvent = require("../services/day/events/createEvent")
 const editEvent = require("../services/day/events/editEvent")
 const deleteEvent = require("../services/day/events/deleteEvent")
 const getEvent = require("../services/day/events/getEvent")
+const getEventByDate = require("../services/day/events/getEventByDate")
 
 // Notes
 const createNote = require("../services/day/notes/createNote")
 const editNote = require("../services/day/notes/editNote")
 const deleteNote = require("../services/day/notes/deleteNote")
 const getNote = require("../services/day/notes/getNote")
+const getNotesByDate = require("../services/day/notes/getNotesByDate")
 
 // Tasks
 const createTask = require("../services/day/tasks/createTask")
@@ -18,6 +20,7 @@ const editTask = require("../services/day/tasks/editTask")
 const deleteTask = require("../services/day/tasks/deleteTask")
 const getTask = require("../services/day/tasks/getTask")
 const getDailyTasks = require("../services/day/tasks/getDailyTasks")
+const getTasksByDate = require("../services/day/tasks/getTasksByDate")
 
 // helpers
 const dayController = async (req, res, next) => {
@@ -88,6 +91,31 @@ const getEventController = async (req, res) => {
     return res.status(500).json({ error })
   }
 }
+const getEventByDateController = async (req, res) => {
+  try {
+    const page = Number(req.query.page) || 1
+    const maxPageSize = req.query.maxPageSize
+      ? Number(req.query.maxPageSize) <= 100
+        ? Number(req.query.maxPageSize)
+        : 100
+      : 1
+    const order = req.query.order || "relevant"
+    const { username, date } = req.params
+
+    const { code, message, props } = await getEventByDate({
+      username,
+      dateStr: date,
+      order,
+      maxPageSize,
+      page,
+      loggedUser: req.user,
+    })
+
+    return res.status(code).json({ message, ...props })
+  } catch (error) {
+    return res.status(500).json({ error })
+  }
+}
 
 // ========== NOTE CONTROLLERS ==========
 const createNoteController = async (req, res) => {
@@ -135,6 +163,31 @@ const getNoteController = async (req, res) => {
     })
 
     return res.status(code).json({ message, data })
+  } catch (error) {
+    return res.status(500).json({ error })
+  }
+}
+const getNotesByDateController = async (req, res) => {
+  try {
+    const page = Number(req.query.page) || 1
+    const maxPageSize = req.query.maxPageSize
+      ? Number(req.query.maxPageSize) <= 100
+        ? Number(req.query.maxPageSize)
+        : 100
+      : 1
+    const order = req.query.order || "relevant"
+    const { username, date } = req.params
+
+    const { code, message, props } = await getNotesByDate({
+      username,
+      dateStr: date,
+      order,
+      maxPageSize,
+      page,
+      loggedUser: req.user,
+    })
+
+    return res.status(code).json({ message, ...props })
   } catch (error) {
     return res.status(500).json({ error })
   }
@@ -212,6 +265,32 @@ const getDailyTasksController = async (req, res) => {
     return res.status(500).json({ error })
   }
 }
+const getTasksByDateController = async (req, res) => {
+  try {
+    const page = Number(req.query.page) || 1
+    const maxPageSize = req.query.maxPageSize
+      ? Number(req.query.maxPageSize) <= 100
+        ? Number(req.query.maxPageSize)
+        : 100
+      : 1
+    const order = req.query.order || "relevant"
+    const { username, date } = req.params
+
+    const { code, message, props } = await getTasksByDate({
+      username,
+      dateStr: date,
+      order,
+      maxPageSize,
+      page,
+      loggedUser: req.user,
+    })
+
+    return res.status(code).json({ message, ...props })
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json({ error })
+  }
+}
 
 module.exports = {
   getUserDay: dayController,
@@ -220,15 +299,18 @@ module.exports = {
   editEvent: editEventController,
   deleteEvent: deleteEventController,
   getEvent: getEventController,
+  getEventByDate: getEventByDateController,
 
   createNote: createNoteController,
   editNote: editNoteController,
   deleteNote: deleteNoteController,
   getNote: getNoteController,
+  getNotesByDate: getNotesByDateController,
 
   createTask: createTaskController,
   editTask: editTaskController,
   deleteTask: deleteTaskController,
   getTask: getTaskController,
   getDailyTasks: getDailyTasksController,
+  getTasksByDate: getTasksByDateController,
 }

@@ -2,6 +2,7 @@ const { Types } = require("mongoose")
 const postInfoPipeline = require("../../common/postInfoPipeline")
 const {
   user: { defaultTimeZone },
+  maxPostsPerUser: DEFAULT_MAXPOSTSPERUSER,
 } = require("../../../../constants/index")
 
 function toObjectIdOrNull(value) {
@@ -19,7 +20,12 @@ const FOLLOW_FIRST_BOOST = 1e9
 
 const feedPostPipeline = (
   mainUser,
-  { scope = "a", dateStr = null, orderMode = "recent" } = {}
+  {
+    scope = "a",
+    dateStr = null,
+    orderMode = "recent",
+    maxPostsPerUser = DEFAULT_MAXPOSTSPERUSER,
+  } = {}
 ) => {
   const tz = mainUser?.timeZone || defaultTimeZone
   const mainUserId = toObjectIdOrNull(mainUser?._id)
@@ -75,7 +81,6 @@ const feedPostPipeline = (
   }
 
   return [
-    // ✅ postValidation + likes/comments + relevance + userLiked etc
     ...postInfoPipeline(mainUser),
 
     // only the requested day (or today)
@@ -304,6 +309,12 @@ const feedPostPipeline = (
             timezone: tz,
           },
         },
+      },
+    },
+    // keep only the 3 posts
+    {
+      $addFields: {
+        posts: { $slice: ["$posts", maxPostsPerUser] },
       },
     },
 

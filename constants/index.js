@@ -5,7 +5,8 @@ const messages = require("./messages")
 const trustScore = require("./trustScore")
 
 module.exports = {
-  maxPageSize: 100,
+  maxPageSize: 5,
+  maxPostsPerUser: 3,
   tokens: {
     AccessTTLSeconds: 60 * 15, // 15 min
     RefreshTTLDays: 30,

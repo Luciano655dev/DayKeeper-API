@@ -13,6 +13,7 @@ const feedController = async (req, res) => {
 
     return res.status(code).json(response)
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: serverError(`${error}`) })
   }
 }

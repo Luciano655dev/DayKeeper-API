@@ -7,17 +7,20 @@ const {
   editEvent,
   deleteEvent,
   getEvent,
+  getEventByDate,
 
   createNote,
   editNote,
   deleteNote,
   getNote,
+  getNotesByDate,
 
   createTask,
   editTask,
   deleteTask,
   getTask,
   getDailyTasks,
+  getTasksByDate,
 } = require("../api/controllers/dayController")
 
 // Middlewares
@@ -34,20 +37,22 @@ router.post("/event", checkTokenMW, createEventValidation, createEvent)
 router.put("/event/:eventId", checkTokenMW, editEventValidation, editEvent)
 router.delete("/event/:eventId", checkTokenMW, deleteEvent)
 router.get("/event/:eventId", checkTokenMW, getEvent)
+router.get("/event/:username/:date", checkTokenMW, getEventByDate)
 
 // Note Router
 router.post("/note", checkTokenMW, createNoteValidation, createNote)
 router.put("/note/:noteId", checkTokenMW, editNoteValidation, editNote)
 router.delete("/note/:noteId", checkTokenMW, deleteNote)
 router.get("/note/:noteId", checkTokenMW, getNote)
+router.get("/note/:username/:date", checkTokenMW, getNotesByDate)
 
 // Task Router
 router.post("/task", checkTokenMW, createTaskValidation, createTask)
 router.put("/task/:taskId", checkTokenMW, editTaskValidation, editTask)
 router.delete("/task/:taskId", checkTokenMW, deleteTask)
 router.get("/task/:taskId", checkTokenMW, getTask)
+router.get("/task/:username/:date", checkTokenMW, getTasksByDate)
 
-// Daily Tasks (templates)
 router.get(
   "/dailyTasks",
   checkTokenMW,

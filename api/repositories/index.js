@@ -29,6 +29,10 @@ const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipelin
 const getUserStoriesFeedPipeline = require("./pipelines/storie/getUserStoriesFeedPipeline")
 const userStoriesPipeline = require("./pipelines/storie/userStoriesPipeline")
 
+const getEventByDatePipeline = require("./pipelines/day/events/getEventByDatePipeline")
+const getNotesByDatePipeline = require("./pipelines/day/notes/getNotesByDatePipeline")
+const getTasksByDatePipeline = require("./pipelines/day/tasks/getTasksByDatePipeline")
+
 const searchEventPipeline = require("./pipelines/search/searchEventPipeline")
 const searchNotePipeline = require("./pipelines/search/searchNotePipeline")
 const searchTaskPipeline = require("./pipelines/search/searchTaskPipeline")
@@ -64,6 +68,11 @@ module.exports = {
   bannedElementPipeline,
   banHistoryMadeByAdmin,
   elementBanHistoryPipeline,
+
+  // DAY RELATED
+  getEventByDatePipeline,
+  getNotesByDatePipeline,
+  getTasksByDatePipeline,
 
   // USER RELATED
   getUserPostsByDayPipeline,
