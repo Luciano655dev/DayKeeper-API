@@ -50,13 +50,6 @@ const dayEventSchema = new mongoose.Schema(
       },
     },
 
-    location: {
-      type: String,
-      trim: true,
-      maxlength: 200,
-      default: "",
-    },
-
     privacy: {
       type: String,
       enum: PRIVACY,

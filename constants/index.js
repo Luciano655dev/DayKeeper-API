@@ -51,14 +51,6 @@ module.exports = {
     maxBioLength: 1000,
     maxDisplayNameLength: 40,
   },
-  location: {
-    maxSearchLength: 50,
-    defaultRadius: 1000, // 1km
-    defaultLat: 28.4535498,
-    defaultLng: -81.4645661,
-    // Universal Cords :)
-    defaultType: "point_of_interest",
-  },
   day: {
     event: {
       maxEventTitleLength: 50,

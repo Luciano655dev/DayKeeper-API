@@ -13,7 +13,6 @@ const editEvent = async (props) => {
     description,
     dateStart,
     dateEnd,
-    location,
     privacy,
     loggedUser,
   } = props || {}
@@ -35,8 +34,6 @@ const editEvent = async (props) => {
       updateData.description = description
     if (Object.prototype.hasOwnProperty.call(props, "privacy"))
       updateData.privacy = privacy
-    if (Object.prototype.hasOwnProperty.call(props, "location"))
-      updateData.location = location
     if (Object.prototype.hasOwnProperty.call(props, "dateStart"))
       updateData.dateStart = dateStart
     if (Object.prototype.hasOwnProperty.call(props, "dateEnd"))

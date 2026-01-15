@@ -2,7 +2,6 @@ const Post = require("../../models/Post")
 const Media = require("../../models/Media")
 const updateStreak = require("../user/streak/updateStreak")
 const deleteFile = require("../../utils/deleteFile")
-const getPlaceById = require("../location/getPlaceById")
 
 const {
   success: { created },

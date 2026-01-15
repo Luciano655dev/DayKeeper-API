@@ -1,5 +1,4 @@
 const { isValid } = require("date-fns")
-const getPlaceById = require("../../../../api/services/location/getPlaceById")
 const getEvent = require("../../../../api/services/day/events/getEvent")
 
 const {
@@ -15,7 +14,7 @@ const createEvent = async (req, res, next) => {
     title,
     description,
     privacy,
-    placeId, // location
+    placeId,
   } = req.body
 
   // Validations

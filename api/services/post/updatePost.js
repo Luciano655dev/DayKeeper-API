@@ -2,7 +2,6 @@ const Post = require("../../models/Post")
 const Media = require("../../models/Media")
 const deleteFile = require("../../utils/deleteFile")
 const getPost = require("./getPost")
-const getPlaceById = require("../location/getPlaceById")
 
 const deletePostLikes = require("./delete/deletePostLikes")
 const deletePostComments = require("./delete/deletePostComments")

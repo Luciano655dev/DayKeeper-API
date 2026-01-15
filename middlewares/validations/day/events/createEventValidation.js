@@ -1,5 +1,4 @@
 const { isValid, isBefore } = require("date-fns")
-const getPlaceById = require("../../../../api/services/location/getPlaceById")
 
 const {
   day: {

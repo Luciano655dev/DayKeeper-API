@@ -52,7 +52,6 @@ const eventInfoPipeline = (mainUser) => {
         dateEndLocal: 1,
         createdAtLocal: 1,
 
-        location: 1,
         user: 1,
         user_info: 1,
       },

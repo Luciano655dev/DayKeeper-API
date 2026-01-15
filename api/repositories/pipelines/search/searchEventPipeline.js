@@ -22,7 +22,6 @@ const searchEventPipeline = (searchQuery, filterPipe, user, mainUser) => {
               $or: [
                 { title: { $regex: regex } },
                 { description: { $regex: regex } },
-                { location: { $regex: regex } },
               ],
             }
           : {}),
