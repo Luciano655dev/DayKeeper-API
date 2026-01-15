@@ -1,7 +1,6 @@
 const getDataWithPages = require(`../getDataWithPages`)
 const User = require("../../models/User")
 const Post = require("../../models/Post")
-const Storie = require("../../models/Storie")
 const { elementBanHistoryPipeline } = require(`../../repositories`)
 const mongoose = require("mongoose")
 
@@ -29,9 +28,7 @@ const getElementBanHistory = async (props) => {
     if (response?.data?.length > 0) {
       if (response?.data[0].type === "user")
         element = await User.findById(elementId)
-      else if (response?.data[0].type === "post")
-        element = await Post.findById(elementId)
-      else element = await Storie.findById(elementId)
+      else element = await Post.findById(elementId) // post
     }
 
     return fetched(`${elementId} Ban History`, {

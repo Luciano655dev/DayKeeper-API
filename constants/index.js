@@ -11,10 +11,6 @@ module.exports = {
     AccessTTLSeconds: 60 * 15, // 15 min
     RefreshTTLDays: 30,
   },
-  stories: {
-    maxStoriesPerDay: 5,
-    maxStorieTextLength: 500,
-  },
   post: {
     maxCommentLength: 500,
   },
@@ -42,7 +38,6 @@ module.exports = {
     maxReportMessageLength: 1000,
     daysToDeleteBannedUser: 30,
     daysToDeleteBannedPost: 7,
-    daysToDeleteBannedStorie: 3,
     reportCountToVerifyFullVideo: 5,
     defaultBannedById: "65cbaab84b9d1cce41e98b60", // change to a default User later
   },

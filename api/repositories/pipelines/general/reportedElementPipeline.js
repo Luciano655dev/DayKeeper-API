@@ -1,6 +1,5 @@
 const hideUserData = require("../../hideProject/hideUserData")
 const hidePostData = require("../../hideProject/hidePostData")
-const hideStorieData = require("../../hideProject/hideStorieData")
 
 const reportedElementPipeline = (type = "user") => [
   {
@@ -11,12 +10,7 @@ const reportedElementPipeline = (type = "user") => [
       as: "entity_info",
       pipeline: [
         {
-          $project:
-            type === "user"
-              ? hideUserData
-              : type === "post"
-              ? hidePostData
-              : hideStorieData,
+          $project: type === "user" ? hideUserData : hidePostData,
         },
       ],
     },

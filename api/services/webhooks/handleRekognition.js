@@ -1,5 +1,4 @@
 const Post = require("../../models/Post")
-const Storie = require("../../models/Storie")
 const Media = require("../../models/Media")
 const axios = require("axios")
 const https = require("https")
@@ -101,10 +100,6 @@ const handleRekognition = async (req, res) => {
 
       if (media.usedIn?.model === "Post") {
         await Post.findByIdAndUpdate(media.usedIn.refId, {
-          status: newStatus,
-        })
-      } else if (media.usedIn?.model === "Storie") {
-        await Storie.findByIdAndUpdate(media.usedIn.refId, {
           status: newStatus,
         })
       }

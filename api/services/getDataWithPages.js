@@ -16,7 +16,6 @@ function toObjectIdOrNull(id) {
 const DEFAULT_MODEL = "Post"
 const MODEL_BY_TYPE = {
   Post: require("../models/Post"),
-  Storie: require("../models/Storie"),
   User: require("../models/User"),
   Follower: require("../models/Followers"),
   CloseFriend: require("../models/CloseFriends"),
@@ -24,8 +23,6 @@ const MODEL_BY_TYPE = {
   PostLikes: require("../models/PostLikes"),
   PostComments: require("../models/PostComments"),
   CommentLikes: require("../models/CommentLikes"),
-  StorieLikes: require("../models/StorieLikes"),
-  StorieViews: require("../models/StorieViews"),
   Report: require("../models/Report"),
   BanHistory: require("../models/BanHistory"),
   Note: require("../models/DayNote"),

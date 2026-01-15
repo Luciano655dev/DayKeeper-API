@@ -21,13 +21,6 @@ const getPostCommentsPipeline = require("./pipelines/post/getPostCommentsPipelin
 const getCommentLikesPipeline = require("./pipelines/post/getCommentLikesPipeline")
 const getAveragePostLikesPipeline = require("./pipelines/post/getAveragePostLikesPipeline")
 
-const getStoriePipeline = require("./pipelines/storie/getStoriePipeline")
-const getTodayStoriesPipeline = require("./pipelines/storie/getTodayStoriesPipeline")
-const getStorieLikesPipeline = require("./pipelines/storie/getStorieLikesPipeline")
-const getStorieViewsPipeline = require("./pipelines/storie/getStorieViewsPipeline")
-const getUserStoriesFeedPipeline = require("./pipelines/storie/getUserStoriesFeedPipeline")
-const userStoriesPipeline = require("./pipelines/storie/userStoriesPipeline")
-
 const getEventByDatePipeline = require("./pipelines/day/events/getEventByDatePipeline")
 const getNotesByDatePipeline = require("./pipelines/day/notes/getNotesByDatePipeline")
 const getTasksByDatePipeline = require("./pipelines/day/tasks/getTasksByDatePipeline")
@@ -40,18 +33,14 @@ const feedPostPipeline = require("./pipelines/search/feedPostPipeline")
 // Hide Projects
 const hideUserData = require(`./hideProject/hideUserData`)
 const hidePostData = require(`./hideProject/hidePostData`)
-const hideStorieData = require("./hideProject/hideStorieData")
 const hideGeneralData = require(`./hideProject/hideGeneralData`)
 
 module.exports = {
   // HIDE
   hideUserData,
   hidePostData,
-  hideStorieData,
   hideGeneralData,
 
-  // STORIES
-  userStoriesPipeline,
   userPostsPipeline,
   reportedElementPipeline,
   feedPostPipeline,
@@ -88,11 +77,4 @@ module.exports = {
   getPostCommentsPipeline,
   getAveragePostLikesPipeline,
   getCommentLikesPipeline,
-
-  // Stories
-  getStoriePipeline,
-  getTodayStoriesPipeline,
-  getStorieLikesPipeline,
-  getStorieViewsPipeline,
-  getUserStoriesFeedPipeline,
 }

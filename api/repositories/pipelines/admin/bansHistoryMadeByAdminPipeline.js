@@ -1,10 +1,9 @@
 const hideUserData = require("../../hideProject/hideUserData")
 const hidePostData = require("../../hideProject/hidePostData")
-const hideStorieData = require("../../hideProject/hideStorieData")
 
 const banHistoryMadeByAdmin = (userId, type = "user") => [
   {
-    // type == "user", "post" or "storie"
+    // type == "user", "post"
     $match: {
       $and: [
         {
@@ -24,12 +23,7 @@ const banHistoryMadeByAdmin = (userId, type = "user") => [
       as: "entity_info",
       pipeline: [
         {
-          $project:
-            type == "users"
-              ? hideUserData
-              : type == "posts"
-              ? hidePostData
-              : hideStorieData,
+          $project: type == "users" ? hideUserData : hidePostData,
         },
       ],
     },

@@ -221,49 +221,6 @@ const sendPostDeletionEmail = async ({
   })
 }
 
-// ========== STORIES ==========
-const sendStorieBanEmail = async ({
-  username,
-  email,
-  date,
-  id,
-  adminUsername,
-  reason,
-}) => {
-  const transporter = nodemailer.createTransport(transporterOptions)
-
-  await transporter.sendMail({
-    from: "Day Keeper <daykeepeer655@gmail.com>",
-    to: email,
-    subject: `Seu Storie do dia ${date} foi banido do DayKeeper`,
-    text: ` ${username}, seu storie do dia ${date} com o id "${id}" foi banido pelo admin ${adminUsername} pelo motivo:
-    
-          "${reason}"
-          `,
-  })
-}
-
-const sendStorieUnbanEmail = async ({
-  username,
-  email,
-  date,
-  id,
-  adminUsername,
-  reason,
-}) => {
-  const transporter = nodemailer.createTransport(transporterOptions)
-
-  await transporter.sendMail({
-    from: "Day Keeper <daykeepeer655@gmail.com>",
-    to: email,
-    subject: `Seu Storie do dia ${date} foi DESBANIDO do DayKeeper`,
-    text: ` ${username}, seu storie do dia ${date} com o id "${id}" foi desbanido pelo admin ${adminUsername} que concluiu:
-    
-          "${reason}"
-          `,
-  })
-}
-
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -275,7 +232,4 @@ module.exports = {
   sendPostBanEmail,
   sendPostUnbanEmail,
   sendPostDeletionEmail,
-
-  sendStorieBanEmail,
-  sendStorieUnbanEmail,
 }

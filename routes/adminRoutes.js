@@ -12,9 +12,6 @@ const {
 
   banOrUnbanPost,
   deleteBannedPost,
-
-  banOrUnbanStorie,
-  deleteBannedStorie,
 } = require("../api/controllers/adminController")
 
 // Middlewares
@@ -23,7 +20,7 @@ const checkAdminMW = require("../middlewares/checkAdminMW")
 
 router.delete("/report/:reportId", checkTokenMW, checkAdminMW, deleteReport)
 router.get(
-  "/banHistoryByAdmin/:username", // type = 'user' || 'post' || 'storie'
+  "/banHistoryByAdmin/:username", // type = 'user' || 'post'
   checkTokenMW,
   checkAdminMW,
   getBanHistoryMadeByAdmin
@@ -44,19 +41,5 @@ router.delete("/:username", checkTokenMW, checkAdminMW, deleteBannedUser)
 // Post
 router.post("/post/:postId", checkTokenMW, checkAdminMW, banOrUnbanPost)
 router.delete("/post/:postId", checkTokenMW, checkAdminMW, deleteBannedPost)
-
-// Storie
-router.post(
-  "/storie/:username/:storieId",
-  checkTokenMW,
-  checkAdminMW,
-  banOrUnbanStorie
-)
-router.delete(
-  "/storie/:username/:storieId",
-  checkTokenMW,
-  checkAdminMW,
-  deleteBannedStorie
-)
 
 module.exports = router

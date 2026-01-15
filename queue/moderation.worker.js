@@ -5,7 +5,6 @@ const path = require("path")
 const AWS = require("aws-sdk")
 const Media = require("../api/models/Media")
 const Post = require("../api/models/Post")
-const Storie = require("../api/models/Storie")
 const generateVideoThumbnails = require("../api/utils/generateVideoThumbnails")
 
 /* Imports and Config */
@@ -35,10 +34,6 @@ const updateMedia = async (mediaId, isSafe) => {
 
     if (media?.usedIn?.model == "Post") {
       await Post.findByIdAndUpdate(media?.usedIn?.refId, {
-        status: newStatus,
-      })
-    } else if (media?.usedIn?.model == "Storie") {
-      await Storie.findByIdAndUpdate(media?.usedIn?.refId, {
         status: newStatus,
       })
     }

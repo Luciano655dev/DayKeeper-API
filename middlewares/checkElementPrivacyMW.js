@@ -1,4 +1,3 @@
-const getStorie = require("../api/services/stories/getStorie")
 const CloseFriends = require("../api/models/CloseFriends")
 const DayEvent = require("../api/models/DayEvent")
 const DayNote = require("../api/models/DayNote")
