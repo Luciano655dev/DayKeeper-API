@@ -25,7 +25,14 @@ const postSchema = mongoose.Schema({
     required: true,
   },
 
-  status: String, // 'pending' or 'public'
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "pending",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
+
   banned: { type: Boolean, required: false },
 })
 

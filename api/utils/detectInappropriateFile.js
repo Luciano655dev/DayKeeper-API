@@ -19,7 +19,7 @@ const detectInappropriateContent = async (
     return true
   }
 
-  console.log(`adding ${mediaId} to the moderation Queue`)
+  console.log(`======== ${mediaId} to the moderation Queue ========`)
   await enqueueModeration({
     key,
     type,

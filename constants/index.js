@@ -7,11 +7,18 @@ const trustScore = require("./trustScore")
 module.exports = {
   maxPageSize: 5,
   maxPostsPerUser: 3,
+  delete: {
+    MediaRetentionDays: 30,
+    UserRetentionDays: 30,
+    PostRetentionDays: 30,
+    dayRetentionDays: 30,
+  },
   tokens: {
     AccessTTLSeconds: 60 * 15, // 15 min
     RefreshTTLDays: 30,
   },
   post: {
+    maxPostLength: 1000,
     maxCommentLength: 500,
   },
   user: {
@@ -23,6 +30,7 @@ module.exports = {
       "day",
       "webhooks",
       "media",
+      "create",
     ],
     defaultPfp: {
       title: "Doggo.jpg",

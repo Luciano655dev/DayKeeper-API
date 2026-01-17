@@ -4,6 +4,7 @@ const multer = require("multer")
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     console.error("Multer Error:", err.message)
+    console.lor(err)
 
     if (req?.file) {
       const key = req.file.key || req.file.filename

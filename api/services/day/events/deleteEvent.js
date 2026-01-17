@@ -1,36 +1,24 @@
 const mongoose = require("mongoose")
-const DayEvent = require("../../../models/DayEvent")
+
+const deleteEventDoc = require("./delete/deleteEvents")
 
 const {
-  errors: { notFound, unauthorized },
+  errors: { notFound },
   success: { deleted },
 } = require("../../../../constants/index")
 
 const deleteEvent = async (props) => {
-  const { eventId, loggedUser } = props || {}
-
-  if (!loggedUser?._id) {
-    return unauthorized("Unauthorized", "Login required", 401)
-  }
+  const { eventId } = props || {}
 
   if (!eventId || !mongoose.Types.ObjectId.isValid(eventId)) {
     return notFound("Event")
   }
 
-  try {
-    const deletedDoc = await DayEvent.findOneAndDelete({
-      _id: eventId,
-      user: loggedUser._id,
-    }).select("_id")
+  const changed = await deleteEventDoc(eventId)
 
-    if (!deletedDoc) {
-      return notFound("Event")
-    }
+  if (!changed) return notFound("Event")
 
-    return deleted("Day Event")
-  } catch (error) {
-    throw error
-  }
+  return deleted("Day Event")
 }
 
 module.exports = deleteEvent

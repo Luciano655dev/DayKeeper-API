@@ -1,15 +1,21 @@
 const PostComments = require("../../../models/PostComments")
 
-const deletePostComments = async (id) => {
-  try {
-    const response = await PostComments.deleteMany({
-      $and: [{ postId: id }, { postUserId: id }],
-    })
+async function deletePostComments({ postId, postUserId }) {
+  const res = await PostComments.updateMany(
+    {
+      postId,
+      postUserId,
+      status: { $ne: "deleted" },
+    },
+    {
+      $set: {
+        status: "deleted",
+        deletedAt: new Date(),
+      },
+    }
+  )
 
-    return response.nModified
-  } catch (error) {
-    throw new Error(error.message)
-  }
+  return res.modifiedCount
 }
 
 module.exports = deletePostComments

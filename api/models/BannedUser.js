@@ -8,6 +8,14 @@ const bannedUserSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "public",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
 })
 
 const BannedUser = mongoose.model(

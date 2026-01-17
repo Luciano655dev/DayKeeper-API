@@ -43,6 +43,14 @@ const dayTaskSchema = new mongoose.Schema(
       default: "public",
       index: true,
     },
+
+    status: {
+      type: String,
+      enum: ["pending", "public", "rejected", "deleted"],
+      default: "public",
+      index: true,
+    },
+    deletedAt: { type: Date, default: null, required: false },
   },
   {
     timestamps: true,

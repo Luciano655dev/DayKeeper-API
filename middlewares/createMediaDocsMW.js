@@ -10,7 +10,6 @@ async function createMediaDocsMW(req, res, next) {
 
     const mediaDocs = await Promise.all(
       files.map(async (file, index) => {
-        console.log(file)
         const type = file.mimetype.startsWith("video") ? "video" : "image"
 
         const doc = await Media.create({

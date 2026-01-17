@@ -15,6 +15,39 @@ function toObjectIdOrNull(value) {
     return null
   }
 }
+function time12hExpr(dateExpr, tz) {
+  return {
+    $let: {
+      vars: {
+        h24: { $hour: { date: dateExpr, timezone: tz } },
+        m: { $dateToString: { format: "%M", date: dateExpr, timezone: tz } },
+      },
+      in: {
+        $concat: [
+          {
+            $toString: {
+              $cond: [
+                { $eq: ["$$h24", 0] },
+                12,
+                {
+                  $cond: [
+                    { $gt: ["$$h24", 12] },
+                    { $subtract: ["$$h24", 12] },
+                    "$$h24",
+                  ],
+                },
+              ],
+            },
+          },
+          ":",
+          "$$m",
+          " ",
+          { $cond: [{ $lt: ["$$h24", 12] }, "AM", "PM"] },
+        ],
+      },
+    },
+  }
+}
 
 const FOLLOW_FIRST_BOOST = 1e9
 
@@ -302,13 +335,7 @@ const feedPostPipeline = (
         timeZoneMatch: 1,
 
         postsCount: { $size: "$posts" },
-        lastPostTime: {
-          $dateToString: {
-            format: "%H:%M",
-            date: "$latestPostAt",
-            timezone: tz,
-          },
-        },
+        lastPostTime: time12hExpr("$latestPostAt", tz),
       },
     },
     // keep only the 3 posts
@@ -345,13 +372,7 @@ const feedPostPipeline = (
             as: "p",
             in: {
               id: "$$p._id",
-              time: {
-                $dateToString: {
-                  format: "%H:%M",
-                  date: "$$p.date",
-                  timezone: tz,
-                },
-              },
+              time: time12hExpr("$$p.date", tz),
               date: {
                 $dateToString: {
                   format: "%Y-%m-%d %H:%M:%S",

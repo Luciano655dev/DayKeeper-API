@@ -13,6 +13,14 @@ const followersSchema = mongoose.Schema({
     type: Boolean,
     required: false,
   },
+
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "public",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
 })
 
 followersSchema.index({ followerId: 1 })

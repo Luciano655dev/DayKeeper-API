@@ -38,6 +38,7 @@ const updateMedia = async (mediaId, isSafe) => {
       })
     }
   } catch (error) {
+    console.log("error at updateMedia")
     console.error(error)
   }
 }
@@ -49,8 +50,10 @@ const worker = new Worker(
     const { key, type, mediaId } = job.data
     const tempDir = path.join(__dirname, "..", "tmp", "thumbs")
     console.log(`worker iniciado para ${mediaId}`)
+    console.log(`LOG: bucketName: ${bucketName}; key: ${key}`)
 
     if (type === "image") {
+      console.log("TYPE: IMAGEM")
       const res = await rekognition
         .detectModerationLabels({
           Image: { S3Object: { Bucket: bucketName, Name: key } },
@@ -67,6 +70,7 @@ const worker = new Worker(
       return
     }
 
+    console.log("TYPE: VIDEO")
     // Vídeo
     const videoPath = path.join(
       tempDir,

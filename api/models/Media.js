@@ -5,11 +5,9 @@ const mediaSchema = mongoose.Schema({
   key: String,
   type: String, // 'image' / 'video'
   url: String,
-  placeId: String,
 
   verified: Boolean,
 
-  status: String, // 'private', 'pending', 'public'
   jobId: String,
   usedIn: {
     model: String,
@@ -17,6 +15,14 @@ const mediaSchema = mongoose.Schema({
   },
   uploadedBy: String,
   created_at: Date,
+
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "pending",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
 })
 
 const Media = mongoose.model("Media", mediaSchema, "media")

@@ -1,34 +1,24 @@
 const mongoose = require("mongoose")
-const DayTask = require("../../../models/DayTask")
+
+const deleteTaskDoc = require("./delete/deleteTasks")
 
 const {
-  errors: { notFound, unauthorized, invalidValue },
+  errors: { notFound, invalidValue },
   success: { deleted },
 } = require("../../../../constants/index")
 
 const deleteTask = async (props) => {
-  const { taskId, loggedUser } = props || {}
-
-  if (!loggedUser?._id) {
-    return unauthorized("Unauthorized", "Login required", 401)
-  }
+  const { taskId } = props || {}
 
   if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
     return invalidValue("Task ID")
   }
 
-  try {
-    const doc = await DayTask.findOneAndDelete({
-      _id: taskId,
-      user: loggedUser._id,
-    }).select("_id")
+  const changed = await deleteTaskDoc(taskId)
 
-    if (!doc) return notFound("Task")
+  if (!changed) return notFound("Task")
 
-    return deleted("Day Task")
-  } catch (error) {
-    throw error
-  }
+  return deleted("Day Task")
 }
 
 module.exports = deleteTask

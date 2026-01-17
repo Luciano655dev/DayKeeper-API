@@ -2,9 +2,12 @@ const PostComments = require("../../../models/PostComments")
 
 const deleteUserComments = async (loggedUserId) => {
   try {
-    const response = await PostComments.deleteMany({ userId: loggedUserId })
+    const res = await PostComments.updateMany(
+      { userId: loggedUserId, status: { $ne: "deleted" } },
+      { $set: { status: "deleted", deletedAt: new Date() } }
+    )
 
-    return response.nModified
+    return res.modifiedCount ?? res.nModified ?? 0
   } catch (error) {
     throw new Error(error.message)
   }

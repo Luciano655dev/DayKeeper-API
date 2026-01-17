@@ -5,9 +5,9 @@ const {
 
 const deleteProfilePicture = async (user) => {
   try {
-    if (user.profile_picture.title != defaultPfp.title)
-      deleteFile({ key: user.profile_picture.key })
-
+    if (user.profile_picture?.title !== defaultPfp.title) {
+      await deleteFile({ key: user.profile_picture.key })
+    }
     return user.profile_picture
   } catch (error) {
     throw new Error(error.message)

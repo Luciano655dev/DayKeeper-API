@@ -3,6 +3,7 @@ const userValidationPipeline = () => [
     $match: {
       $and: [
         { banned: { $ne: true } },
+        { status: "public" },
         {
           $or: [
             { private: false },

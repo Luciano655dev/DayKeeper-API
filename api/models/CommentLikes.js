@@ -17,6 +17,14 @@ const commentLikesSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Comment",
   },
+
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "public",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
 })
 
 const CommentLikes = mongoose.model(

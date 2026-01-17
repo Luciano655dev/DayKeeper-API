@@ -22,11 +22,6 @@ const createTask = async (props) => {
 
   // ---------- DAILY TEMPLATE ----------
   if (daily === true) {
-    // templates are never completed
-    if (completed === true) {
-      return invalidValue("Completed in Templated")
-    }
-
     try {
       const task = await DayTask.create({
         title: title.trim(),
@@ -54,18 +49,7 @@ const createTask = async (props) => {
   }
 
   // ---------- NORMAL DAY TASK ----------
-  if (!date) {
-    return invalidValue("Date")
-  }
-
   const parsedDate = typeof date === "string" ? parseISO(date) : new Date(date)
-  if (!isValid(parsedDate)) {
-    return invalidValue("Date")
-  }
-
-  if (typeof completed !== "boolean") {
-    return invalidValue("Completed")
-  }
 
   try {
     const task = await DayTask.create({
@@ -75,6 +59,7 @@ const createTask = async (props) => {
       privacy,
       user: loggedUser._id,
       daily: false,
+      status: "public",
     })
 
     const obj = task.toObject()
@@ -82,7 +67,10 @@ const createTask = async (props) => {
     return created("Day Task", {
       data: {
         ...obj,
-        created_at: convertTimeZone(obj.createdAt || task.createdAt, timeZone),
+        created_at: convertTimeZone(
+          obj.createdAt || obj?.created_at || Date.now(),
+          timeZone
+        ),
       },
     })
   } catch (error) {

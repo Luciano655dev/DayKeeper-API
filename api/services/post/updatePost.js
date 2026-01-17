@@ -8,78 +8,93 @@ const deletePostComments = require("./delete/deletePostComments")
 const deleteCommentLikes = require("./delete/deleteCommentLikes")
 
 const {
-  errors: { notFound, inputTooLong },
+  errors: { notFound },
   success: { updated },
 } = require("../../../constants/index")
 
+function parseIdArray(input) {
+  if (!input) return []
+
+  // If already an array
+  if (Array.isArray(input)) {
+    return input.map(String).filter(Boolean)
+  }
+
+  // If JSON stringified array
+  if (typeof input === "string") {
+    try {
+      const parsed = JSON.parse(input)
+      if (Array.isArray(parsed)) {
+        return parsed.map(String).filter(Boolean)
+      }
+    } catch {
+      // fallback: comma-separated string
+      return input
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    }
+  }
+
+  return []
+}
+
 const updatePost = async (props) => {
-  const placesIds = props?.placesIds?.split(",") || []
   const {
     data,
     privacy,
     emotion,
     postId,
     loggedUser,
-    mediaDocs = [], // novas mídias (req.mediaDocs)
-    keepMediaIds = [], // mídias que o usuário quer manter
-  } = props
+    mediaDocs = [],
+    keepMediaIds = [],
+  } = props || {}
+
+  const keepIds = parseIdArray(keepMediaIds)
 
   try {
-    // 1. Get Post
+    // 1) Permission / existence check
     const postResponse = await getPost({ postId, loggedUser })
     if (postResponse.code !== 200) return notFound("Post")
-    const post = postResponse.data
 
-    // 2. Look for old medias that will be keeped in the post
-    const mediaToKeep = await Media.find({ _id: { $in: keepMediaIds } })
+    // get REAL mongoose doc so .save works
+    const post = await Post.findById(postId)
+    if (!post) return notFound("Post")
 
-    //  3. Verify if the total number is still in the limit
-    const totalAfterUpdate = mediaToKeep.length + mediaDocs.length
-    if (totalAfterUpdate > 5) {
-      throw new Error(inputTooLong("media field").message)
+    // 2) media currently on post
+    const postMediaIds = (post.media || []).map(String)
+    const keepIdsOnPost = keepIds.filter((id) => postMediaIds.includes(id))
+
+    const mediaToKeep = keepIdsOnPost.length
+      ? await Media.find({ _id: { $in: keepIdsOnPost } })
+      : []
+
+    // 3) delete medias removed by user (only those belonging to this post)
+    const idsToDelete = postMediaIds.filter((id) => !keepIdsOnPost.includes(id))
+
+    if (idsToDelete.length) {
+      const mediaToDelete = await Media.find({ _id: { $in: idsToDelete } })
+
+      await Promise.all(mediaToDelete.map((m) => deleteFile({ key: m.key })))
+      await Media.deleteMany({ _id: { $in: idsToDelete } })
     }
 
-    // 4. Delete Media that user don't want
-    const mediaToDelete = await Media.find({
-      _id: { $in: post.media },
-      _id: { $nin: keepMediaIds },
-    })
-
-    for (let media of mediaToDelete) {
-      await deleteFile({ key: media.key })
-      await media.deleteOne()
-    }
-
-    // 5. Link placeIds to medias
-    if (placesIds.length > 0) {
-      for (let i in mediaDocs) {
-        if (!placesIds[i]) continue
-        const place = await getPlaceById({ placeId: placesIds[i] })
-        if (place.code === 200) {
-          mediaDocs[i].placeId = placesIds[i]
-          await mediaDocs[i].save()
-        }
-      }
-    }
-
-    // 6. Link post to new medias
+    // 5) link post usage to new medias
     if (mediaDocs.length) {
-      await Promise.all(
-        mediaDocs.map((media) =>
-          Media.findByIdAndUpdate(media._id, {
-            usedIn: { model: "Post", refId: post._id },
-          })
-        )
+      await Media.updateMany(
+        { _id: { $in: mediaDocs.map((m) => m._id) } },
+        { $set: { usedIn: { model: "Post", refId: post._id } } }
       )
     }
 
-    // 7. Calculate new Post Status
+    // 6) status based on media moderation
     const allMedia = [...mediaToKeep, ...mediaDocs]
-    const postStatus = allMedia.every((m) => m.status === "public")
-      ? "public"
-      : "pending"
+    const postStatus =
+      allMedia.length > 0 && allMedia.every((m) => m.status === "public")
+        ? "public"
+        : "pending"
 
-    // 8. If the privacy changed, delete al previous interactions
+    // 7) privacy change cleanup
     if (privacy && post.privacy !== privacy) {
       if (["private", "close_friends"].includes(privacy)) {
         await deletePostLikes(post._id)
@@ -88,22 +103,22 @@ const updatePost = async (props) => {
       }
     }
 
-    // 9. Update Post
-    post.data = data ?? post.data
-    post.privacy = privacy ?? post.privacy
-    post.emotion = emotion ?? post.emotion
+    // 8) update fields (assumes validated)
+    if (data !== undefined) post.data = data
+    if (privacy !== undefined) post.privacy = privacy
+    if (emotion !== undefined) post.emotion = emotion // only if your schema has it
+
     post.media = allMedia.map((m) => m._id)
     post.status = postStatus
-    post.edited_at = Date.now()
+    post.edited_at = new Date()
 
     await post.save()
-
     return updated("post")
   } catch (error) {
     console.error(error)
-    for (let media of mediaDocs) {
-      await deleteFile({ key: media.key })
-    }
+
+    await Promise.all((mediaDocs || []).map((m) => deleteFile({ key: m.key })))
+
     throw new Error(error.message)
   }
 }

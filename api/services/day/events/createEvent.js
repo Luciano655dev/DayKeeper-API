@@ -18,29 +18,9 @@ const createEvent = async (props) => {
     loggedUser,
   } = props || {}
 
-  if (!loggedUser?._id) {
-    throw new Error("Unauthorized")
-  }
-
-  if (!title || typeof title !== "string" || title.trim().length < 1) {
-    throw new Error("Title is required")
-  }
-
-  if (!dateStart || !dateEnd) {
-    throw new Error("dateStart and dateEnd are required")
-  }
-
   // Prefer ISO strings from client. If you use another format, change parsing here.
   const start = parseISO(dateStart)
   const end = parseISO(dateEnd)
-
-  if (!isValid(start) || !isValid(end)) {
-    throw new Error("Invalid dateStart or dateEnd format (expected ISO string)")
-  }
-
-  if (end < start) {
-    throw new Error("dateEnd must be after dateStart")
-  }
 
   const timeZone = loggedUser?.timeZone || defaultTimeZone
 
@@ -54,6 +34,7 @@ const createEvent = async (props) => {
     placeId,
     user: loggedUser._id,
     created_at: new Date(),
+    status: "public",
   }
 
   const newEvent = await DayEvent.create(doc)
@@ -66,7 +47,7 @@ const createEvent = async (props) => {
       dateStart: convertTimeZone(obj.dateStart, timeZone),
       dateEnd: convertTimeZone(obj.dateEnd, timeZone),
       created_at: convertTimeZone(
-        obj.createdAt || obj.created_at || obj.createdAt,
+        obj.createdAt || obj?.created_at || Date.now(),
         timeZone
       ),
     },

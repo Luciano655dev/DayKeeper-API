@@ -24,6 +24,14 @@ const postCommentsSchema = mongoose.Schema({
     id: String,
     url: String,
   },
+
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "public",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
 })
 
 const PostComments = mongoose.model(

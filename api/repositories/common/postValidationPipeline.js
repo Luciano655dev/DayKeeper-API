@@ -199,10 +199,13 @@ const postValidationPipeline = (mainUser) => {
               // close friends: owner OR close friend can see
               {
                 $and: [
-                  { privacy: "close friends" },
+                  { privacy: { $in: ["close friends", "close_friends"] } },
                   {
                     $or: [
+                      // owner always sees their own post
                       { "user_info._id": mainUserId },
+
+                      // close friend sees it
                       { "isInCloseFriends.0": { $exists: true } },
                     ],
                   },

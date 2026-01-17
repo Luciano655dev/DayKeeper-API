@@ -52,6 +52,8 @@ const register = async (props) => {
     password: passwordHash,
     created_at: Date.now(),
 
+    status: "public",
+
     verification_code_hash: verificationCodeHash,
     verification_expires_at: verificationExpiresAt,
   })

@@ -110,10 +110,8 @@ const dayElementValidationPipeline = (mainUser) => [
   {
     $match: {
       $and: [
-        // hide if I blocked them
         { "block_info.0": { $exists: false } },
-
-        // hide if they blocked me
+        { status: "public" },
         { "blocked_by_owner_info.0": { $exists: false } },
 
         { "user_info.banned": { $ne: true } },

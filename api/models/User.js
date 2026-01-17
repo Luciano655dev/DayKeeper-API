@@ -71,6 +71,14 @@ const userSchema = mongoose.Schema({
   },
 
   banned: { type: Boolean, default: false, required: false },
+
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "public",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
 })
 
 // Indexes

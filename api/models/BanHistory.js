@@ -43,6 +43,14 @@ const banHistorySchema = new mongoose.Schema({
     ref: "User",
     required: false,
   },
+
+  status: {
+    type: String,
+    enum: ["pending", "public", "rejected", "deleted"],
+    default: "public",
+    index: true,
+  },
+  deletedAt: { type: Date, default: null, required: false },
 })
 
 const BanHistory = mongoose.model("BanHistory", banHistorySchema, "banHistory")

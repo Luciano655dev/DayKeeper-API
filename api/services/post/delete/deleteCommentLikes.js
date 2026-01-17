@@ -1,15 +1,21 @@
 const CommentLikes = require("../../../models/CommentLikes")
 
-const deleteCommentLikes = async (id) => {
-  try {
-    const response = await CommentLikes.deleteMany({
-      $and: [{ $or: [{ commentId: id }, { postId: id }] }, { postUserId: id }],
-    })
+async function deleteCommentLikes({ postId, postUserId }) {
+  const res = await CommentLikes.updateMany(
+    {
+      postUserId,
+      $or: [{ postId }, { commentId: postId }],
+      status: { $ne: "deleted" },
+    },
+    {
+      $set: {
+        status: "deleted",
+        deletedAt: new Date(),
+      },
+    }
+  )
 
-    return response.nModified
-  } catch (error) {
-    throw new Error(error.message)
-  }
+  return res.modifiedCount
 }
 
 module.exports = deleteCommentLikes

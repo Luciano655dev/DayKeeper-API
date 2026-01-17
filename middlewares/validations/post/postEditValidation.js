@@ -1,42 +1,70 @@
 const deleteFile = require("../../../api/utils/deleteFile")
 const {
   errors: { serverError },
+  post: { maxPostLength },
 } = require("../../../constants/index")
+
+const ALLOWED_PRIVACY = new Set(["public", "private", "close_friends"])
+
+async function cleanupUploadedFiles(req) {
+  const files = req.files || []
+  await Promise.all(files.map((f) => deleteFile({ key: f.key })))
+}
+
+function isNonEmptyString(v) {
+  return typeof v === "string" && v.trim().length > 0
+}
+
+function isIntegerStringOrNumber(v) {
+  // Accept "50" or 50
+  if (typeof v === "number") return Number.isInteger(v)
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v)
+    return Number.isInteger(n)
+  }
+  return false
+}
 
 const postEditValidation = async (req, res, next) => {
   const { data, privacy, emotion } = req.body
-  const maxDataLength = 1000
 
-  function handleBadRequest(errorCode, message) {
-    if (req.files)
-      for (let i in req.files) deleteFile({ key: req.files[i].key })
-
-    return res.status(errorCode).json({ message })
+  const badRequest = async (status, message) => {
+    await cleanupUploadedFiles(req)
+    return res.status(status).json({ message })
   }
 
   try {
-    if (data && data.length > maxDataLength)
-      return handleBadRequest(413, `Text is too long`)
-
-    // Privacy
-    if (privacy) {
-      switch (privacy) {
-        case "public":
-        case "private":
-        case "close friends":
-        case undefined:
-          break
-        default:
-          return handleBadRequest(400, "Invalid privacy value")
-      }
+    // data
+    if (data !== undefined) {
+      if (typeof data !== "string") return badRequest(400, "Invalid data value")
+      if (data.length > maxPostLength)
+        return badRequest(413, "Text is too long")
     }
 
-    /* Emotions */
-    if (
-      emotion &&
-      (emotion > 100 || emotion < 0 || !Number(emotion).isInteger())
-    )
-      return handleBadRequest(400, "Invalid emotion value")
+    // privacy
+    if (privacy !== undefined) {
+      if (typeof privacy !== "string")
+        return badRequest(400, "Invalid privacy value")
+
+      const normalized = privacy.trim().toLowerCase().replace(" ", "_")
+      if (!ALLOWED_PRIVACY.has(normalized))
+        return badRequest(400, "Invalid privacy value")
+
+      // normalize so controllers always receive your internal value
+      req.body.privacy = normalized
+    }
+
+    // emotion (0..100 integer)
+    if (emotion !== undefined) {
+      if (!isIntegerStringOrNumber(emotion))
+        return badRequest(400, "Invalid emotion value")
+
+      const n = Number(emotion)
+      if (n < 0 || n > 100) return badRequest(400, "Invalid emotion value")
+
+      // normalize
+      req.body.emotion = n
+    }
 
     return next()
   } catch (error) {

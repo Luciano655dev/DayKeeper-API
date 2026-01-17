@@ -66,6 +66,7 @@ const deletePostController = async (req, res) => {
 
     return res.status(code).json({ message, post })
   } catch (error) {
+    console.log(error)
     return res.status(500).json({ message: serverError(error.toString()) })
   }
 }
