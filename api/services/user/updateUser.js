@@ -8,7 +8,7 @@ const { sendVerificationEmail } = require("../../utils/emailHandler")
 const {
   errors: { notFound },
   success: { updated },
-  auth: { registerCodeExpiresTime },
+  auth: { registerCodeExpiresTime, maxTimeZoneLength }, // add maxTimeZoneLength in constants or it will fallback
   user: { defaultPfp },
 } = require("../../../constants/index")
 
@@ -27,14 +27,37 @@ function normalizeOptionalString(v, { lower = false } = {}) {
   return lower ? t.toLowerCase() : t
 }
 
+// date-fns-tz expects IANA zones like "America/New_York"
+function isValidIanaTimeZone(tz) {
+  if (typeof tz !== "string") return false
+  const s = tz.trim()
+  if (!s) return false
+  try {
+    Intl.DateTimeFormat("en-US", { timeZone: s }).format()
+    return true
+  } catch {
+    return false
+  }
+}
+
 const updateUser = async (params) => {
-  let { username, displayName, email, password, bio, file, loggedUser } = params
+  let {
+    username,
+    displayName,
+    email,
+    password,
+    bio,
+    file,
+    timeZone,
+    loggedUser,
+  } = params
 
   // normalize
   username = normalizeOptionalString(username)
   displayName = normalizeOptionalString(displayName)
   email = normalizeOptionalString(email, { lower: true })
   bio = typeof bio === "string" ? bio : undefined
+  timeZone = normalizeOptionalString(timeZone)
 
   const privateNext =
     typeof params?.private === "string" &&
@@ -50,6 +73,9 @@ const updateUser = async (params) => {
   const usernameChanged = !!username && username !== user.username
   const displayNameChanged =
     !!displayName && displayName !== (user.displayName || "")
+
+  const timeZoneChanged =
+    typeof timeZone === "string" && timeZone !== (user.timeZone || "")
 
   // Keep old picture key so we can delete it AFTER successful update
   const oldPictureKey = user.profile_picture?.key
@@ -90,6 +116,7 @@ const updateUser = async (params) => {
   if (usernameChanged) set.username = username
   if (displayNameChanged) set.displayName = displayName
   if (passwordHash) set.password = passwordHash
+  if (timeZoneChanged) set.timeZone = timeZone
 
   if (file) {
     set.profile_picture = {
@@ -111,7 +138,7 @@ const updateUser = async (params) => {
     updatedUser = await User.findOneAndUpdate(
       { _id: user._id },
       { $set: set },
-      { new: true }
+      { new: true },
     )
   } catch (err) {
     if (err && (err.code === 11000 || err.code === 11001)) {
@@ -147,7 +174,7 @@ const updateUser = async (params) => {
       friendlyName,
       updatedUser.email,
       pfpUrl,
-      verificationCode
+      verificationCode,
     ).catch(() => null)
   }
 

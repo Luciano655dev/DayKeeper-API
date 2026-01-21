@@ -58,7 +58,7 @@ const feedPostPipeline = (
     dateStr = null,
     orderMode = "recent",
     maxPostsPerUser = DEFAULT_MAXPOSTSPERUSER,
-  } = {}
+  } = {},
 ) => {
   const tz = mainUser?.timeZone || defaultTimeZone
   const mainUserId = toObjectIdOrNull(mainUser?._id)
@@ -176,10 +176,11 @@ const feedPostPipeline = (
           $push: {
             _id: "$_id",
             date: "$date",
+            edited_at: "$edited_at",
             data: "$data",
-            emotion: "$emotion",
             privacy: "$privacy",
             media: "$media",
+            isOwner: "$isOwner",
 
             likes: "$likes",
             userLiked: "$userLiked",
@@ -383,11 +384,20 @@ const feedPostPipeline = (
               content: "$$p.data",
               privacy: "$$p.privacy",
               media: "$$p.media",
+              isOwner: "$$p.isOwner",
 
               likes: "$$p.likes",
               userLiked: "$$p.userLiked",
               comments: "$$p.comments",
               userCommented: "$$p.userCommented",
+
+              edited_at: {
+                $dateToString: {
+                  format: "%Y-%m-%d %H:%M:%S",
+                  date: "$$p.edited_at",
+                  timezone: tz,
+                },
+              },
 
               relevance: "$$p.relevance",
             },

@@ -62,7 +62,7 @@ const worker = new Worker(
 
       const isSafe = res.ModerationLabels.every(
         (label) =>
-          !inappropriateLabels.includes(label.Name) || label.Confidence < 90
+          !inappropriateLabels.includes(label.Name) || label.Confidence < 90,
       )
 
       await updateMedia(mediaId, isSafe)
@@ -74,7 +74,7 @@ const worker = new Worker(
     // Vídeo
     const videoPath = path.join(
       tempDir,
-      `${Date.now()}-${key.split("/").pop()}`
+      `${Date.now()}-${key.split("/").pop()}`,
     )
     const s3File = await s3
       .getObject({ Bucket: bucketName, Key: key })
@@ -92,7 +92,7 @@ const worker = new Worker(
 
       const hasBadLabel = res.ModerationLabels.some(
         (label) =>
-          inappropriateLabels.includes(label.Name) && label.Confidence >= 90
+          inappropriateLabels.includes(label.Name) && label.Confidence >= 90,
       )
 
       if (hasBadLabel) {
@@ -106,7 +106,7 @@ const worker = new Worker(
 
     await updateMedia(mediaId, isSafe)
   },
-  { connection }
+  { connection },
 )
 
 worker.on("failed", (job, err) => {

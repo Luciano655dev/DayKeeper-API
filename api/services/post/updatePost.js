@@ -90,7 +90,7 @@ const updatePost = async (props) => {
     // 6) status based on media moderation
     const allMedia = [...mediaToKeep, ...mediaDocs]
     const postStatus =
-      allMedia.length > 0 && allMedia.every((m) => m.status === "public")
+      allMedia.length === 0 || allMedia.every((m) => m.status === "public")
         ? "public"
         : "pending"
 

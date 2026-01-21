@@ -2,49 +2,115 @@ const fs = require("fs")
 const path = require("path")
 const { spawn } = require("child_process")
 
-function generateVideoThumbnails(videoPath, outputDir, count = 10) {
+function run(cmd, args) {
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
+    const child = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"] })
+    let stderr = ""
+    child.stderr.on("data", (d) => (stderr += d.toString()))
+    child.on("close", (code) => {
+      if (code !== 0)
+        return reject(new Error(`${cmd} exited with ${code}: ${stderr}`))
+      resolve()
+    })
+  })
+}
 
-    const jobDir = fs.mkdtempSync(path.join(outputDir, "job-"))
-    const ext = "png"
-    const outPattern = path.join(jobDir, `thumb-%03d.${ext}`)
+function probeDurationSeconds(videoPath) {
+  return new Promise((resolve, reject) => {
+    const args = [
+      "-v",
+      "error",
+      "-show_entries",
+      "format=duration",
+      "-of",
+      "default=noprint_wrappers=1:nokey=1",
+      videoPath,
+    ]
+    const child = spawn("ffprobe", args, { stdio: ["ignore", "pipe", "pipe"] })
+
+    let out = ""
+    let err = ""
+    child.stdout.on("data", (d) => (out += d.toString()))
+    child.stderr.on("data", (d) => (err += d.toString()))
+
+    child.on("close", (code) => {
+      if (code !== 0)
+        return reject(new Error(`ffprobe exited with ${code}: ${err}`))
+      const n = Number(String(out).trim())
+      if (!Number.isFinite(n) || n <= 0)
+        return reject(new Error("Could not read video duration"))
+      resolve(n)
+    })
+  })
+}
+
+async function generateVideoThumbnails(
+  videoPath,
+  outputDir,
+  count = 10,
+  { maxWidth = 960, quality = 5 } = {},
+) {
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true })
+
+  const jobDir = fs.mkdtempSync(path.join(outputDir, "job-"))
+  const ext = "jpg"
+  const outPattern = path.join(jobDir, `thumb-%03d.${ext}`)
+
+  // Get duration to spread frames across whole video
+  const duration = await probeDurationSeconds(videoPath)
+
+  // pick count timestamps, skipping first/last 5% to avoid black frames
+  const start = duration * 0.05
+  const end = duration * 0.95
+  const step = count > 1 ? (end - start) / (count - 1) : 0
+
+  // ffmpeg filter:
+  // - select frames around chosen timestamps using `select` with `between(t,...)` is messy
+  // Better approach: use -ss per frame (loop). It's slower but stable and simple.
+  // Since count is small (<=10), this is totally fine.
+  const files = []
+
+  for (let i = 0; i < count; i++) {
+    const t = start + step * i
+    const outFile = path.join(
+      jobDir,
+      `thumb-${String(i + 1).padStart(3, "0")}.${ext}`,
+    )
+
+    const vf = [
+      // scale to maxWidth while keeping aspect ratio; ensure even dims
+      `scale='min(${maxWidth},iw)':-2`,
+    ].join(",")
 
     const args = [
       "-hide_banner",
       "-loglevel",
       "error",
+      "-ss",
+      String(t),
       "-i",
       videoPath,
-      "-vf",
-      `fps=1,scale=trunc(iw/2)*2:trunc(ih/2)*2`,
       "-frames:v",
-      String(count),
-      outPattern,
+      "1",
+      "-vf",
+      vf,
+      // JPEG quality: 2(best)..31(worst). 4-6 is good for moderation.
+      "-q:v",
+      String(quality),
+      outFile,
     ]
 
-    const child = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] })
+    await run("ffmpeg", args)
+    files.push(outFile)
+  }
 
-    let stderr = ""
-    child.stderr.on("data", (d) => (stderr += d.toString()))
+  // sanity check
+  const existing = files.filter((f) => fs.existsSync(f))
+  if (existing.length === 0) {
+    throw new Error("Nenhum thumbnail foi gerado pelo ffmpeg.")
+  }
 
-    child.on("close", (code) => {
-      if (code !== 0) {
-        return reject(new Error(`ffmpeg exited with ${code}: ${stderr}`))
-      }
-
-      const files = fs
-        .readdirSync(jobDir)
-        .filter((f) => f.startsWith("thumb-") && f.endsWith(`.${ext}`))
-        .map((f) => path.join(jobDir, f))
-        .sort()
-
-      if (files.length === 0) {
-        return reject(new Error("Nenhum thumbnail foi gerado pelo ffmpeg."))
-      }
-      resolve(files)
-    })
-  })
+  return existing
 }
 
 module.exports = generateVideoThumbnails

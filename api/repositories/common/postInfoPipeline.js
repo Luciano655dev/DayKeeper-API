@@ -91,6 +91,20 @@ const postInfoPipeline = (mainUser) => {
             { $ifNull: ["$comment_info.totalComments", 0] },
           ],
         },
+
+        isOwner: {
+          $cond: [
+            {
+              $and: [
+                { $ne: [mainUserId, null] },
+                { $eq: ["$user", mainUserId] },
+              ],
+            },
+            true,
+            false,
+          ],
+        },
+
         // optional
         timeZoneMatch: { $eq: ["$user_info.timeZone", tz] },
       },
@@ -108,6 +122,8 @@ const postInfoPipeline = (mainUser) => {
         privacy: 1,
         status: 1,
         created_at: 1,
+        edited_at: 1,
+        isOwner: 1,
 
         likes: 1,
         userLiked: 1,

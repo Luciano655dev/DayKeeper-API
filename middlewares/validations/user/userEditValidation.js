@@ -9,12 +9,30 @@ const {
     maxUsernameLength,
     maxPasswordLength,
     maxDisplayNameLength,
+    maxTimeZoneLength, // add this in constants if you want; fallback below if not present
   },
   errors: { serverError },
 } = require("../../../constants/index")
 
+function isValidIanaTimeZone(tz) {
+  if (typeof tz !== "string") return false
+  const s = tz.trim()
+  if (!s) return false
+
+  // Fast reject for common non-IANA inputs like "EST", "GMT-5", "+02:00"
+  // IANA zones usually contain "/" (e.g. "America/New_York")
+  // But we won't rely only on that; Intl check is the real validation.
+  try {
+    Intl.DateTimeFormat("en-US", { timeZone: s }).format()
+    return true
+  } catch {
+    return false
+  }
+}
+
 const userValidation = async (req, res, next) => {
-  let { username, displayName, email, password, bio, lastPassword } = req.body
+  let { username, displayName, email, password, bio, lastPassword, timeZone } =
+    req.body
 
   const handleBadRequest = (status, message) => {
     if (req.file) deleteFile({ key: req.file.key })
@@ -31,9 +49,12 @@ const userValidation = async (req, res, next) => {
     email = typeof email === "string" ? email.trim().toLowerCase() : undefined
     bio = typeof bio === "string" ? bio : undefined
 
+    timeZone = typeof timeZone === "string" ? timeZone.trim() : undefined
+    if (timeZone === "") timeZone = undefined
+
     // load fresh user with password (don’t trust req.user snapshot)
     const loggedUser = await User.findById(req.user._id).select(
-      "email username displayName password profile_picture private"
+      "email username displayName password profile_picture private timeZone",
     )
     if (!loggedUser) return handleBadRequest(404, "User not found")
 
@@ -58,6 +79,17 @@ const userValidation = async (req, res, next) => {
 
     if (displayName && displayName.length > maxDisplayNameLength) {
       return handleBadRequest(413, "Display name is too long")
+    }
+
+    // timeZone validation (IANA, date-fns-tz compatible)
+    const tzMax = typeof maxTimeZoneLength === "number" ? maxTimeZoneLength : 64
+    if (timeZone) {
+      if (timeZone.length > tzMax) {
+        return handleBadRequest(413, "Time zone is too long")
+      }
+      if (!isValidIanaTimeZone(timeZone)) {
+        return handleBadRequest(400, "Enter a valid time zone")
+      }
     }
 
     if (password) {
@@ -85,7 +117,7 @@ const userValidation = async (req, res, next) => {
       if (exists) return handleBadRequest(409, "Username is already being used")
     }
 
-    // displayName is NOT unique => no "exists" check
+    if (timeZone !== undefined) req.body.timeZone = timeZone
 
     req.loggedUserDoc = loggedUser
     return next()
