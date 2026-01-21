@@ -1,4 +1,4 @@
-const { isValid } = require("date-fns")
+const { isValid, isBefore } = require("date-fns")
 const getEvent = require("../../../../api/services/day/events/getEvent")
 
 const {
@@ -24,7 +24,8 @@ const createEvent = async (req, res, next) => {
     return res.status(413).json({ message: "Event Title is too long" })
 
   const dateStart = req.body.dateStart ? new Date(req.body.dateStart) : null
-  const dateEnd = req.body.dateStart ? new Date(req.body.dateEnd) : null
+  const dateEnd = req.body.dateEnd ? new Date(req.body.dateEnd) : null
+
   if (
     (dateStart && !isValid(dateStart)) ||
     (dateEnd && !isValid(dateEnd)) ||
