@@ -1,21 +1,17 @@
 const eventInfoPipeline = require("../../common/day/events/eventInfoPipeline")
-const mongoose = require("mongoose")
 
 function escapeRegex(input = "") {
   return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
-const searchEventPipeline = (searchQuery, filterPipe, user, mainUser) => {
+const searchEventPipeline = (searchQuery, filterPipe, mainUser) => {
   const q = (searchQuery || "").trim().slice(0, 64) // clamp length
   const safe = escapeRegex(q)
   const regex = safe ? new RegExp(safe, "i") : null
 
-  const userId = new mongoose.Types.ObjectId(user._id)
-
   return [
     {
       $match: {
-        user: userId,
         ...(filterPipe && Object.keys(filterPipe).length ? filterPipe : {}),
         ...(regex
           ? {

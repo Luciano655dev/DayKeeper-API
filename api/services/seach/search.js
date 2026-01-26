@@ -56,10 +56,10 @@ const search = async (props) => {
         : type === "User"
         ? searchUserPipeline(searchQuery, loggedUser)
         : type === "Event"
-        ? searchEventPipeline(searchQuery, filterPipe, loggedUser, loggedUser)
+        ? searchEventPipeline(searchQuery, filterPipe, loggedUser)
         : type === "Task"
-        ? searchTaskPipeline(searchQuery, filterPipe, loggedUser, loggedUser)
-        : searchNotePipeline(searchQuery, filterPipe, loggedUser, loggedUser)
+        ? searchTaskPipeline(searchQuery, filterPipe, loggedUser)
+        : searchNotePipeline(searchQuery, filterPipe, loggedUser)
 
     const response = await getDataWithPages(
       {
