@@ -38,6 +38,7 @@ const userSchema = mongoose.Schema({
   // Post strikes, like Duolingo
   currentStreak: { type: Number, default: 0 },
   maxStreak: { type: Number, default: 0 },
+  streakLastDay: { type: String, default: 0, required: false },
 
   device_tokens: [
     {
@@ -89,7 +90,7 @@ userSchema.index(
     partialFilterExpression: {
       username: { $exists: true, $ne: null, $ne: "" },
     },
-  }
+  },
 )
 userSchema.index(
   { email: 1 },
@@ -98,7 +99,7 @@ userSchema.index(
     partialFilterExpression: {
       email: { $exists: true, $ne: null, $ne: "" },
     },
-  }
+  },
 )
 userSchema.index(
   { google_id: 1 },
@@ -107,7 +108,7 @@ userSchema.index(
     partialFilterExpression: {
       google_id: { $exists: true, $ne: null },
     },
-  }
+  },
 )
 
 const User = mongoose.model("User", userSchema)

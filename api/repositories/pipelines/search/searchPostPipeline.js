@@ -9,6 +9,7 @@ const searchPostPipeline = (searchQuery, mainUser) => [
     $match: {
       $or: [
         { date: { $regex: new RegExp(searchQuery, "i") } },
+        { data: { $regex: new RegExp(searchQuery, "i") } },
         { "user_info.username": { $regex: new RegExp(searchQuery, "i") } },
       ],
     },

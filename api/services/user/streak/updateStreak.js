@@ -1,70 +1,69 @@
-const User = require("../../../models/User")
 const { formatInTimeZone } = require("date-fns-tz")
-const { parseISO, differenceInCalendarDays } = require("date-fns")
-
+const { subDays } = require("date-fns")
+const User = require("../../../models/User")
 const {
   user: { defaultTimeZone },
 } = require("../../../../constants/index")
 
-function dayKeyNow(timeZone) {
-  return formatInTimeZone(new Date(), timeZone, "yyyy-MM-dd")
+function dayKey(d, tz) {
+  return formatInTimeZone(d, tz, "dd-MM-yyyy")
 }
 
-const updateStreak = async (loggedUser) => {
-  const timeZone = loggedUser?.timeZone || defaultTimeZone
-  const todayKey = dayKeyNow(timeZone)
+async function updateStreak(userId, timeZone) {
+  // always prefer the user's real tz from DB if not provided
+  const baseUser = await User.findById(userId).select(
+    "timeZone currentStreak maxStreak streakLastDay",
+  )
+  console.log(baseUser.streakLastDay)
+  if (!baseUser) return null
 
-  const lastKey = loggedUser.streakLastDay || null
-  const current = Number(loggedUser.currentStreak || 0)
-  const max = Number(loggedUser.maxStreak || 0)
+  const tz = timeZone || baseUser.timeZone || defaultTimeZone
+
+  const todayKey = dayKey(new Date(), tz)
+  const yesterdayKey = dayKey(subDays(new Date(), 1), tz)
+
+  const lastKey = baseUser.streakLastDay || null
+  const current = Number(baseUser.currentStreak || 0)
+  const max = Number(baseUser.maxStreak || 0)
 
   // first post ever (streak-wise)
   if (!lastKey) {
     const nextCurrent = 1
     const nextMax = Math.max(max, nextCurrent)
 
-    await User.updateOne(
-      { _id: loggedUser._id },
+    return await User.findByIdAndUpdate(
+      userId,
       {
         $set: {
           currentStreak: nextCurrent,
           maxStreak: nextMax,
           streakLastDay: todayKey,
         },
-      }
-    )
-    return { currentStreak: nextCurrent, maxStreak: nextMax }
+      },
+      { new: true },
+    ).select("currentStreak maxStreak streakLastDay")
   }
 
-  // already posted today (don’t change streak)
+  // already posted today (do nothing)
   if (lastKey === todayKey) {
-    return { currentStreak: current, maxStreak: max }
+    return baseUser
   }
 
-  // compare day difference in calendar-days
-  const daysDiff = differenceInCalendarDays(
-    parseISO(todayKey),
-    parseISO(lastKey)
-  )
-
-  let nextCurrent
-  if (daysDiff === 1) nextCurrent = current + 1 // continued
-  else nextCurrent = 1 // missed 1+ full days => reset to 1 on new post
-
+  // continue only if last post was yesterday in the SAME timezone
+  const nextCurrent = lastKey === yesterdayKey ? current + 1 : 1
   const nextMax = Math.max(max, nextCurrent)
 
-  await User.updateOne(
-    { _id: loggedUser._id },
+  return await User.findByIdAndUpdate(
+    userId,
     {
       $set: {
         currentStreak: nextCurrent,
         maxStreak: nextMax,
         streakLastDay: todayKey,
       },
-    }
-  )
-
-  return { currentStreak: nextCurrent, maxStreak: nextMax }
+    },
+    { new: true },
+  ).select("currentStreak maxStreak streakLastDay")
 }
 
 module.exports = updateStreak

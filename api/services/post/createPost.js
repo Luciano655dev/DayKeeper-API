@@ -13,27 +13,8 @@ const createPost = async (req) => {
   const loggedUser = req.user
 
   const mediaDocs = Array.isArray(req.mediaDocs) ? req.mediaDocs : []
-  // const placesIds = (req?.body?.placesIds ? String(req.body.placesIds) : "").split(",").map((s) => s.trim()).filter(Boolean)\
 
   try {
-    /*
-    NOTE: NOT WORKING RIGHT NOW
-    if (placesIds.length > 0 && mediaDocs.length > 0) {
-      await Promise.all(
-        mediaDocs.map(async (m, i) => {
-          const placeId = placesIds[i]
-          if (!placeId) return
-
-          const placeById = await getPlaceById({ placeId })
-          if (placeById?.code !== 200) return
-
-          m.placeId = placeId
-          await m.save()
-        })
-      )
-    }
-    */
-
     const allMediaPublic = mediaDocs.length
       ? mediaDocs.every((m) => m.status === "public")
       : true
@@ -54,12 +35,12 @@ const createPost = async (req) => {
         mediaDocs.map((media) =>
           Media.findByIdAndUpdate(media._id, {
             usedIn: { model: "Post", refId: post._id },
-          })
-        )
+          }),
+        ),
       )
     }
 
-    await updateStreak(loggedUser)
+    await updateStreak(loggedUser._id, loggedUser?.timeZone)
 
     return created("post", { post })
   } catch (error) {
