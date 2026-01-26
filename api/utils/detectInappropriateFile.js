@@ -5,7 +5,8 @@ const detectInappropriateContent = async (
   key,
   type = "image",
   mediaId,
-  trustScore
+  trustScore,
+  uploadedBy
 ) => {
   const shouldSkip = trustScore >= 80 && Math.random() < 0.5
 
@@ -24,6 +25,7 @@ const detectInappropriateContent = async (
     key,
     type,
     mediaId,
+    uploadedBy,
   })
 
   await Media.findByIdAndUpdate(mediaId, {

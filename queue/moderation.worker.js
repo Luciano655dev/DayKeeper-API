@@ -6,6 +6,7 @@ const AWS = require("aws-sdk")
 const Media = require("../api/models/Media")
 const Post = require("../api/models/Post")
 const generateVideoThumbnails = require("../api/utils/generateVideoThumbnails")
+const createNotification = require("../api/services/notification/createNotification")
 
 /* Imports and Config */
 const { inappropriateLabels } = require("../constants/index")
@@ -23,23 +24,101 @@ const connection = new IORedis(redisUrl, {
 
 const updateMedia = async (mediaId, isSafe) => {
   try {
-    newStatus = isSafe ? "public" : "rejected"
+    const newStatus = isSafe ? "public" : "rejected"
     console.log(`media ${mediaId} is ${newStatus}`)
 
-    const media = await Media.findByIdAndUpdate(mediaId, {
-      status: newStatus,
-      verified: true,
-    })
-    if (!media) return
+    const media = await Media.findByIdAndUpdate(
+      mediaId,
+      {
+        status: newStatus,
+        verified: true,
+      },
+      { new: true }
+    )
+    if (!media) return { media: null, newStatus }
 
     if (media?.usedIn?.model == "Post") {
       await Post.findByIdAndUpdate(media?.usedIn?.refId, {
         status: newStatus,
       })
     }
+    return { media, newStatus }
   } catch (error) {
     console.log("error at updateMedia")
     console.error(error)
+    return { media: null, newStatus: null }
+  }
+}
+
+const formatPostDate = (postDate) => {
+  if (!postDate) return null
+  try {
+    return new Date(postDate).toISOString().slice(0, 10)
+  } catch {
+    return null
+  }
+}
+
+const notifyModerationStarted = async (job) => {
+  try {
+    const { mediaId, uploadedBy } = job.data || {}
+    if (!uploadedBy || !mediaId) return
+
+    const media = await Media.findById(mediaId).lean()
+    if (!media) return
+
+    const postId = media?.usedIn?.refId
+    const post = postId ? await Post.findById(postId).lean() : null
+    const postDate = formatPostDate(post?.date || post?.created_at)
+    const mediaTitle = media?.title || "media"
+
+    await createNotification({
+      userId: uploadedBy,
+      type: "moderation_started",
+      title: "Media review started",
+      body: postDate
+        ? `We are reviewing ${mediaTitle} from ${postDate}.`
+        : `We are reviewing ${mediaTitle} for safety.`,
+      data: {
+        mediaId,
+        mediaTitle,
+        postId: post?._id || postId || null,
+        postDate,
+      },
+    })
+  } catch (error) {
+    console.error("Failed to send moderation start notification", error)
+  }
+}
+
+const notifyModerationFinished = async ({ media, newStatus, fallbackUserId }) => {
+  try {
+    const userId = media?.uploadedBy || fallbackUserId
+    if (!userId) return
+
+    const postId = media?.usedIn?.refId || null
+    const post = postId ? await Post.findById(postId).lean() : null
+    const postDate = formatPostDate(post?.date || post?.created_at)
+    const mediaTitle = media?.title || "media"
+    const statusLabel = newStatus === "public" ? "approved" : "rejected"
+
+    await createNotification({
+      userId,
+      type: "moderation_finished",
+      title: "Media review completed",
+      body: postDate
+        ? `Your ${mediaTitle} from ${postDate} was ${statusLabel}.`
+        : `Your ${mediaTitle} was ${statusLabel}.`,
+      data: {
+        mediaId: media?._id,
+        mediaTitle,
+        status: newStatus,
+        postId,
+        postDate,
+      },
+    })
+  } catch (error) {
+    console.error("Failed to send moderation finished notification", error)
   }
 }
 
@@ -65,7 +144,12 @@ const worker = new Worker(
           !inappropriateLabels.includes(label.Name) || label.Confidence < 90,
       )
 
-      await updateMedia(mediaId, isSafe)
+      const result = await updateMedia(mediaId, isSafe)
+      await notifyModerationFinished({
+        media: result?.media,
+        newStatus: result?.newStatus,
+        fallbackUserId: job.data?.uploadedBy,
+      })
 
       return
     }
@@ -104,10 +188,19 @@ const worker = new Worker(
     fs.unlinkSync(videoPath)
     thumbs.forEach((thumb) => fs.unlinkSync(thumb))
 
-    await updateMedia(mediaId, isSafe)
+    const result = await updateMedia(mediaId, isSafe)
+    await notifyModerationFinished({
+      media: result?.media,
+      newStatus: result?.newStatus,
+      fallbackUserId: job.data?.uploadedBy,
+    })
   },
   { connection },
 )
+
+worker.on("active", (job) => {
+  notifyModerationStarted(job).catch(() => null)
+})
 
 worker.on("failed", (job, err) => {
   console.error(`Job ${job.id} failed:`, err)

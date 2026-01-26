@@ -17,7 +17,8 @@ async function detectInappropriateContentMW(req, res, next) {
         media.key,
         media.type,
         media._id,
-        trustScore
+        trustScore,
+        media.uploadedBy
       )
     }
 

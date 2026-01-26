@@ -29,7 +29,7 @@ const getDailyTasks = async (props) => {
       loggedUser
     )
 
-    return fetched("Daily Tasks", { data: tasks || [] })
+    return fetched("Daily Tasks", tasks || { data: [] })
   } catch (error) {
     throw error
   }

@@ -9,10 +9,10 @@ const connection = new IORedis(redisUrl)
 
 const moderationQueue = new Queue("moderationQueue", { connection })
 
-function enqueueModeration({ mediaId, key, type }) {
+function enqueueModeration({ mediaId, key, type, uploadedBy }) {
   return moderationQueue.add(
     "analyzeMedia",
-    { mediaId, key, type },
+    { mediaId, key, type, uploadedBy },
     {
       attempts: 3,
       backoff: { type: "exponential", delay: 3000 },
