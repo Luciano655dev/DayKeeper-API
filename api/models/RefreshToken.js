@@ -14,6 +14,9 @@ const RefreshTokenSchema = new mongoose.Schema(
   { timestamps: true }
 )
 
+// Auto-clean expired refresh tokens
+RefreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+
 const RefreshToken = mongoose.model(
   "RefreshTokens",
   RefreshTokenSchema,
