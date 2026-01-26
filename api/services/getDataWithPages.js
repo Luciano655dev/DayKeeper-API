@@ -28,6 +28,7 @@ const MODEL_BY_TYPE = {
   Note: require("../models/DayNote"),
   Task: require("../models/DayTask"),
   Event: require("../models/DayEvent"),
+  Notification: require("../models/Notification"),
 }
 
 const getDataWithPages = async (

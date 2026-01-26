@@ -1,6 +1,6 @@
 const User = require("../../models/User")
 const Followers = require("../../models/Followers")
-const sendNotification = require("../../utils/sendNotification")
+const createNotification = require("../notification/createNotification")
 
 const {
   notifications: {
@@ -50,10 +50,16 @@ const followUser = async (props) => {
         requested: true,
       })
       await newFollowRelation.save()
-      sendNotification(
-        user._id,
-        newFollowRequestNotification(loggedUser.username)
+      const followRequestPayload = newFollowRequestNotification(
+        loggedUser.username
       )
+      await createNotification({
+        userId: user._id,
+        type: "follow_request",
+        title: followRequestPayload.title,
+        body: followRequestPayload.body,
+        data: { followerId: loggedUser._id, username: loggedUser.username },
+      })
       return custom(`You sent a follow request to ${username}`)
     }
 
@@ -63,7 +69,14 @@ const followUser = async (props) => {
     })
     await newFollowRelation.save()
 
-    sendNotification(user._id, newFollowerNotification(loggedUser.username))
+    const newFollowerPayload = newFollowerNotification(loggedUser.username)
+    await createNotification({
+      userId: user._id,
+      type: "new_follower",
+      title: newFollowerPayload.title,
+      body: newFollowerPayload.body,
+      data: { followerId: loggedUser._id, username: loggedUser.username },
+    })
     return custom(`You started following ${username}`)
   } catch (error) {
     throw new Error(error.message)

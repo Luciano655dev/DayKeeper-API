@@ -106,6 +106,7 @@ app.use("/post", require("./routes/postRoutes"))
 app.use("/day", require("./routes/dayRoutes"))
 app.use("/admin", require("./routes/adminRoutes"))
 app.use("/media", require("./routes/mediaRoutes"))
+app.use("/notifications", require("./routes/notificationRoutes"))
 app.use("/", require("./routes/searchRoutes"))
 app.use("/", require("./routes/userRoutes"))
 

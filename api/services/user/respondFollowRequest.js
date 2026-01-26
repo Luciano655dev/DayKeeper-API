@@ -1,8 +1,10 @@
 const findUser = require("../user/get/findUser")
 const Followers = require("../../models/Followers")
+const createNotification = require("../notification/createNotification")
 const {
   errors: { notFound, unauthorized, custom: customErr },
   success: { custom },
+  notifications,
 } = require("../../../constants/index")
 
 const respondeFollowRequest = async (props) => {
@@ -36,6 +38,16 @@ const respondeFollowRequest = async (props) => {
     /* ACCEPTED */
     followRelation.required = undefined
     await followRelation.save()
+
+    const acceptedPayload =
+      notifications.follow.followRequestAccepted(loggedUser.username)
+    await createNotification({
+      userId: followUser._id,
+      type: "follow_request_accepted",
+      title: acceptedPayload.title,
+      body: acceptedPayload.body,
+      data: { followingId: loggedUser._id, username: loggedUser.username },
+    })
 
     return custom(`You accepted ${followUser.username}'s request`)
   } catch (error) {
