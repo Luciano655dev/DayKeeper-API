@@ -15,7 +15,7 @@ const removeFollower = async (props) => {
     const followRelation = await Followers.findOne({
       followerId: followUser._id,
       followingId: loggedUser._id,
-      required: { $ne: true },
+      requested: { $ne: true },
     })
 
     // validations

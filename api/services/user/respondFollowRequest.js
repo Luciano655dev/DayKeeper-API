@@ -17,7 +17,7 @@ const respondeFollowRequest = async (props) => {
     const followRelation = await Followers.findOne({
       followerId: followUser._id,
       followingId: loggedUser._id,
-      required: true,
+      requested: true,
     })
 
     /* Validations */
@@ -36,7 +36,7 @@ const respondeFollowRequest = async (props) => {
     }
 
     /* ACCEPTED */
-    followRelation.required = undefined
+    followRelation.requested = false
     await followRelation.save()
 
     const acceptedPayload =

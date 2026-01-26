@@ -11,7 +11,7 @@ const searchUserPipeline = (searchQuery, mainUser) => [
       ],
     },
   },
-  ...userInfoPipeline(mainUser),
+  ...userInfoPipeline(mainUser, { allowPrivate: true }),
 ]
 
 module.exports = searchUserPipeline

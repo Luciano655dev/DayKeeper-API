@@ -9,7 +9,9 @@ const getUser = async (props) => {
   const { username: userInput, loggedUser } = props
 
   try {
-    const user = await User.aggregate(getUserPipeline(userInput, loggedUser))
+    const user = await User.aggregate(
+      getUserPipeline(userInput, loggedUser, { allowPrivate: true })
+    )
     if (!user[0]) return notFound("User")
 
     return fetched(`user`, {

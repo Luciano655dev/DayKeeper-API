@@ -41,7 +41,7 @@ async function checkValidUserMW(req, res, next) {
         .json({ message: "This user blocked you or you blocked him" })
     }
 
-    if (user.private && !isFollowing) {
+    if (!req.allowPrivateAccess && user.private && !isFollowing) {
       return res
         .status(409)
         .json({ message: "You cannot access a private user's route" })

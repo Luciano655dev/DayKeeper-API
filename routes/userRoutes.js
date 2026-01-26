@@ -49,9 +49,18 @@ router.delete("/user", checkTokenMW, deleteUser)
 // Follows
 router.get("/:username/followers", checkTokenMW, getFollowers)
 router.get("/:username/following", checkTokenMW, getFollowing)
-router.post("/:username/follow", checkTokenMW, checkValidUserMW, followUser)
 router.post(
-  "/:name/respond_follow",
+  "/:username/follow",
+  checkTokenMW,
+  (req, res, next) => {
+    req.allowPrivateAccess = true
+    next()
+  },
+  checkValidUserMW,
+  followUser
+)
+router.post(
+  "/:username/respond_follow",
   checkTokenMW,
   checkValidUserMW,
   respondFollowRequest

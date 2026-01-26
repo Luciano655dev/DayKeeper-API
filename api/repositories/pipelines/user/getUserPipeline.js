@@ -11,9 +11,9 @@ function buildUserMatch(userInput) {
   return { $or: or }
 }
 
-const getUserPipeline = (userInput, mainUser) => [
+const getUserPipeline = (userInput, mainUser, options = {}) => [
   { $match: buildUserMatch(userInput) },
-  ...userInfoPipeline(mainUser),
+  ...userInfoPipeline(mainUser, options),
 ]
 
 module.exports = getUserPipeline

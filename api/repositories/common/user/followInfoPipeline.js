@@ -106,6 +106,27 @@ const followInfoPipeline = (mainUser) => {
     // keep your public fields
     {
       $addFields: {
+        _requestedByMe: {
+          $gt: [
+            {
+              $size: {
+                $filter: {
+                  input: "$_followRels",
+                  as: "r",
+                  cond: {
+                    $and: [
+                      { $eq: ["$$r.requested", true] },
+                      { $eq: ["$$r.followerId", mainUser._id] },
+                      { $eq: ["$$r.followingId", "$_id"] },
+                    ],
+                  },
+                },
+              },
+            },
+            0,
+          ],
+        },
+
         // if it's me, force false so UI doesn't show "Following" on myself
         isFollowing: {
           $cond: ["$_sameUser", false, "$_followByMe"],
@@ -128,6 +149,11 @@ const followInfoPipeline = (mainUser) => {
                 then: "follower",
               },
               {
+                // if I requested to follow a private user
+                case: { $and: ["$private", "$_requestedByMe"] },
+                then: "requested",
+              },
+              {
                 // if they follow me -> "following"
                 case: "$_followsMe",
                 then: "following",
@@ -145,6 +171,7 @@ const followInfoPipeline = (mainUser) => {
         _followRels: 0,
         _followByMe: 0,
         _followsMe: 0,
+        _requestedByMe: 0,
       },
     },
   ]

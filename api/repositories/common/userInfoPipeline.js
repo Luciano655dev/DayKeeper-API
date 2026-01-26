@@ -6,9 +6,9 @@ const {
   user: { defaultTimeZone },
 } = require("../../../constants/index")
 
-const userInfoPipeline = (mainUser) => [
+const userInfoPipeline = (mainUser, options = {}) => [
   ...followInfoPipeline(mainUser),
-  ...userValidationPipeline(mainUser),
+  ...userValidationPipeline(options),
   ...isInCloseFriends(mainUser),
 
   {
