@@ -145,7 +145,6 @@ const followInfoPipeline = (mainUser) => {
         _followRels: 0,
         _followByMe: 0,
         _followsMe: 0,
-        _sameUser: 0,
       },
     },
   ]

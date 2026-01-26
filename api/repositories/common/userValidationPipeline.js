@@ -8,7 +8,10 @@ const userValidationPipeline = () => [
           $or: [
             { private: false },
             {
-              $and: [{ private: true }, { isFollowing: true }],
+              $and: [
+                { private: true },
+                { $or: [{ isFollowing: true }, { _sameUser: true }] },
+              ],
             },
           ],
         },
