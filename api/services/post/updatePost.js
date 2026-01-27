@@ -97,9 +97,9 @@ const updatePost = async (props) => {
     // 7) privacy change cleanup
     if (privacy && post.privacy !== privacy) {
       if (["private", "close_friends"].includes(privacy)) {
-        await deletePostLikes(post._id)
-        await deletePostComments(post._id)
-        await deleteCommentLikes(post._id)
+        await deletePostLikes({ postId: post._id, postUserId: post.user })
+        await deletePostComments({ postId: post._id, postUserId: post.user })
+        await deleteCommentLikes({ postId: post._id, postUserId: post.user })
       }
     }
 

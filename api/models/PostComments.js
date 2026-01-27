@@ -11,7 +11,12 @@ const postCommentsSchema = mongoose.Schema({
   },
   postId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Post",
+  },
+  parentCommentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "PostComments",
+    default: null,
   },
 
   created_at: {
@@ -33,6 +38,10 @@ const postCommentsSchema = mongoose.Schema({
   },
   deletedAt: { type: Date, default: null, required: false },
 })
+
+postCommentsSchema.index({ postId: 1, created_at: -1 })
+postCommentsSchema.index({ parentCommentId: 1, created_at: -1 })
+postCommentsSchema.index({ userId: 1, created_at: -1 })
 
 const PostComments = mongoose.model(
   "PostComments",

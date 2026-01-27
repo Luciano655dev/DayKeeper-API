@@ -18,6 +18,13 @@ const {
 const userRegisterValidation = require("../middlewares/validations/auth/userRegisterValidation")
 const userLoginValidation = require("../middlewares/validations/auth/userLoginValidation")
 const checkTokenMW = require("../middlewares/checkTokenMW")
+const rateLimit = require("../middlewares/rateLimit")
+
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  methods: ["POST"],
+})
 
 passportConfig(passport)
 
@@ -36,7 +43,7 @@ router.post(
   login
 )
 
-router.post("/refresh", refresh)
+router.post("/refresh", refreshLimiter, refresh)
 router.post("/logout", logout)
 
 router.get(

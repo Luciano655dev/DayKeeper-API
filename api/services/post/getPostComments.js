@@ -5,6 +5,7 @@ const mongoose = require("mongoose")
 
 const {
   success: { fetched },
+  errors: { invalidValue, notFound },
 } = require("../../../constants/index")
 
 const getPostComments = async (props) => {
@@ -18,7 +19,11 @@ const getPostComments = async (props) => {
 
     // get comments
     const comments = await getDataWithPages({
-      pipeline: getPostCommentsPipeline(postId, loggedUser),
+      pipeline: getPostCommentsPipeline({
+        postId,
+        parentCommentId: null,
+        mainUser: loggedUser,
+      }),
       type: "PostComments",
       page,
       maxPageSize,

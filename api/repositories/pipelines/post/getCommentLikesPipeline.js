@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const getCommentLikesPipeline = (userCommentId, postId) => [
+const getCommentLikesPipeline = (commentId) => [
   {
     $lookup: {
       from: "postComments",
@@ -25,8 +25,7 @@ const getCommentLikesPipeline = (userCommentId, postId) => [
   },
   {
     $match: {
-      "commentAuthor._id": new mongoose.Types.ObjectId(userCommentId),
-      postId: new mongoose.Types.ObjectId(postId),
+      commentId: new mongoose.Types.ObjectId(commentId),
     },
   },
   {

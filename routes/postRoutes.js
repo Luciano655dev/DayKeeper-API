@@ -9,6 +9,9 @@ const {
   likePost,
   getPostLikes,
   getPostComments,
+  getCommentById,
+  getCommentReplies,
+  commentOnComment,
   commentPost,
   likeComment,
   getCommentLikes,
@@ -59,8 +62,11 @@ router.post("/:postId/like", checkTokenMW, likePost) // Like a Post
 router.get("/:postId/likes", checkTokenMW, getPostLikes) // get post likes
 router.post("/:postId/comment", checkTokenMW, commentPost) // Comment in a post
 router.get("/:postId/comments", checkTokenMW, getPostComments) // Get Post Comments
-router.delete("/:postId/comment/:userId", checkTokenMW, deleteComment) // Delete a comment
-router.post("/:postId/like/:userId", checkTokenMW, likeComment) // Like a comment
-router.get("/:postId/likes/:userId", checkTokenMW, getCommentLikes) // get comment likes
+router.get("/comment/:commentId", checkTokenMW, getCommentById) // Get comment by id
+router.get("/comment/:commentId/replies", checkTokenMW, getCommentReplies) // Get comment replies
+router.post("/comment/:commentId/reply", checkTokenMW, commentOnComment) // Reply to a comment
+router.delete("/comment/:commentId", checkTokenMW, deleteComment) // Delete a comment
+router.post("/comment/:commentId/like", checkTokenMW, likeComment) // Like a comment
+router.get("/comment/:commentId/likes", checkTokenMW, getCommentLikes) // get comment likes
 
 module.exports = router

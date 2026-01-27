@@ -10,15 +10,40 @@ const dotenv = require("dotenv")
 dotenv.config()
 
 const passportConfig = require("./api/config/passportAuth")
+const rateLimit = require("./middlewares/rateLimit")
 
 const app = express()
 const isProd = process.env.NODE_ENV === "prod"
+
+app.disable("x-powered-by")
 
 // IMPORTANT when behind a proxy / load balancer (Render, Railway, Nginx, etc.)
 app.set("trust proxy", 1)
 
 // --------- Security + parsing ---------
 app.use(helmet())
+
+// --------- Rate limiting ---------
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
+  methods: ["POST", "PUT", "PATCH", "DELETE"],
+})
+
+const readLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10000,
+  methods: ["GET"],
+})
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  methods: ["POST"],
+})
+
+app.use(writeLimiter)
+app.use(readLimiter)
 
 app.use(cookieParser())
 app.use(express.json({ limit: "1mb" }))
@@ -101,7 +126,7 @@ passportConfig(passport)
 app.get("/ping", (req, res) => res.status(200).send("PONG"))
 
 app.use("/webhooks", require("./routes/webhooks"))
-app.use("/auth", require("./routes/authRoutes"))
+app.use("/auth", authLimiter, require("./routes/authRoutes"))
 app.use("/post", require("./routes/postRoutes"))
 app.use("/day", require("./routes/dayRoutes"))
 app.use("/admin", require("./routes/adminRoutes"))

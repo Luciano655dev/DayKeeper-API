@@ -1,7 +1,6 @@
 const Post = require("../../models/Post")
-const findUser = require("../user/get/findUser")
+const PostComments = require("../../models/PostComments")
 const getDataWithPages = require("../getDataWithPages")
-const convertTimeZone = require(`../../utils/convertTimeZone`)
 const {
   getCommentLikesPipeline,
   getPostPipeline,
@@ -13,14 +12,22 @@ const {
 } = require("../../../constants/index")
 
 const getCommentLikes = async (props) => {
-  const { postId, userId, loggedUser, page, maxPageSize } = props
+  const { commentId, loggedUser, page, maxPageSize } = props
 
   try {
-    const post = await Post.aggregate(getPostPipeline(postId, loggedUser))
-    if (!post) return notFound("Post")
+    const comment = await PostComments.findOne({
+      _id: commentId,
+      status: { $ne: "deleted" },
+    })
+    if (!comment) return notFound("Comment")
+
+    const post = await Post.aggregate(
+      getPostPipeline(comment.postId, loggedUser)
+    )
+    if (!post?.[0]) return notFound("Post")
 
     const usersThatLiked = await getDataWithPages({
-      pipeline: getCommentLikesPipeline(userId, postId),
+      pipeline: getCommentLikesPipeline(commentId),
       type: "CommentLikes",
       page,
       maxPageSize,
@@ -29,6 +36,7 @@ const getCommentLikes = async (props) => {
     return fetched(`Comment Likes`, {
       response: {
         post: post[0],
+        commentId,
         ...usersThatLiked,
       },
     })

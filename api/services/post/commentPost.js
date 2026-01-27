@@ -1,6 +1,5 @@
 const PostComments = require("../../models/PostComments")
 const getPost = require("./getPost")
-const deleteCommentLikes = require("./delete/deleteCommentLikes")
 const axios = require("axios")
 const {
   giphy: { apiKey },
@@ -10,11 +9,11 @@ const {
   post: { maxCommentLength },
   errors: { fieldsNotFilledIn, inputTooLong, notFound },
   errorGif,
-  success: { created, deleted },
+  success: { created },
 } = require("../../../constants/index")
 
 const commentPost = async (props) => {
-  let { postId, loggedUser, comment, gif } = props
+  let { postId, loggedUser, comment, gif, parentCommentId } = props
 
   /* Validations */
   if (!comment) return fieldsNotFilledIn(`comment`)
@@ -29,18 +28,13 @@ const commentPost = async (props) => {
       post = postResponse.data
     } else return notFound("Post")
 
-    /* Create Comment Relation */
-    const commentRelation = await PostComments.findOne({
-      userId: loggedUser._id,
-      postId: post._id,
-    })
-
-    if (commentRelation) {
-      // delete comment
-      await deleteCommentLikes(commentRelation._id)
-      await PostComments.deleteOne({ userId: loggedUser._id, postId: post._id })
-
-      return deleted("Comment", { response: { post, comment: newComment } })
+    if (parentCommentId) {
+      const parent = await PostComments.findOne({
+        _id: parentCommentId,
+        postId: post._id,
+        status: { $ne: "deleted" },
+      })
+      if (!parent) return notFound("Comment")
     }
 
     /* Get Gif */
@@ -67,6 +61,7 @@ const commentPost = async (props) => {
       userId: loggedUser._id,
       postUserId: post.user_info._id,
       postId: post._id,
+      parentCommentId: parentCommentId || null,
       comment,
       gif,
     })
