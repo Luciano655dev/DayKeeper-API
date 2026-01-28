@@ -58,10 +58,12 @@ const allowedOrigins = (process.env.CORS_ORIGINS || "")
 if (allowedOrigins.length === 0) {
   allowedOrigins.push("https://daykeeper.app", "https://www.daykeeper.app")
 }
+const allowAllCors = process.env.CORS_ALLOW_ALL === "true"
 
 app.use(
   cors({
     origin: (origin, cb) => {
+      if (allowAllCors) return cb(null, true)
       // Allow server-to-server / tools without Origin header
       if (!origin) return cb(null, true)
 
