@@ -19,16 +19,25 @@ const createPost = async (req) => {
       ? mediaDocs.every((m) => m.status === "public")
       : true
 
+    const postStatus = allMediaPublic ? "public" : "pending"
+
     const post = await Post.create({
       date: new Date(),
       data,
       emotion,
       privacy,
-      status: allMediaPublic ? "public" : "pending",
+      status: postStatus,
       media: mediaDocs.map((m) => m._id),
       user: loggedUser._id,
       created_at: new Date(),
     })
+
+    if (postStatus !== "public") {
+      await Post.updateOne(
+        { _id: post._id, status: "public" },
+        { $set: { status: "pending" } }
+      )
+    }
 
     if (mediaDocs.length) {
       await Promise.all(

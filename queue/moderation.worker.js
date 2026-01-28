@@ -38,9 +38,24 @@ const updateMedia = async (mediaId, isSafe) => {
     if (!media) return { media: null, newStatus }
 
     if (media?.usedIn?.model == "Post") {
-      await Post.findByIdAndUpdate(media?.usedIn?.refId, {
-        status: newStatus,
-      })
+      const post = await Post.findById(media?.usedIn?.refId).select("media")
+      if (post?.media?.length) {
+        const medias = await Media.find({ _id: { $in: post.media } }).select(
+          "status"
+        )
+
+        const hasRejected = medias.some((m) => m.status === "rejected")
+        const allPublic =
+          medias.length > 0 && medias.every((m) => m.status === "public")
+
+        const postStatus = hasRejected
+          ? "rejected"
+          : allPublic
+          ? "public"
+          : "pending"
+
+        await Post.findByIdAndUpdate(post._id, { status: postStatus })
+      }
     }
     return { media, newStatus }
   } catch (error) {
