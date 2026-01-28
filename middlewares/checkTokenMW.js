@@ -16,7 +16,7 @@ async function checkTokenMW(req, res, next) {
     })
 
     const user = await User.findById(payload.sub)
-    if (!user) {
+    if (!user || user.status === "deleted") {
       return res.status(401).json({ message: "Not logged user broo" })
     }
 

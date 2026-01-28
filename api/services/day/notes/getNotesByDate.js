@@ -23,7 +23,10 @@ const getNotesByDate = async (props) => {
     return unauthorized("Unauthorized", "Login required", 401)
   }
 
-  const targetUser = await User.findOne({ username }).select("_id username")
+  const targetUser = await User.findOne({
+    username,
+    status: { $ne: "deleted" },
+  }).select("_id username")
   if (!targetUser) return notFound("User")
 
   const tz = loggedUser?.timeZone || defaultTimeZone

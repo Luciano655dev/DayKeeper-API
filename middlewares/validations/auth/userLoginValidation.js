@@ -83,6 +83,10 @@ const userLoginValidation = async (req, res, next) => {
       return res.status(401).json({ message: "Incorrect email or password" })
     }
 
+    if (user.status === "deleted") {
+      return res.status(401).json({ message: "Incorrect email or password" })
+    }
+
     const ok = await bcrypt.compare(password, user.password)
     if (!ok) {
       return res.status(401).json({ message: "Incorrect email or password" })

@@ -5,7 +5,7 @@ module.exports = async function getUserData({ userId }) {
     "_id username displayName email profile_picture roles verified_email timeZone private"
   )
 
-  if (!user) {
+  if (!user || user.status === "deleted") {
     return { code: 404, message: "User not found", user: null }
   }
 

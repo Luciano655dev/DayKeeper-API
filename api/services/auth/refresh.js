@@ -19,7 +19,7 @@ async function refresh(props) {
   if (!rotated) return invalidValue(`Refresh Token`)
 
   const user = await User.findById(rotated.userId)
-  if (!user) return invalidValue(`Refresh Token`)
+  if (!user || user.status === "deleted") return invalidValue(`Refresh Token`)
 
   const accessToken = signAccessToken(user)
 

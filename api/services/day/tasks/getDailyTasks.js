@@ -15,7 +15,10 @@ const getDailyTasks = async (props) => {
 
     // Just you can see your daily tasks
     if (username) {
-      targetUser = await User.findOne({ username })
+      targetUser = await User.findOne({
+        username,
+        status: { $ne: "deleted" },
+      })
       if (!targetUser) return notFound("User")
     }
 

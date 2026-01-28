@@ -9,7 +9,7 @@ const {
 const addOrRemoveFromCloseFriends = async (props) => {
   const { username, loggedUser } = props
   try {
-    const user = await User.findOne({ username })
+    const user = await User.findOne({ username, status: { $ne: "deleted" } })
     if (!user) return notFound("User")
 
     if (user._id.equals(loggedUser._id))

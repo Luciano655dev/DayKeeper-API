@@ -5,9 +5,15 @@ const { hideUserData } = require("../../../repositories/index")
 
 const findUser = async ({ userInput = "" }) => {
   try {
-    let user = await User.findOne({ username: userInput }).select(hideUserData)
+    let user = await User.findOne({
+      username: userInput,
+      status: { $ne: "deleted" },
+    }).select(hideUserData)
     if (!user && mongoose.Types.ObjectId.isValid(userInput))
-      user = await User.findById(userInput).select(hideUserData)
+      user = await User.findOne({
+        _id: userInput,
+        status: { $ne: "deleted" },
+      }).select(hideUserData)
 
     return user
   } catch (error) {

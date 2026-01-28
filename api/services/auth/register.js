@@ -2,6 +2,7 @@ const User = require("../../models/User")
 const bcrypt = require("bcryptjs")
 const crypto = require("crypto")
 const { sendVerificationEmail } = require("../../utils/emailHandler")
+const createNotification = require("../notification/createNotification")
 
 const {
   user: { defaultPfp, defaultTimeZone },
@@ -74,6 +75,15 @@ const register = async (props) => {
   sendVerificationEmail(username, email, img?.url, verificationCode).catch(
     () => null
   )
+
+  createNotification({
+    userId: user._id,
+    type: "welcome",
+    title: "Welcome to Daykeeper!",
+    body: "Thanks for joining. Your account is ready to use.",
+    data: { userId: user._id },
+    sendPush: false,
+  }).catch(() => null)
 
   return created(`${username}`, user)
 }
