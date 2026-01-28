@@ -19,6 +19,13 @@ const createPost = async (req) => {
       ? mediaDocs.every((m) => m.status === "public")
       : true
 
+    console.log("[post] createPost", {
+      userId: loggedUser._id,
+      mediaIds: mediaDocs.map((m) => m._id),
+      mediaStatuses: mediaDocs.map((m) => m.status),
+      allMediaPublic,
+    })
+
     const postStatus = allMediaPublic ? "public" : "pending"
 
     const post = await Post.create({
@@ -48,6 +55,12 @@ const createPost = async (req) => {
         ),
       )
     }
+
+    console.log("[post] createPost saved", {
+      postId: post._id,
+      status: postStatus,
+      mediaCount: mediaDocs.length,
+    })
 
     await updateStreak(loggedUser._id, loggedUser?.timeZone)
 

@@ -54,6 +54,12 @@ const updateMedia = async (mediaId, isSafe) => {
           ? "public"
           : "pending"
 
+        console.log("[worker] post status recalculated", {
+          postId: post._id,
+          postStatus,
+          mediaStatuses: medias.map((m) => m.status),
+        })
+
         await Post.findByIdAndUpdate(post._id, { status: postStatus })
       }
     }
@@ -145,6 +151,7 @@ const worker = new Worker(
     const tempDir = path.join(__dirname, "..", "tmp", "thumbs")
     console.log(`worker iniciado para ${mediaId}`)
     console.log(`LOG: bucketName: ${bucketName}; key: ${key}`)
+    console.log("[worker] job data", job.data)
 
     if (type === "image") {
       console.log("TYPE: IMAGEM")
@@ -214,6 +221,7 @@ const worker = new Worker(
 )
 
 worker.on("active", (job) => {
+  console.log("[worker] job active", { id: job.id, data: job.data })
   notifyModerationStarted(job).catch(() => null)
 })
 

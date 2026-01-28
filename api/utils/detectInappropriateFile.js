@@ -21,6 +21,13 @@ const detectInappropriateContent = async (
   }
 
   console.log(`======== ${mediaId} to the moderation Queue ========`)
+  console.log("[media] detectInappropriateContent enqueue", {
+    mediaId,
+    key,
+    type,
+    uploadedBy,
+    trustScore,
+  })
   await enqueueModeration({
     key,
     type,
@@ -31,6 +38,10 @@ const detectInappropriateContent = async (
   await Media.findByIdAndUpdate(mediaId, {
     status: "pending",
     verified: false,
+  })
+
+  console.log("[media] detectInappropriateContent updated media to pending", {
+    mediaId,
   })
 
   return true
