@@ -119,7 +119,11 @@ const reseteProfilePictureController = async (req, res) => {
 // deleteUser
 const deleteUserController = async (req, res) => {
   try {
-    const { code, message, data } = await deleteUser({ loggedUser: req.user })
+    const { code, message, data } = await deleteUser({
+      loggedUser: req.user,
+      password: req.body?.password,
+      code: req.body?.code,
+    })
 
     return res.status(code).json({ message, data })
   } catch (error) {

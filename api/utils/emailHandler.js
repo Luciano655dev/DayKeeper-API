@@ -8,6 +8,7 @@ const {
   postBanTemplate,
   postUnbanTemplate,
   postDeletionTemplate,
+  accountDeletionTemplate,
 } = require("./email/templates")
 
 async function sendVerificationEmail(
@@ -167,6 +168,17 @@ const sendPostDeletionEmail = async ({
   })
 }
 
+const sendAccountDeletionCode = async (email, code) => {
+  const { subject, html, text } = accountDeletionTemplate({ code })
+
+  await sendMail({
+    to: email,
+    subject,
+    html,
+    text,
+  })
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -178,4 +190,5 @@ module.exports = {
   sendPostBanEmail,
   sendPostUnbanEmail,
   sendPostDeletionEmail,
+  sendAccountDeletionCode,
 }

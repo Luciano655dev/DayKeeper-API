@@ -10,6 +10,7 @@ const confirmEmail = require("../services/auth/confirmEmail")
 const resendVerificationCode = require("../services/auth/resendVerificationCode")
 const forgetPassword = require("../services/auth/forgetPassword")
 const resetPassword = require("../services/auth/resetPassword")
+const requestDeleteAccountCode = require("../services/auth/requestDeleteAccountCode")
 const getUserData = require("../services/auth/getUserData")
 
 // login
@@ -92,6 +93,19 @@ const resendCodeController = async (req, res) => {
   }
 }
 
+// request delete account code
+const requestDeleteAccountCodeController = async (req, res) => {
+  try {
+    const { code, message } = await requestDeleteAccountCode({
+      loggedUser: req.user,
+    })
+
+    return res.status(code).json({ message })
+  } catch (error) {
+    return res.status(500).json({ message: `${error}` })
+  }
+}
+
 // forgetPassword
 const forgetPasswordController = async (req, res) => {
   try {
@@ -142,6 +156,7 @@ module.exports = {
   userData: userDataController,
   confirmEmail: confirmEmailController,
   resendCode: resendCodeController,
+  requestDeleteAccountCode: requestDeleteAccountCodeController,
   forgetPassword: forgetPasswordController,
   resetPassword: resetPasswordController,
 }

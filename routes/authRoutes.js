@@ -13,6 +13,7 @@ const {
   resendCode,
   forgetPassword,
   resetPassword,
+  requestDeleteAccountCode,
 } = require("../api/controllers/authController")
 
 const userRegisterValidation = require("../middlewares/validations/auth/userRegisterValidation")
@@ -33,6 +34,7 @@ router.post("/confirm_email", confirmEmail)
 router.post("/forget_password", forgetPassword)
 router.post("/reset_password", resetPassword)
 router.post("/resend_code", resendCode)
+router.post("/request_delete_code", checkTokenMW, requestDeleteAccountCode)
 
 router.get("/user", checkTokenMW, userData)
 

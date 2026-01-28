@@ -70,6 +70,14 @@ const userSchema = mongoose.Schema({
     type: Date,
     required: false,
   },
+  delete_code_hash: {
+    type: String,
+    required: false,
+  },
+  delete_expires_at: {
+    type: Date,
+    required: false,
+  },
 
   banned: { type: Boolean, default: false, required: false },
 

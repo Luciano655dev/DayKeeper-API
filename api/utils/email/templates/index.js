@@ -7,6 +7,7 @@ const userDeletionTemplate = require("./userDeletion")
 const postBanTemplate = require("./postBan")
 const postUnbanTemplate = require("./postUnban")
 const postDeletionTemplate = require("./postDeletion")
+const accountDeletionTemplate = require("./accountDeletion")
 
 module.exports = {
   buildEmail,
@@ -19,4 +20,5 @@ module.exports = {
   postBanTemplate,
   postUnbanTemplate,
   postDeletionTemplate,
+  accountDeletionTemplate,
 }

@@ -55,6 +55,10 @@ const allowedOrigins = (process.env.CORS_ORIGINS || "")
   .map((s) => s.trim())
   .filter(Boolean)
 
+if (allowedOrigins.length === 0) {
+  allowedOrigins.push("https://daykeeper.app", "https://www.daykeeper.app")
+}
+
 app.use(
   cors({
     origin: (origin, cb) => {
