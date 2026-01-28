@@ -41,6 +41,7 @@ const register = async (props) => {
 
   const user = new User({
     username,
+    name: username,
     displayName: username,
     email,
     bio: "",

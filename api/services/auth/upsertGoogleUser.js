@@ -25,6 +25,7 @@ module.exports = async function upsertGoogleUser(profile) {
 
   user = await User.create({
     username: displayName,
+    name: displayName,
     displayName,
     email,
     bio: "",

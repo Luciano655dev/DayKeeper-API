@@ -9,6 +9,11 @@ const userSchema = mongoose.Schema({
     index: true,
     trim: true,
   },
+  name: {
+    type: String,
+    required: false,
+    trim: true,
+  },
   displayName: {
     type: String,
     required: true,
