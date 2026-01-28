@@ -1,7 +1,7 @@
 const isInCloseFriends = (mainUser) => [
   {
     $lookup: {
-      from: "close_friends",
+      from: "closeFriends",
       let: { userId: "$_id" },
       pipeline: [
         {
