@@ -2,7 +2,7 @@ const User = require("../../models/User")
 const bcrypt = require("bcryptjs")
 const crypto = require("crypto")
 const { sendVerificationEmail } = require("../../utils/emailHandler")
-const createNotification = require("../notification/createNotification")
+const { createNotification } = require("../notification/createNotification")
 
 const {
   user: { defaultPfp, defaultTimeZone },

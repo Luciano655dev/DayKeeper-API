@@ -4,6 +4,9 @@ const axios = require("axios")
 const {
   giphy: { apiKey },
 } = require("../../../config")
+const {
+  createNotificationWithLimits,
+} = require("../notification/createNotification")
 
 const {
   post: { maxCommentLength },
@@ -28,13 +31,14 @@ const commentPost = async (props) => {
       post = postResponse.data
     } else return notFound("Post")
 
+    let parentComment = null
     if (parentCommentId) {
-      const parent = await PostComments.findOne({
+      parentComment = await PostComments.findOne({
         _id: parentCommentId,
         postId: post._id,
         status: { $ne: "deleted" },
       })
-      if (!parent) return notFound("Comment")
+      if (!parentComment) return notFound("Comment")
     }
 
     /* Get Gif */
@@ -66,6 +70,54 @@ const commentPost = async (props) => {
       gif,
     })
     await newComment.save()
+
+    // Notify post owner
+    if (String(post.user_info._id) !== String(loggedUser._id)) {
+      await createNotificationWithLimits({
+        userId: post.user_info._id,
+        type: "post_comment",
+        title: "New comment",
+        body: `@${loggedUser.username} commented on your post.`,
+        data: {
+          actorId: loggedUser._id,
+          actorUsername: loggedUser.username,
+          targetId: post._id,
+          postId: post._id,
+          commentId: newComment._id,
+        },
+        actorId: loggedUser._id,
+        targetId: post._id,
+        debounceMs: 30 * 1000,
+        maxPerWindow: 60,
+        windowMs: 60 * 60 * 1000,
+      })
+    }
+
+    // Notify parent comment owner on reply
+    if (
+      parentComment &&
+      String(parentComment.userId) !== String(loggedUser._id)
+    ) {
+      await createNotificationWithLimits({
+        userId: parentComment.userId,
+        type: "comment_reply",
+        title: "New reply",
+        body: `@${loggedUser.username} replied to your comment.`,
+        data: {
+          actorId: loggedUser._id,
+          actorUsername: loggedUser.username,
+          targetId: parentComment._id,
+          postId: post._id,
+          commentId: newComment._id,
+          parentCommentId: parentComment._id,
+        },
+        actorId: loggedUser._id,
+        targetId: parentComment._id,
+        debounceMs: 30 * 1000,
+        maxPerWindow: 60,
+        windowMs: 60 * 60 * 1000,
+      })
+    }
 
     return created(`Comment`, { response: { post, comment: newComment } })
   } catch (error) {

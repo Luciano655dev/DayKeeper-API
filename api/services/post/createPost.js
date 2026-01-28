@@ -64,6 +64,33 @@ const createPost = async (req) => {
       )
     }
 
+    // Recalculate post status after media linkage (worker may have finished early)
+    if (mediaDocs.length) {
+      const finalMedia = await Media.find({
+        _id: { $in: mediaDocs.map((m) => m._id) },
+      }).select("status")
+
+      const hasRejected = finalMedia.some((m) => m.status === "rejected")
+      const allPublic =
+        finalMedia.length > 0 && finalMedia.every((m) => m.status === "public")
+
+      const finalStatus = hasRejected
+        ? "rejected"
+        : allPublic
+        ? "public"
+        : "pending"
+
+      if (finalStatus !== post.status) {
+        await Post.updateOne({ _id: post._id }, { $set: { status: finalStatus } })
+      }
+
+      console.log("[post] createPost final status", {
+        postId: post._id,
+        finalStatus,
+        mediaStatuses: finalMedia.map((m) => m.status),
+      })
+    }
+
     console.log("[post] createPost saved", {
       postId: post._id,
       status: postStatus,

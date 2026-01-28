@@ -10,6 +10,7 @@ const followInfoPipeline = (mainUser) => {
               $expr: {
                 $and: [
                   { $ne: ["$requested", true] },
+                  { $ne: ["$status", "deleted"] },
                   {
                     $or: [
                       { $eq: ["$followingId", "$$userId"] }, // followers of user
@@ -106,27 +107,6 @@ const followInfoPipeline = (mainUser) => {
     // keep your public fields
     {
       $addFields: {
-        _requestedByMe: {
-          $gt: [
-            {
-              $size: {
-                $filter: {
-                  input: "$_followRels",
-                  as: "r",
-                  cond: {
-                    $and: [
-                      { $eq: ["$$r.requested", true] },
-                      { $eq: ["$$r.followerId", mainUser._id] },
-                      { $eq: ["$$r.followingId", "$_id"] },
-                    ],
-                  },
-                },
-              },
-            },
-            0,
-          ],
-        },
-
         // if it's me, force false so UI doesn't show "Following" on myself
         isFollowing: {
           $cond: ["$_sameUser", false, "$_followByMe"],
@@ -165,6 +145,35 @@ const followInfoPipeline = (mainUser) => {
       },
     },
 
+    // pending follow request sent by me
+    {
+      $lookup: {
+        from: "followers",
+        let: { userId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$requested", true] },
+                  { $ne: ["$status", "deleted"] },
+                  { $eq: ["$followerId", mainUser._id] },
+                  { $eq: ["$followingId", "$$userId"] },
+                ],
+              },
+            },
+          },
+          { $limit: 1 },
+        ],
+        as: "_requestedByMeInfo",
+      },
+    },
+    {
+      $addFields: {
+        _requestedByMe: { $gt: [{ $size: "$_requestedByMeInfo" }, 0] },
+      },
+    },
+
     // cleanup temp fields
     {
       $project: {
@@ -172,6 +181,7 @@ const followInfoPipeline = (mainUser) => {
         _followByMe: 0,
         _followsMe: 0,
         _requestedByMe: 0,
+        _requestedByMeInfo: 0,
       },
     },
   ]

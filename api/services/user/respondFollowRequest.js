@@ -1,6 +1,6 @@
 const findUser = require("../user/get/findUser")
 const Followers = require("../../models/Followers")
-const createNotification = require("../notification/createNotification")
+const { createNotification } = require("../notification/createNotification")
 const {
   errors: { notFound, unauthorized, custom: customErr },
   success: { custom },

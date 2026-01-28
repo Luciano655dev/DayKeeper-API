@@ -1,5 +1,8 @@
 const PostLikes = require("../../models/PostLikes")
 const getPost = require("./getPost")
+const {
+  createNotificationWithLimits,
+} = require("../notification/createNotification")
 
 const {
   success: { custom },
@@ -36,6 +39,27 @@ const likePost = async (props) => {
       postUserId: post.user_info._id,
     })
     await newPostLikeRelation.save()
+
+    if (String(post.user_info._id) !== String(loggedUser._id)) {
+      await createNotificationWithLimits({
+        userId: post.user_info._id,
+        type: "post_like",
+        title: "New like",
+        body: `@${loggedUser.username} liked your post.`,
+        data: {
+          actorId: loggedUser._id,
+          actorUsername: loggedUser.username,
+          targetId: post._id,
+          postId: post._id,
+        },
+        actorId: loggedUser._id,
+        targetId: post._id,
+        debounceMs: 60 * 1000,
+        maxPerWindow: 30,
+        windowMs: 60 * 60 * 1000,
+      })
+    }
+
     return custom("Post liked successfully", { post })
   } catch (error) {
     console.error(error)

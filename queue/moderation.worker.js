@@ -6,7 +6,7 @@ const AWS = require("aws-sdk")
 const Media = require("../api/models/Media")
 const Post = require("../api/models/Post")
 const generateVideoThumbnails = require("../api/utils/generateVideoThumbnails")
-const createNotification = require("../api/services/notification/createNotification")
+const { createNotification } = require("../api/services/notification/createNotification")
 
 /* Imports and Config */
 const { inappropriateLabels } = require("../constants/index")

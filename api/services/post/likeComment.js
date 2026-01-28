@@ -1,6 +1,9 @@
 const PostComments = require("../../models/PostComments")
 const CommentLikes = require("../../models/CommentLikes")
 const getPost = require("./getPost")
+const {
+  createNotificationWithLimits,
+} = require("../notification/createNotification")
 
 const {
   errors: { notFound },
@@ -48,6 +51,26 @@ const likeComment = async (props) => {
       likeRelation.status = "public"
       likeRelation.deletedAt = null
       await likeRelation.save()
+      if (String(comment.userId) !== String(loggedUser._id)) {
+        await createNotificationWithLimits({
+          userId: comment.userId,
+          type: "comment_like",
+          title: "New like",
+          body: `@${loggedUser.username} liked your comment.`,
+          data: {
+            actorId: loggedUser._id,
+            actorUsername: loggedUser.username,
+            targetId: comment._id,
+            postId: post._id,
+            commentId: comment._id,
+          },
+          actorId: loggedUser._id,
+          targetId: comment._id,
+          debounceMs: 60 * 1000,
+          maxPerWindow: 30,
+          windowMs: 60 * 60 * 1000,
+        })
+      }
       return custom("The like was added to the comment", {
         post,
       })
@@ -61,6 +84,26 @@ const likeComment = async (props) => {
       status: "public",
     })
     await newLikeRelation.save()
+    if (String(comment.userId) !== String(loggedUser._id)) {
+      await createNotificationWithLimits({
+        userId: comment.userId,
+        type: "comment_like",
+        title: "New like",
+        body: `@${loggedUser.username} liked your comment.`,
+        data: {
+          actorId: loggedUser._id,
+          actorUsername: loggedUser.username,
+          targetId: comment._id,
+          postId: post._id,
+          commentId: comment._id,
+        },
+        actorId: loggedUser._id,
+        targetId: comment._id,
+        debounceMs: 60 * 1000,
+        maxPerWindow: 30,
+        windowMs: 60 * 60 * 1000,
+      })
+    }
 
     return custom("The like was added to the comment", {
       post,

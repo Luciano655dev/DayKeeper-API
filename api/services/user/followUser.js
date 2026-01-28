@@ -1,6 +1,6 @@
 const User = require("../../models/User")
 const Followers = require("../../models/Followers")
-const createNotification = require("../notification/createNotification")
+const { createNotification } = require("../notification/createNotification")
 
 const {
   notifications: {
