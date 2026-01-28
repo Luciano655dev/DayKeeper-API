@@ -128,6 +128,18 @@ app.use(passport.initialize())
 app.use(passport.session())
 passportConfig(passport)
 
+// --------- Background workers/jobs (optional) ---------
+const startWorkers = process.env.WORKER_ENABLED !== "false"
+const startJobs = process.env.JOBS_ENABLED !== "false"
+
+if (startWorkers) {
+  require("./queue/index.js")
+}
+
+if (startJobs) {
+  require("./api/jobs/index.js")
+}
+
 // --------- Routes ---------
 app.get("/ping", (req, res) => res.status(200).send("PONG"))
 
