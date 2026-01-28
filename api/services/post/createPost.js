@@ -15,14 +15,22 @@ const createPost = async (req) => {
   const mediaDocs = Array.isArray(req.mediaDocs) ? req.mediaDocs : []
 
   try {
-    const allMediaPublic = mediaDocs.length
-      ? mediaDocs.every((m) => m.status === "public")
-      : true
+    let allMediaPublic = true
+    let mediaStatuses = mediaDocs.map((m) => m.status)
+
+    if (mediaDocs.length) {
+      const freshMedia = await Media.find({
+        _id: { $in: mediaDocs.map((m) => m._id) },
+      }).select("status")
+
+      mediaStatuses = freshMedia.map((m) => m.status)
+      allMediaPublic = freshMedia.every((m) => m.status === "public")
+    }
 
     console.log("[post] createPost", {
       userId: loggedUser._id,
       mediaIds: mediaDocs.map((m) => m._id),
-      mediaStatuses: mediaDocs.map((m) => m.status),
+      mediaStatuses,
       allMediaPublic,
     })
 

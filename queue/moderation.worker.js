@@ -22,6 +22,18 @@ const connection = new IORedis(redisUrl, {
   maxRetriesPerRequest: null,
 })
 
+connection.on("connect", () => {
+  console.log("[worker] Redis connect")
+})
+
+connection.on("ready", () => {
+  console.log("[worker] Redis ready")
+})
+
+connection.on("error", (err) => {
+  console.error("[worker] Redis error", err)
+})
+
 const updateMedia = async (mediaId, isSafe) => {
   try {
     const newStatus = isSafe ? "public" : "rejected"
@@ -108,7 +120,11 @@ const notifyModerationStarted = async (job) => {
       },
     })
   } catch (error) {
-    console.error("Failed to send moderation start notification", error)
+    console.error("Failed to send moderation start notification", {
+      error: error?.message || error,
+      mediaId: job.data?.mediaId,
+      uploadedBy: job.data?.uploadedBy,
+    })
   }
 }
 
@@ -139,7 +155,12 @@ const notifyModerationFinished = async ({ media, newStatus, fallbackUserId }) =>
       },
     })
   } catch (error) {
-    console.error("Failed to send moderation finished notification", error)
+    console.error("Failed to send moderation finished notification", {
+      error: error?.message || error,
+      mediaId: media?._id,
+      uploadedBy: fallbackUserId,
+      newStatus,
+    })
   }
 }
 
@@ -227,4 +248,8 @@ worker.on("active", (job) => {
 
 worker.on("failed", (job, err) => {
   console.error(`Job ${job.id} failed:`, err)
+})
+
+worker.on("completed", (job) => {
+  console.log("[worker] job completed", { id: job.id, data: job.data })
 })
