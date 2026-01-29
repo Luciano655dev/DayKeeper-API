@@ -28,7 +28,16 @@ const postInfoPipeline = (mainUser) => {
         from: "postLikes",
         let: { postId: "$_id" },
         pipeline: [
-          { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$postId", "$$postId"] },
+                  { $ne: ["$status", "deleted"] },
+                ],
+              },
+            },
+          },
           {
             $group: {
               _id: null,
@@ -52,7 +61,16 @@ const postInfoPipeline = (mainUser) => {
         from: "postComments",
         let: { postId: "$_id" },
         pipeline: [
-          { $match: { $expr: { $eq: ["$postId", "$$postId"] } } },
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$postId", "$$postId"] },
+                  { $ne: ["$status", "deleted"] },
+                ],
+              },
+            },
+          },
           {
             $group: {
               _id: null,

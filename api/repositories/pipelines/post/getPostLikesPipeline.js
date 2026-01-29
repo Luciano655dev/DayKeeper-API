@@ -4,6 +4,7 @@ const getPostLikesPipeline = (postId) => [
   {
     $match: {
       postId: new mongoose.Types.ObjectId(postId),
+      status: { $ne: "deleted" },
     },
   },
   {

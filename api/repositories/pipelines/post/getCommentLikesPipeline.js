@@ -2,6 +2,9 @@ const mongoose = require("mongoose")
 
 const getCommentLikesPipeline = (commentId) => [
   {
+    $match: { status: { $ne: "deleted" } },
+  },
+  {
     $lookup: {
       from: "postComments",
       localField: "commentId",
@@ -11,6 +14,9 @@ const getCommentLikesPipeline = (commentId) => [
   },
   {
     $unwind: "$comment_info",
+  },
+  {
+    $match: { "comment_info.status": { $ne: "deleted" } },
   },
   {
     $lookup: {
